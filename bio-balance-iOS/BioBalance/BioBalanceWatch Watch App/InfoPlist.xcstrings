@@ -1,0 +1,106 @@
+{
+  "sourceLanguage" : "zh-Hans",
+  "strings" : {
+    "CFBundleDisplayName" : {
+      "comment" : "Bundle display name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "眠屿"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "眠屿"
+          }
+        }
+      },
+      "shouldTranslate" : false
+    },
+    "CFBundleName" : {
+      "comment" : "Bundle name",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "BioBalanceWatch Watch App"
+          }
+        }
+      }
+    },
+    "NSHealthShareUsageDescription" : {
+      "comment" : "Privacy - Health Share Usage Description",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu reads heart rate, active energy, and swimming workout data for live Apple Watch swim metrics and workout details. It also reads other health data you authorize to show trends and recovery insights."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "眠屿需要读取你的心率、HRV、睡眠、步数、活动能量、呼吸频率、正念分钟、环境声级等健康数据，用于展示趋势、生成恢复建议和提醒；游泳训练期间还会读取心率、活动能量与游泳数据用于实时指标和训练详情。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "眠屿需要讀取你的心率、HRV、睡眠、步數、活動能量、呼吸頻率、正念分鐘、環境聲級等健康資料，用於顯示趨勢、產生恢復建議與提醒；游泳訓練期間也會讀取心率、活動能量與游泳資料，用於即時指標和訓練詳情。"
+          }
+        }
+      }
+    },
+    "NSHealthUpdateUsageDescription" : {
+      "comment" : "Privacy - Health Update Usage Description",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When you start a swim on Apple Watch, Mianyu saves that workout to Health so you and Health can view its duration and the swimming data recorded by the device. It does not modify your other original health records."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "眠屿 会在你记录正念练习、经期信息，以及系统支持时的饮水、咖啡因和药物记录时，将对应数据写入健康 App，用于趋势展示与提醒；Apple Watch 游泳训练也会保存到健康 App，供眠屿和健康 App 查看训练时间及设备提供的游泳数据。不会修改你的其他原始健康记录。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "眠屿會在你記錄正念練習、經期資訊，以及系統支援時的飲水、咖啡因和藥物記錄時，將對應資料寫入健康 App，用於趨勢顯示與提醒；Apple Watch 游泳訓練也會儲存到健康 App，供眠屿和健康 App 查看訓練時間及裝置提供的游泳資料。不會修改你的其他原始健康記錄。"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

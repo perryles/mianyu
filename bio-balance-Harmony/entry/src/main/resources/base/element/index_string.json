@@ -1,0 +1,532 @@
+{
+  "string": [
+    {
+      "name": "index_data_local",
+      "value": "数据仅保存在本机"
+    },
+    {
+      "name": "index_health_waiting",
+      "value": "等待连接华为运动健康"
+    },
+    {
+      "name": "index_not_synced",
+      "value": "尚未同步"
+    },
+    {
+      "name": "index_date_format",
+      "value": "%1$d月%2$d日 · %3$s"
+    },
+    {
+      "name": "index_greeting_morning",
+      "value": "早上好"
+    },
+    {
+      "name": "index_greeting_noon",
+      "value": "中午好"
+    },
+    {
+      "name": "index_greeting_afternoon",
+      "value": "下午好"
+    },
+    {
+      "name": "index_greeting_evening",
+      "value": "晚上好"
+    },
+    {
+      "name": "index_greeting_format",
+      "value": "%1$s，今天也照顾好自己"
+    },
+    {
+      "name": "index_avatar",
+      "value": "眠"
+    },
+    {
+      "name": "index_mood_exhausted",
+      "value": "很疲惫"
+    },
+    {
+      "name": "index_mood_low",
+      "value": "有点低落"
+    },
+    {
+      "name": "index_mood_calm",
+      "value": "平稳"
+    },
+    {
+      "name": "index_mood_good",
+      "value": "不错"
+    },
+    {
+      "name": "index_mood_great",
+      "value": "状态很好"
+    },
+    {
+      "name": "index_mood_tired",
+      "value": "很累"
+    },
+    {
+      "name": "index_mood_low_short",
+      "value": "低落"
+    },
+    {
+      "name": "index_mood_great_short",
+      "value": "很好"
+    },
+    {
+      "name": "index_health_connected",
+      "value": "已连接华为运动健康"
+    },
+    {
+      "name": "index_health_auth_required",
+      "value": "需要授权步数、心率和睡眠"
+    },
+    {
+      "name": "index_health_synced",
+      "value": "已同步华为运动健康数据"
+    },
+    {
+      "name": "index_health_read_failed",
+      "value": "读取健康数据失败，请稍后重试"
+    },
+    {
+      "name": "index_health_install",
+      "value": "请先从华为应用市场安装华为运动健康"
+    },
+    {
+      "name": "index_health_open_failed",
+      "value": "暂时无法打开华为运动健康"
+    },
+    {
+      "name": "index_today_time_format",
+      "value": "今天 %1$d:%2$s"
+    },
+    {
+      "name": "index_trend_connect",
+      "value": "连接华为运动健康后查看近 7 天活动"
+    },
+    {
+      "name": "index_trend_empty",
+      "value": "已连接，但近 7 天没有可用活动数据"
+    },
+    {
+      "name": "index_trend_source",
+      "value": "来自 Health Service Kit 的近 7 天聚合数据"
+    },
+    {
+      "name": "index_health_waiting_short",
+      "value": "等待连接运动健康"
+    },
+    {
+      "name": "index_data_empty",
+      "value": "暂时没有可用数据"
+    },
+    {
+      "name": "index_status_updated",
+      "value": "今日状态已更新"
+    },
+    {
+      "name": "index_health_connect_help",
+      "value": "连接华为运动健康后，可读取已授权的步数、静息心率与睡眠。"
+    },
+    {
+      "name": "index_sleep_hint_format",
+      "value": "最近睡眠 %1$s。健康数据可能存在同步延迟，请以华为运动健康为准。"
+    },
+    {
+      "name": "index_health_partial",
+      "value": "已连接运动健康，部分数据尚未产生或未获得授权。"
+    },
+    {
+      "name": "index_today_status",
+      "value": "今日状态"
+    },
+    {
+      "name": "index_local_assessment",
+      "value": "本地综合评估 · 仅供健康管理参考"
+    },
+    {
+      "name": "index_health_overview",
+      "value": "健康概览"
+    },
+    {
+      "name": "index_today",
+      "value": "今日"
+    },
+    {
+      "name": "index_resting_heart_rate",
+      "value": "静息心率"
+    },
+    {
+      "name": "index_health_source",
+      "value": "运动健康"
+    },
+    {
+      "name": "index_pending_auth",
+      "value": "待授权"
+    },
+    {
+      "name": "index_sleep",
+      "value": "睡眠"
+    },
+    {
+      "name": "index_today_steps",
+      "value": "今日步数"
+    },
+    {
+      "name": "index_water",
+      "value": "饮水"
+    },
+    {
+      "name": "index_cups_format",
+      "value": "%1$d / 8 杯"
+    },
+    {
+      "name": "index_goal_met",
+      "value": "达标"
+    },
+    {
+      "name": "index_continue",
+      "value": "继续"
+    },
+    {
+      "name": "index_today_priority",
+      "value": "今日优先"
+    },
+    {
+      "name": "index_completed",
+      "value": "已完成"
+    },
+    {
+      "name": "index_one_item",
+      "value": "1 项"
+    },
+    {
+      "name": "index_action_done",
+      "value": "今天的主要行动已完成"
+    },
+    {
+      "name": "index_action_stretch",
+      "value": "午后安排 10 分钟舒展"
+    },
+    {
+      "name": "index_action_done_help",
+      "value": "做得很好，保持轻松节奏。"
+    },
+    {
+      "name": "index_action_stretch_help",
+      "value": "久坐时间偏长，轻量活动比临时加练更适合今天。"
+    },
+    {
+      "name": "index_undo",
+      "value": "撤销"
+    },
+    {
+      "name": "index_complete",
+      "value": "完成"
+    },
+    {
+      "name": "index_quick_water",
+      "value": "快速记录一杯水"
+    },
+    {
+      "name": "index_water_goal_format",
+      "value": "当前 %1$d 杯 · 目标 8 杯"
+    },
+    {
+      "name": "index_record",
+      "value": "记录"
+    },
+    {
+      "name": "index_daily_checkin",
+      "value": "每日记录"
+    },
+    {
+      "name": "index_daily_checkin_subtitle",
+      "value": "用一分钟留下今天的身体感受"
+    },
+    {
+      "name": "index_mood_question",
+      "value": "今天感觉怎么样？"
+    },
+    {
+      "name": "index_quick_actions",
+      "value": "快速行动"
+    },
+    {
+      "name": "index_drink_water",
+      "value": "喝水"
+    },
+    {
+      "name": "index_add_cup",
+      "value": "+ 1 杯"
+    },
+    {
+      "name": "index_breathe",
+      "value": "呼吸放松"
+    },
+    {
+      "name": "index_seconds_format",
+      "value": "%1$d 秒"
+    },
+    {
+      "name": "index_one_minute",
+      "value": "1 分钟"
+    },
+    {
+      "name": "index_in_progress",
+      "value": "进行中"
+    },
+    {
+      "name": "index_start",
+      "value": "开始"
+    },
+    {
+      "name": "index_more_logs",
+      "value": "更多记录"
+    },
+    {
+      "name": "index_sunlight",
+      "value": "日照"
+    },
+    {
+      "name": "index_sunlight_help",
+      "value": "记录今天的户外阳光时间"
+    },
+    {
+      "name": "index_caffeine",
+      "value": "咖啡因"
+    },
+    {
+      "name": "index_caffeine_help",
+      "value": "关注摄入时间与睡眠关系"
+    },
+    {
+      "name": "index_medication",
+      "value": "用药提醒"
+    },
+    {
+      "name": "index_medication_help",
+      "value": "本机记录，不上传健康明细"
+    },
+    {
+      "name": "index_symptoms",
+      "value": "身体症状"
+    },
+    {
+      "name": "index_symptoms_help",
+      "value": "快速记录强度与发生时间"
+    },
+    {
+      "name": "index_emergency",
+      "value": "如出现胸痛、呼吸困难、意识异常等紧急症状，请立即联系当地急救服务。"
+    },
+    {
+      "name": "index_trends",
+      "value": "趋势"
+    },
+    {
+      "name": "index_week_steps",
+      "value": "近 7 天步数"
+    },
+    {
+      "name": "index_no_activity",
+      "value": "暂无活动数据"
+    },
+    {
+      "name": "index_goal_days_format",
+      "value": "%1$d / 7 达标"
+    },
+    {
+      "name": "index_health_summary",
+      "value": "健康摘要"
+    },
+    {
+      "name": "index_average_sleep",
+      "value": "近 7 天平均睡眠"
+    },
+    {
+      "name": "index_sleep_coverage_format",
+      "value": "覆盖 %1$d 天；最近一次 %2$s。"
+    },
+    {
+      "name": "index_sleep_no_records",
+      "value": "暂无已授权的睡眠记录。"
+    },
+    {
+      "name": "index_week_heart_rate",
+      "value": "近 7 天静息心率"
+    },
+    {
+      "name": "index_heart_coverage_format",
+      "value": "按 %1$d 天有效记录计算，仅展示数据，不作医学判断。"
+    },
+    {
+      "name": "index_heart_no_records",
+      "value": "暂无已授权的静息心率记录。"
+    },
+    {
+      "name": "index_activity_goal",
+      "value": "活动目标"
+    },
+    {
+      "name": "index_days_of_seven_format",
+      "value": "%1$d / 7 天"
+    },
+    {
+      "name": "index_activity_summary_format",
+      "value": "近 7 天共 %1$d 步，以每日 %2$d 步为目标。"
+    },
+    {
+      "name": "index_activity_empty",
+      "value": "暂无活动聚合数据。"
+    },
+    {
+      "name": "index_week_insight",
+      "value": "本周洞察"
+    },
+    {
+      "name": "index_insight_good",
+      "value": "本周多数日期达到活动目标，保持当前节奏并注意恢复。"
+    },
+    {
+      "name": "index_insight_low",
+      "value": "本周活动目标完成较少，可从短时步行开始，不必一次加量。"
+    },
+    {
+      "name": "index_insight_empty",
+      "value": "完成运动健康授权并产生数据后，这里会展示基于真实记录的本地提示。"
+    },
+    {
+      "name": "index_profile",
+      "value": "我的"
+    },
+    {
+      "name": "index_profile_subtitle",
+      "value": "设备、目标与隐私设置"
+    },
+    {
+      "name": "index_user_name",
+      "value": "眠屿 用户"
+    },
+    {
+      "name": "index_local_streak",
+      "value": "连续记录 7 天 · 本地模式"
+    },
+    {
+      "name": "index_huawei_health",
+      "value": "运动健康"
+    },
+    {
+      "name": "index_connected",
+      "value": "已连接"
+    },
+    {
+      "name": "index_disconnected",
+      "value": "未连接"
+    },
+    {
+      "name": "index_last_sync_format",
+      "value": "最近同步：%1$s"
+    },
+    {
+      "name": "index_processing",
+      "value": "处理中…"
+    },
+    {
+      "name": "index_refresh",
+      "value": "刷新数据"
+    },
+    {
+      "name": "index_connect_authorize",
+      "value": "连接并授权"
+    },
+    {
+      "name": "index_open_health",
+      "value": "打开运动健康"
+    },
+    {
+      "name": "index_health_privacy",
+      "value": "仅申请读取步数、静息心率和睡眠；只读不写不删，数据仅保存在本机，不上传。"
+    },
+    {
+      "name": "index_revoke_health",
+      "value": "撤销运动健康授权"
+    },
+    {
+      "name": "index_daily_goal",
+      "value": "每日目标"
+    },
+    {
+      "name": "index_step_goal",
+      "value": "步数目标"
+    },
+    {
+      "name": "index_reminder_types",
+      "value": "喝水 · 用药 · 久坐"
+    },
+    {
+      "name": "index_settings",
+      "value": "设置"
+    },
+    {
+      "name": "index_privacy_setting",
+      "value": "健康记录默认仅保存在当前设备"
+    },
+    {
+      "name": "index_device_connection",
+      "value": "设备连接"
+    },
+    {
+      "name": "index_device_disconnected",
+      "value": "暂未连接穿戴设备"
+    },
+    {
+      "name": "index_help_feedback",
+      "value": "帮助与反馈"
+    },
+    {
+      "name": "index_help_subtitle",
+      "value": "使用说明与健康数据口径"
+    },
+    {
+      "name": "index_reset_today",
+      "value": "重置今天的记录"
+    },
+    {
+      "name": "index_brand_footer",
+      "value": "眠屿 · HarmonyOS"
+    },
+    {
+      "name": "index_footer_disclaimer_format",
+      "value": "%1$s · 本应用不提供医疗诊断"
+    },
+    {
+      "name": "index_tab_home",
+      "value": "首页"
+    },
+    {
+      "name": "index_tab_record",
+      "value": "记录"
+    },
+    {
+      "name": "index_tab_trends",
+      "value": "趋势"
+    },
+    {
+      "name": "index_tab_profile",
+      "value": "我的"
+    },
+    {
+      "name": "index_reset_title",
+      "value": "重置今天的记录？"
+    },
+    {
+      "name": "index_reset_body",
+      "value": "饮水、步数、心情和行动状态将恢复为初始值。"
+    },
+    {
+      "name": "index_confirm_reset",
+      "value": "确认重置"
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "module": {
+    "name": "entry",
+    "type": "entry",
+    "description": "$string:module_desc",
+    "mainElement": "EntryAbility",
+    "deviceTypes": [
+      "phone"
+    ],
+    "querySchemes": [
+      "huaweischeme"
+    ],
+    "requestPermissions": [
+      {
+        // 仅用于用户显式开启后的 AGC Cloud DB 白名单摘要同步。
+        "name": "ohos.permission.INTERNET"
+      },
+      {
+        // 发布本地定时提醒（喝水/用药/久坐），仅本机，不上传任何健康数据。
+        "name": "ohos.permission.PUBLISH_AGENT_REMINDER"
+      }
+    ],
+    "metadata": [
+      {
+        // 华为运动健康（Health Service Kit）Client ID，需在 AppGallery Connect 申请后替换。
+        // 配置清单见 AGC_CONFIG.md；未配置凭证前保持占位符。
+        "name": "client_id",
+        "value": "REPLACE_WITH_AGC_CLIENT_ID"
+      }
+    ],
+    "deliveryWithInstall": true,
+    "installationFree": false,
+    "pages": "$profile:main_pages",
+    "abilities": [
+      {
+        "name": "EntryAbility",
+        "srcEntry": "./ets/entryability/EntryAbility.ets",
+        "description": "$string:EntryAbility_desc",
+        "icon": "$media:layered_image",
+        "label": "$string:EntryAbility_label",
+        "startWindowIcon": "$media:startIcon",
+        "startWindowBackground": "$color:start_window_background",
+        "exported": true,
+        "skills": [
+          {
+            "entities": [
+              "entity.system.home"
+            ],
+            "actions": [
+              "ohos.want.action.home"
+            ]
+          }
+        ]
+      }
+    ],
+    "extensionAbilities": [
+      {
+        "name": "EntryBackupAbility",
+        "srcEntry": "./ets/entrybackupability/EntryBackupAbility.ets",
+        "type": "backup",
+        "exported": false,
+        "metadata": [
+          {
+            "name": "ohos.extension.backup",
+            "resource": "$profile:backup_config"
+          }
+        ],
+      }
+    ]
+  }
+}

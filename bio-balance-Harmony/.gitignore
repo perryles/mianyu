@@ -1,0 +1,5 @@
+# Harmony 本地构建产物（构建自动生成，不纳入版本库）
+.hvigor/
+entry/build/
+entry/.test/
+oh_modules/

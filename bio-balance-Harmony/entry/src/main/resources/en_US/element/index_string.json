@@ -1,0 +1,532 @@
+{
+  "string": [
+    {
+      "name": "index_data_local",
+      "value": "Data is stored only on this device"
+    },
+    {
+      "name": "index_health_waiting",
+      "value": "Waiting to connect to Huawei Health"
+    },
+    {
+      "name": "index_not_synced",
+      "value": "Not synced"
+    },
+    {
+      "name": "index_date_format",
+      "value": "%3$s, %1$d/%2$d"
+    },
+    {
+      "name": "index_greeting_morning",
+      "value": "Good morning"
+    },
+    {
+      "name": "index_greeting_noon",
+      "value": "Hello"
+    },
+    {
+      "name": "index_greeting_afternoon",
+      "value": "Good afternoon"
+    },
+    {
+      "name": "index_greeting_evening",
+      "value": "Good evening"
+    },
+    {
+      "name": "index_greeting_format",
+      "value": "%1$s. Take care of yourself today."
+    },
+    {
+      "name": "index_avatar",
+      "value": "M"
+    },
+    {
+      "name": "index_mood_exhausted",
+      "value": "Exhausted"
+    },
+    {
+      "name": "index_mood_low",
+      "value": "A little low"
+    },
+    {
+      "name": "index_mood_calm",
+      "value": "Steady"
+    },
+    {
+      "name": "index_mood_good",
+      "value": "Good"
+    },
+    {
+      "name": "index_mood_great",
+      "value": "Feeling great"
+    },
+    {
+      "name": "index_mood_tired",
+      "value": "Tired"
+    },
+    {
+      "name": "index_mood_low_short",
+      "value": "Low"
+    },
+    {
+      "name": "index_mood_great_short",
+      "value": "Great"
+    },
+    {
+      "name": "index_health_connected",
+      "value": "Connected to Huawei Health"
+    },
+    {
+      "name": "index_health_auth_required",
+      "value": "Steps, heart rate, and sleep access required"
+    },
+    {
+      "name": "index_health_synced",
+      "value": "Huawei Health data synced"
+    },
+    {
+      "name": "index_health_read_failed",
+      "value": "Could not read health data. Try again later."
+    },
+    {
+      "name": "index_health_install",
+      "value": "Install Huawei Health from AppGallery first"
+    },
+    {
+      "name": "index_health_open_failed",
+      "value": "Could not open Huawei Health"
+    },
+    {
+      "name": "index_today_time_format",
+      "value": "Today %1$d:%2$s"
+    },
+    {
+      "name": "index_trend_connect",
+      "value": "Connect Huawei Health to see 7-day activity"
+    },
+    {
+      "name": "index_trend_empty",
+      "value": "Connected, but no activity data is available for 7 days"
+    },
+    {
+      "name": "index_trend_source",
+      "value": "7-day aggregates from Health Service Kit"
+    },
+    {
+      "name": "index_health_waiting_short",
+      "value": "Waiting for Huawei Health"
+    },
+    {
+      "name": "index_data_empty",
+      "value": "No data available"
+    },
+    {
+      "name": "index_status_updated",
+      "value": "Today’s status is updated"
+    },
+    {
+      "name": "index_health_connect_help",
+      "value": "Connect Huawei Health to read authorized steps, resting heart rate, and sleep."
+    },
+    {
+      "name": "index_sleep_hint_format",
+      "value": "Latest sleep: %1$s. Health data may be delayed; refer to Huawei Health."
+    },
+    {
+      "name": "index_health_partial",
+      "value": "Huawei Health is connected; some data is unavailable or not authorized."
+    },
+    {
+      "name": "index_today_status",
+      "value": "Today’s status"
+    },
+    {
+      "name": "index_local_assessment",
+      "value": "On-device assessment · For health management only"
+    },
+    {
+      "name": "index_health_overview",
+      "value": "Health overview"
+    },
+    {
+      "name": "index_today",
+      "value": "Today"
+    },
+    {
+      "name": "index_resting_heart_rate",
+      "value": "Resting heart rate"
+    },
+    {
+      "name": "index_health_source",
+      "value": "Huawei Health"
+    },
+    {
+      "name": "index_pending_auth",
+      "value": "Authorization needed"
+    },
+    {
+      "name": "index_sleep",
+      "value": "Sleep"
+    },
+    {
+      "name": "index_today_steps",
+      "value": "Steps today"
+    },
+    {
+      "name": "index_water",
+      "value": "Water"
+    },
+    {
+      "name": "index_cups_format",
+      "value": "%1$d / 8 cups"
+    },
+    {
+      "name": "index_goal_met",
+      "value": "Goal met"
+    },
+    {
+      "name": "index_continue",
+      "value": "Keep going"
+    },
+    {
+      "name": "index_today_priority",
+      "value": "Today’s priority"
+    },
+    {
+      "name": "index_completed",
+      "value": "Completed"
+    },
+    {
+      "name": "index_one_item",
+      "value": "1 item"
+    },
+    {
+      "name": "index_action_done",
+      "value": "Today’s main action is complete"
+    },
+    {
+      "name": "index_action_stretch",
+      "value": "Take a 10-minute afternoon stretch"
+    },
+    {
+      "name": "index_action_done_help",
+      "value": "Nice work. Keep an easy pace."
+    },
+    {
+      "name": "index_action_stretch_help",
+      "value": "You have been sitting longer; light movement suits today better than an intense session."
+    },
+    {
+      "name": "index_undo",
+      "value": "Undo"
+    },
+    {
+      "name": "index_complete",
+      "value": "Complete"
+    },
+    {
+      "name": "index_quick_water",
+      "value": "Quick-log a cup of water"
+    },
+    {
+      "name": "index_water_goal_format",
+      "value": "%1$d cups now · Goal 8"
+    },
+    {
+      "name": "index_record",
+      "value": "Log"
+    },
+    {
+      "name": "index_daily_checkin",
+      "value": "Daily check-in"
+    },
+    {
+      "name": "index_daily_checkin_subtitle",
+      "value": "Take a minute to note how your body feels"
+    },
+    {
+      "name": "index_mood_question",
+      "value": "How do you feel today?"
+    },
+    {
+      "name": "index_quick_actions",
+      "value": "Quick actions"
+    },
+    {
+      "name": "index_drink_water",
+      "value": "Drink water"
+    },
+    {
+      "name": "index_add_cup",
+      "value": "+ 1 cup"
+    },
+    {
+      "name": "index_breathe",
+      "value": "Breathing break"
+    },
+    {
+      "name": "index_seconds_format",
+      "value": "%1$d sec"
+    },
+    {
+      "name": "index_one_minute",
+      "value": "1 min"
+    },
+    {
+      "name": "index_in_progress",
+      "value": "In progress"
+    },
+    {
+      "name": "index_start",
+      "value": "Start"
+    },
+    {
+      "name": "index_more_logs",
+      "value": "More logs"
+    },
+    {
+      "name": "index_sunlight",
+      "value": "Sunlight"
+    },
+    {
+      "name": "index_sunlight_help",
+      "value": "Log today’s outdoor daylight"
+    },
+    {
+      "name": "index_caffeine",
+      "value": "Caffeine"
+    },
+    {
+      "name": "index_caffeine_help",
+      "value": "Track intake timing and sleep"
+    },
+    {
+      "name": "index_medication",
+      "value": "Medication"
+    },
+    {
+      "name": "index_medication_help",
+      "value": "On-device log; health details are never uploaded"
+    },
+    {
+      "name": "index_symptoms",
+      "value": "Symptoms"
+    },
+    {
+      "name": "index_symptoms_help",
+      "value": "Quickly log intensity and time"
+    },
+    {
+      "name": "index_emergency",
+      "value": "For chest pain, trouble breathing, altered consciousness, or other urgent symptoms, contact local emergency services immediately."
+    },
+    {
+      "name": "index_trends",
+      "value": "Trends"
+    },
+    {
+      "name": "index_week_steps",
+      "value": "Steps · 7 days"
+    },
+    {
+      "name": "index_no_activity",
+      "value": "No activity data"
+    },
+    {
+      "name": "index_goal_days_format",
+      "value": "%1$d / 7 goal days"
+    },
+    {
+      "name": "index_health_summary",
+      "value": "Health summary"
+    },
+    {
+      "name": "index_average_sleep",
+      "value": "Average sleep · 7 days"
+    },
+    {
+      "name": "index_sleep_coverage_format",
+      "value": "%1$d days covered; latest %2$s."
+    },
+    {
+      "name": "index_sleep_no_records",
+      "value": "No authorized sleep records."
+    },
+    {
+      "name": "index_week_heart_rate",
+      "value": "Resting heart rate · 7 days"
+    },
+    {
+      "name": "index_heart_coverage_format",
+      "value": "Calculated from %1$d valid days; shown as data, not medical advice."
+    },
+    {
+      "name": "index_heart_no_records",
+      "value": "No authorized resting-heart-rate records."
+    },
+    {
+      "name": "index_activity_goal",
+      "value": "Activity goal"
+    },
+    {
+      "name": "index_days_of_seven_format",
+      "value": "%1$d / 7 days"
+    },
+    {
+      "name": "index_activity_summary_format",
+      "value": "%1$d steps in 7 days, with a daily goal of %2$d."
+    },
+    {
+      "name": "index_activity_empty",
+      "value": "No activity aggregates."
+    },
+    {
+      "name": "index_week_insight",
+      "value": "Weekly insight"
+    },
+    {
+      "name": "index_insight_good",
+      "value": "You met your activity goal on most days. Keep the pace and allow recovery."
+    },
+    {
+      "name": "index_insight_low",
+      "value": "Fewer activity goals were met. Start with short walks rather than adding too much at once."
+    },
+    {
+      "name": "index_insight_empty",
+      "value": "After authorization and real data are available, on-device insights will appear here."
+    },
+    {
+      "name": "index_profile",
+      "value": "Profile"
+    },
+    {
+      "name": "index_profile_subtitle",
+      "value": "Device, goals, and privacy"
+    },
+    {
+      "name": "index_user_name",
+      "value": "Mianyu user"
+    },
+    {
+      "name": "index_local_streak",
+      "value": "7-day streak · Local mode"
+    },
+    {
+      "name": "index_huawei_health",
+      "value": "Huawei Health"
+    },
+    {
+      "name": "index_connected",
+      "value": "Connected"
+    },
+    {
+      "name": "index_disconnected",
+      "value": "Not connected"
+    },
+    {
+      "name": "index_last_sync_format",
+      "value": "Last sync: %1$s"
+    },
+    {
+      "name": "index_processing",
+      "value": "Processing…"
+    },
+    {
+      "name": "index_refresh",
+      "value": "Refresh data"
+    },
+    {
+      "name": "index_connect_authorize",
+      "value": "Connect and authorize"
+    },
+    {
+      "name": "index_open_health",
+      "value": "Open Huawei Health"
+    },
+    {
+      "name": "index_health_privacy",
+      "value": "Requests read access only for steps, resting heart rate, and sleep. Data stays on this device and is never uploaded."
+    },
+    {
+      "name": "index_revoke_health",
+      "value": "Revoke Huawei Health access"
+    },
+    {
+      "name": "index_daily_goal",
+      "value": "Daily goal"
+    },
+    {
+      "name": "index_step_goal",
+      "value": "Step goal"
+    },
+    {
+      "name": "index_reminder_types",
+      "value": "Water · Medication · Move"
+    },
+    {
+      "name": "index_settings",
+      "value": "Settings"
+    },
+    {
+      "name": "index_privacy_setting",
+      "value": "Health logs stay on this device by default"
+    },
+    {
+      "name": "index_device_connection",
+      "value": "Device connection"
+    },
+    {
+      "name": "index_device_disconnected",
+      "value": "No wearable connected"
+    },
+    {
+      "name": "index_help_feedback",
+      "value": "Help & feedback"
+    },
+    {
+      "name": "index_help_subtitle",
+      "value": "Usage and health-data definitions"
+    },
+    {
+      "name": "index_reset_today",
+      "value": "Reset today’s log"
+    },
+    {
+      "name": "index_brand_footer",
+      "value": "Mianyu · HarmonyOS"
+    },
+    {
+      "name": "index_footer_disclaimer_format",
+      "value": "%1$s · This app does not provide a medical diagnosis"
+    },
+    {
+      "name": "index_tab_home",
+      "value": "Home"
+    },
+    {
+      "name": "index_tab_record",
+      "value": "Log"
+    },
+    {
+      "name": "index_tab_trends",
+      "value": "Trends"
+    },
+    {
+      "name": "index_tab_profile",
+      "value": "Profile"
+    },
+    {
+      "name": "index_reset_title",
+      "value": "Reset today’s log?"
+    },
+    {
+      "name": "index_reset_body",
+      "value": "Water, steps, mood, and action status will return to their initial values."
+    },
+    {
+      "name": "index_confirm_reset",
+      "value": "Reset"
+    }
+  ]
+}

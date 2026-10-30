@@ -1,0 +1,923 @@
+Ôr@Ÿªassertions¤code´customTransformCache¬dependencies¢id¤meta±moduleSideEffects¬originalCode±originalSourcemap«resolvedIds®sourcemapChainµsyntheticNamedExportsµtransformDependencies®transformFiles¨cacheAstÔrAÚ8import healthStore from "@hms.health.store";
+export class HuaweiHealthService {
+    t(name, first) {
+        if (this.context === undefined)
+            return '';
+        if (first === undefined)
+            return this.context.resourceManager.getStringByNameSync(name);
+        return this.context.resourceManager.getStringByNameSync(name, first);
+    }
+    constructor() {
+        this.context = undefined;
+        this.initialized = false;
+        this.dataTypes = {
+            dailyActivities: healthStore.samplePointHelper.dailyActivities.DATA_TYPE,
+            restingHeartRate: healthStore.samplePointHelper.restingHeartRate.DATA_TYPE,
+            sleepRecord: healthStore.healthSequenceHelper.sleepRecord.DATA_TYPE
+        };
+        this.readDataTypes = [];
+        this.writeDataTypes = [];
+        this.readDataTypes.push(this.dataTypes.dailyActivities);
+        this.readDataTypes.push(this.dataTypes.restingHeartRate);
+        this.readDataTypes.push(this.dataTypes.sleepRecord);
+    }
+    get authorizationRequest() {
+        return {
+            readDataTypes: this.readDataTypes,
+            writeDataTypes: this.writeDataTypes
+        };
+    }
+    /**
+     * åˆå§‹åŒ– Health Service Kitï¼Œå¹¶ç¼“å­˜æˆæƒæ‰€éœ€çš„æ•°æ®ç±»å‹ã€‚
+     */
+    async initialize(context) {
+        this.context = context;
+        if (this.initialized) {
+            return { success: true, message: this.t('health_ready') };
+        }
+        try {
+            await healthStore.init(context);
+            this.initialized = true;
+            return { success: true, message: this.t('health_initialized') };
+        }
+        catch (error) {
+            const code = error.code;
+            return { success: false, message: this.errorMessage(code) };
+        }
+    }
+    /**
+     * æ£€æŸ¥æ˜¯å¦å·²è·å¾—å…¨éƒ¨æ‰€éœ€æˆæƒã€‚
+     */
+    async hasRequiredAuthorizations() {
+        try {
+            const response = await healthStore.getAuthorizations(this.authorizationRequest);
+            return this.containsRequiredTypes(response.grantedTypes);
+        }
+        catch (error) {
+            return false;
+        }
+    }
+    /**
+     * å‘èµ·æˆæƒï¼ˆä¼šæ‹‰èµ·åä¸ºè¿åŠ¨å¥åº·æˆæƒé¡µï¼‰ã€‚
+     */
+    async requestAuthorizations(context) {
+        const initializedResult = await this.initialize(context);
+        if (!initializedResult.success) {
+            return initializedResult;
+        }
+        try {
+            const granted = await healthStore.requestAuthorizations(context, this.authorizationRequest);
+            if (this.containsRequiredTypes(granted.grantedTypes)) {
+                return { success: true, message: this.t('health_auth_all') };
+            }
+            if (this.containsAnyRequiredType(this.readDataTypes, granted.grantedTypes)) {
+                return { success: false, message: this.t('health_auth_partial') };
+            }
+            return { success: false, message: this.t('health_auth_none') };
+        }
+        catch (error) {
+            const code = error.code;
+            return { success: false, message: this.errorMessage(code) };
+        }
+    }
+    /**
+     * è¯»å–ä»Šæ—¥å¿«ç…§ä¸è¿‘ 7 å¤©åºåˆ—ã€‚
+     */
+    async readTodaySnapshot() {
+        const stepResult = await this.readSteps();
+        const heartRateResult = await this.readRestingHeartRate();
+        const sleepResult = await this.readSleep();
+        const snapshot = {
+            steps: stepResult.steps,
+            restingHeartRate: heartRateResult.restingHeartRate,
+            sleepMinutes: sleepResult.sleepMinutes,
+            sleepScore: sleepResult.sleepScore,
+            hasSteps: stepResult.hasSteps,
+            hasRestingHeartRate: heartRateResult.hasRestingHeartRate,
+            hasSleep: sleepResult.hasSleep,
+            dailySteps: stepResult.dailySteps,
+            dailyStepDates: stepResult.dailyStepDates,
+            dailyRestingHeartRates: heartRateResult.dailyRestingHeartRates,
+            dailySleepMinutes: sleepResult.dailySleepMinutes,
+            dailySleepScores: sleepResult.dailySleepScores,
+            lastSleepStages: sleepResult.lastSleepStages,
+            updatedAt: Date.now()
+        };
+        return snapshot;
+    }
+    /**
+     * æ’¤é”€è¿åŠ¨å¥åº·æˆæƒã€‚
+     */
+    async cancelAuthorizations() {
+        try {
+            await healthStore.cancelAuthorizations();
+            this.initialized = false;
+            return { success: true, message: this.t('health_auth_revoked') };
+        }
+        catch (error) {
+            const code = error.code;
+            return { success: false, message: this.errorMessage(code) };
+        }
+    }
+    async readSteps() {
+        const endDate = new Date();
+        const startDate = new Date(endDate.getTime() - 6 * 24 * 60 * 60 * 1000);
+        const request = {
+            dataType: this.dataTypes.dailyActivities,
+            metrics: { step: ['sum'] },
+            groupBy: { unitType: healthStore.GroupUnitType.DAY },
+            startLocalDate: HuaweiHealthService.localDate(startDate),
+            endLocalDate: HuaweiHealthService.localDate(endDate)
+        };
+        try {
+            const results = await healthStore.aggregateData(request);
+            const dailySteps = [];
+            const dailyStepDates = [];
+            for (let index = 0; index < 7; index++) {
+                const date = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate() - 6 + index);
+                const key = HuaweiHealthService.localDate(date);
+                let dayTotal = 0;
+                results.forEach((item) => {
+                    if (HuaweiHealthService.localDate(new Date(item.startTime)) === key) {
+                        dayTotal += item.result.step.sum ?? 0;
+                    }
+                });
+                dailySteps.push(dayTotal);
+                dailyStepDates.push(key);
+            }
+            const steps = dailySteps.length > 0 ? dailySteps[dailySteps.length - 1] : 0;
+            const hasSteps = dailySteps.some((value) => value > 0);
+            return { steps, hasSteps, dailySteps, dailyStepDates };
+        }
+        catch (error) {
+            return { steps: 0, hasSteps: false, dailySteps: [0, 0, 0, 0, 0, 0, 0], dailyStepDates: [] };
+        }
+    }
+    async readRestingHeartRate() {
+        const endDate = new Date();
+        const startDate = new Date(endDate.getTime() - 6 * 24 * 60 * 60 * 1000);
+        const request = {
+            samplePointDataType: this.dataTypes.restingHeartRate,
+            startTime: startDate.getTime(),
+            endTime: endDate.getTime(),
+            sortOrder: healthStore.SortOrder.ASC
+        };
+        try {
+            const points = await healthStore.readData(request);
+            const dailyRestingHeartRates = [];
+            for (let index = 0; index < 7; index++) {
+                const date = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate() - 6 + index);
+                const key = HuaweiHealthService.localDate(date);
+                let latestBpm = 0;
+                let latestTime = 0;
+                points.forEach((point) => {
+                    if (HuaweiHealthService.localDate(new Date(point.startTime)) === key && point.modifiedTime >= latestTime) {
+                        latestTime = point.modifiedTime;
+                        latestBpm = point.fields.restBpm;
+                    }
+                });
+                dailyRestingHeartRates.push(latestBpm);
+            }
+            const restingHeartRate = dailyRestingHeartRates.length > 0 ? dailyRestingHeartRates[dailyRestingHeartRates.length - 1] : 0;
+            const hasRestingHeartRate = dailyRestingHeartRates.some((value) => value > 0);
+            return { restingHeartRate, hasRestingHeartRate, dailyRestingHeartRates };
+        }
+        catch (error) {
+            return { restingHeartRate: 0, hasRestingHeartRate: false, dailyRestingHeartRates: [0, 0, 0, 0, 0, 0, 0] };
+        }
+    }
+    async readSleep() {
+        const endDate = new Date();
+        const startDate = new Date(endDate.getTime() - 6 * 24 * 60 * 60 * 1000);
+        const request = {
+            healthSequenceDataType: this.dataTypes.sleepRecord,
+            startTime: startDate.getTime(),
+            endTime: endDate.getTime(),
+            readOptions: { withDetails: true }
+        };
+        try {
+            const records = await healthStore.readData(request);
+            const dailySleepMinutes = [];
+            const dailySleepScores = [];
+            let todayScore = 0;
+            for (let index = 0; index < 7; index++) {
+                const date = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate() - 6 + index);
+                const key = HuaweiHealthService.localDate(date);
+                let dayMinutes = 0;
+                let dayScore = 0;
+                records.forEach((record) => {
+                    if (HuaweiHealthService.localDate(new Date(record.startTime)) === key) {
+                        dayMinutes += Math.round((record.summaries.duration ?? 0) / 60);
+                        const score = record.summaries.sleepScore ?? 0;
+                        if (score > dayScore) {
+                            dayScore = score;
+                        }
+                        if (index === 6 && score > 0) {
+                            todayScore = score;
+                        }
+                    }
+                });
+                dailySleepMinutes.push(dayMinutes);
+                dailySleepScores.push(dayScore);
+            }
+            const sleepMinutes = dailySleepMinutes.length > 0 ? dailySleepMinutes[dailySleepMinutes.length - 1] : 0;
+            const sleepScore = todayScore;
+            const hasSleep = dailySleepMinutes.some((value) => value > 0);
+            const lastSleepStages = this.aggregateLatestSleepStages(records);
+            return { sleepMinutes, sleepScore, hasSleep, dailySleepMinutes, dailySleepScores, lastSleepStages };
+        }
+        catch (error) {
+            return {
+                sleepMinutes: 0,
+                sleepScore: 0,
+                hasSleep: false,
+                dailySleepMinutes: [0, 0, 0, 0, 0, 0, 0],
+                dailySleepScores: [0, 0, 0, 0, 0, 0, 0],
+                lastSleepStages: this.emptySleepStages()
+            };
+        }
+    }
+    /**
+     * èšåˆæœ€è¿‘ä¸€æ¡åŒ…å«åˆ†æœŸæ˜ç»†çš„ç¡çœ è®°å½•ï¼Œè¾“å‡ºæ·±ç¡/æµ…ç¡/REM/æ¸…é†’åˆ†é’Ÿæ•°ã€‚
+     * 1=æ·±ç¡ 2=æµ…ç¡ 3=REM 4=æ¸…é†’ï¼›å…¶ä½™çŠ¶æ€ï¼ˆ0 æœªçŸ¥ã€5 å°ç¡ã€6 å§åºŠç­‰ï¼‰ä¸çº³å…¥åˆ†æœŸå æ¯”ã€‚
+     */
+    aggregateLatestSleepStages(records) {
+        const empty = this.emptySleepStages();
+        if (records.length === 0) {
+            return empty;
+        }
+        const sorted = records.slice().sort((a, b) => b.startTime - a.startTime);
+        for (let index = 0; index < sorted.length; index++) {
+            const record = sorted[index];
+            const segments = record.details?.sleepSegment;
+            if (segments === undefined || segments.length === 0) {
+                continue;
+            }
+            let deepMinutes = 0;
+            let shallowMinutes = 0;
+            let dreamMinutes = 0;
+            let awakeMinutes = 0;
+            let totalMinutes = 0;
+            segments.forEach((segment) => {
+                const minutes = Math.round((segment.endTime - segment.startTime) / 60000);
+                if (minutes <= 0) {
+                    return;
+                }
+                if (segment.sleepStatus === 1) {
+                    deepMinutes += minutes;
+                    totalMinutes += minutes;
+                }
+                else if (segment.sleepStatus === 2) {
+                    shallowMinutes += minutes;
+                    totalMinutes += minutes;
+                }
+                else if (segment.sleepStatus === 3) {
+                    dreamMinutes += minutes;
+                    totalMinutes += minutes;
+                }
+                else if (segment.sleepStatus === 4) {
+                    awakeMinutes += minutes;
+                }
+            });
+            return { deepMinutes, shallowMinutes, dreamMinutes, awakeMinutes, totalMinutes, hasDetails: totalMinutes > 0 };
+        }
+        return empty;
+    }
+    emptySleepStages() {
+        return { deepMinutes: 0, shallowMinutes: 0, dreamMinutes: 0, awakeMinutes: 0, totalMinutes: 0, hasDetails: false };
+    }
+    containsRequiredTypes(grantedTypes) {
+        const requiredIds = this.readDataTypes.map((type) => type.id);
+        for (let index = 0; index < requiredIds.length; index++) {
+            const found = grantedTypes.some((grantedType) => grantedType.id === requiredIds[index]);
+            if (!found) {
+                return false;
+            }
+        }
+        return true;
+    }
+    containsAnyRequiredType(requiredTypes, grantedTypes) {
+        return requiredTypes.some((requiredType) => grantedTypes.some((grantedType) => grantedType.id === requiredType.id));
+    }
+    /**
+     * å°†å¥åº·æœåŠ¡é”™è¯¯ç æ˜ å°„ä¸ºç”¨æˆ·å¯è¯»æ–‡æ¡ˆï¼ˆä¸è¾“å‡ºä»»ä½•å¥åº·æ˜ç»†ï¼‰ã€‚
+     */
+    errorMessage(code) {
+        switch (code) {
+            case 201:
+                return this.t('health_error_config');
+            case 1002701001:
+                return this.t('health_error_network');
+            case 1002702001:
+                return this.t('health_error_account');
+            case 1002702002:
+                return this.t('health_error_unavailable_format', code);
+            case 1002703001:
+                return this.t('health_error_privacy');
+            case 1002700001:
+            case 1002700002:
+                return this.t('health_error_unavailable_format', code);
+            default:
+                return this.t('health_error_unavailable_format', code);
+        }
+    }
+    static localDate(date) {
+        const month = `${date.getMonth() + 1}`.padStart(2, '0');
+        const day = `${date.getDate()}`.padStart(2, '0');
+        return `${date.getFullYear()}-${month}-${day}`;
+    }
+}
+//# sourceMappingURL=HuaweiHealthService.js.mapÂ‘Ùf hvigor_ignore__Applications_DevEco-Studio.app_Contents_sdk_default_hms_ets_api_@hms.health.store.d.tsÙt/Users/lihaha/Documents/o-company/bio-balance/bio-balance-Harmony/entry/src/main/ets/service/HuaweiHealthService.etsÔrB›ªmoduleName±isLocalDependency¯isNodeEntryFile§pkgPath±belongProjectPath§pkgNameªpkgVersion±dependencyPkgInfo¯hostModulesInfo°belongModulePath¬shouldEmitJs¥entryÃÂÙG/Users/lihaha/Documents/o-company/bio-balance/bio-balance-Harmony/entryÙA/Users/lihaha/Documents/o-company/bio-balance/bio-balance-Harmony¥entry¥1.0.0Ô  ‘ÔrC’²hostDependencyName®hostModuleName¾../service/HuaweiHealthService¥entryÙG/Users/lihaha/Documents/o-company/bio-balance/bio-balance-Harmony/entryÃÃÚ@import { healthStore } from '@kit.HealthServiceKit';
+import type common from '@ohos.app.ability.common';
+import { BusinessError } from '@kit.BasicServicesKit';
+
+/**
+ * åä¸ºè¿åŠ¨å¥åº·ï¼ˆHealth Service Kitï¼‰å°è£…ã€‚
+ * åªè¯»ä¸å†™ï¼šä»…ç”³è¯·æ—¥å¸¸æ´»åŠ¨ã€é™æ¯å¿ƒç‡ä¸ç¡çœ çš„è¯»å–æˆæƒï¼Œ
+ * ä¸å†™å…¥ã€ä¸åˆ é™¤ä»»ä½•å¥åº·æ•°æ®ï¼Œä¹Ÿä¸å‘ä»»ä½•è¿œç«¯ä¸Šä¼ æ˜ç»†ã€‚
+ */
+export interface HealthServiceResult {
+  success: boolean;
+  message: string;
+}
+
+export interface HuaweiHealthSnapshot {
+  steps: number;
+  restingHeartRate: number;
+  sleepMinutes: number;
+  sleepScore: number;
+  hasSteps: boolean;
+  hasRestingHeartRate: boolean;
+  hasSleep: boolean;
+  dailySteps: number[];
+  dailyStepDates: string[];
+  dailyRestingHeartRates: number[];
+  dailySleepMinutes: number[];
+  dailySleepScores: number[];
+  lastSleepStages: SleepStages;
+  updatedAt: number;
+}
+
+/**
+ * æœ€è¿‘ä¸€æ™šçš„ç¡çœ åˆ†æœŸï¼ˆåˆ†é’Ÿï¼‰ã€‚ä»…ä»æœ¬æœºå·²æˆæƒçš„ç¡çœ æ˜ç»†èšåˆï¼Œä¸è½ç›˜ã€ä¸ä¸Šä¼ ã€‚
+ */
+export interface SleepStages {
+  deepMinutes: number;
+  shallowMinutes: number;
+  dreamMinutes: number;
+  awakeMinutes: number;
+  totalMinutes: number;
+  hasDetails: boolean;
+}
+
+/**
+ * ç¡çœ åˆ†æœŸæ˜ç»†æ®µï¼ˆHealth Service Kit çš„ sleepSegment å­é›†ï¼‰ã€‚
+ */
+interface SleepSegment {
+  startTime: number;
+  endTime: number;
+  sleepStatus: number;
+}
+
+interface StepAggregateValue {
+  sum?: number;
+}
+
+interface StepAggregateResult {
+  step: StepAggregateValue;
+}
+
+interface StepAggregateItem extends healthStore.AggregateResult {
+  result: StepAggregateResult;
+}
+
+interface AuthorizationGrantedResponse extends healthStore.AuthorizationResponse {
+  grantedTypes: healthStore.DataType[];
+}
+
+interface HealthDataTypes {
+  dailyActivities: healthStore.DataType;
+  restingHeartRate: healthStore.DataType;
+  sleepRecord: healthStore.DataType;
+}
+
+interface StepReadResult {
+  steps: number;
+  hasSteps: boolean;
+  dailySteps: number[];
+  dailyStepDates: string[];
+}
+
+interface HeartRateReadResult {
+  restingHeartRate: number;
+  hasRestingHeartRate: boolean;
+  dailyRestingHeartRates: number[];
+}
+
+interface SleepReadResult {
+  sleepMinutes: number;
+  sleepScore: number;
+  hasSleep: boolean;
+  dailySleepMinutes: number[];
+  dailySleepScores: number[];
+  lastSleepStages: SleepStages;
+}
+
+export class HuaweiHealthService {
+  private context: common.Context | undefined = undefined;
+  private initialized: boolean = false;
+  private readonly dataTypes: HealthDataTypes = {
+    dailyActivities: healthStore.samplePointHelper.dailyActivities.DATA_TYPE,
+    restingHeartRate: healthStore.samplePointHelper.restingHeartRate.DATA_TYPE,
+    sleepRecord: healthStore.healthSequenceHelper.sleepRecord.DATA_TYPE
+  };
+  private readonly readDataTypes: healthStore.DataType[] = [];
+  private readonly writeDataTypes: healthStore.DataType[] = [];
+
+  private t(name: string, first?: number): string {
+    if (this.context === undefined) return '';
+    if (first === undefined) return this.context.resourceManager.getStringByNameSync(name);
+    return this.context.resourceManager.getStringByNameSync(name, first);
+  }
+
+  constructor() {
+    this.readDataTypes.push(this.dataTypes.dailyActivities);
+    this.readDataTypes.push(this.dataTypes.restingHeartRate);
+    this.readDataTypes.push(this.dataTypes.sleepRecord);
+  }
+
+  private get authorizationRequest(): healthStore.AuthorizationRequest {
+    return {
+      readDataTypes: this.readDataTypes,
+      writeDataTypes: this.writeDataTypes
+    };
+  }
+
+  /**
+   * åˆå§‹åŒ– Health Service Kitï¼Œå¹¶ç¼“å­˜æˆæƒæ‰€éœ€çš„æ•°æ®ç±»å‹ã€‚
+   */
+  async initialize(context: common.Context): Promise<HealthServiceResult> {
+    this.context = context;
+    if (this.initialized) {
+      return { success: true, message: this.t('health_ready') };
+    }
+    try {
+      await healthStore.init(context);
+      this.initialized = true;
+      return { success: true, message: this.t('health_initialized') };
+    } catch (error) {
+      const code: number = (error as BusinessError).code;
+      return { success: false, message: this.errorMessage(code) };
+    }
+  }
+
+  /**
+   * æ£€æŸ¥æ˜¯å¦å·²è·å¾—å…¨éƒ¨æ‰€éœ€æˆæƒã€‚
+   */
+  async hasRequiredAuthorizations(): Promise<boolean> {
+    try {
+      const response: AuthorizationGrantedResponse = await healthStore.getAuthorizations(this.authorizationRequest) as AuthorizationGrantedResponse;
+      return this.containsRequiredTypes(response.grantedTypes);
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
+   * å‘èµ·æˆæƒï¼ˆä¼šæ‹‰èµ·åä¸ºè¿åŠ¨å¥åº·æˆæƒé¡µï¼‰ã€‚
+   */
+  async requestAuthorizations(context: common.UIAbilityContext): Promise<HealthServiceResult> {
+    const initializedResult: HealthServiceResult = await this.initialize(context);
+    if (!initializedResult.success) {
+      return initializedResult;
+    }
+    try {
+      const granted: AuthorizationGrantedResponse = await healthStore.requestAuthorizations(context, this.authorizationRequest) as AuthorizationGrantedResponse;
+      if (this.containsRequiredTypes(granted.grantedTypes)) {
+        return { success: true, message: this.t('health_auth_all') };
+      }
+      if (this.containsAnyRequiredType(this.readDataTypes, granted.grantedTypes)) {
+        return { success: false, message: this.t('health_auth_partial') };
+      }
+      return { success: false, message: this.t('health_auth_none') };
+    } catch (error) {
+      const code: number = (error as BusinessError).code;
+      return { success: false, message: this.errorMessage(code) };
+    }
+  }
+
+  /**
+   * è¯»å–ä»Šæ—¥å¿«ç…§ä¸è¿‘ 7 å¤©åºåˆ—ã€‚
+   */
+  async readTodaySnapshot(): Promise<HuaweiHealthSnapshot> {
+    const stepResult: StepReadResult = await this.readSteps();
+    const heartRateResult: HeartRateReadResult = await this.readRestingHeartRate();
+    const sleepResult: SleepReadResult = await this.readSleep();
+    const snapshot: HuaweiHealthSnapshot = {
+      steps: stepResult.steps,
+      restingHeartRate: heartRateResult.restingHeartRate,
+      sleepMinutes: sleepResult.sleepMinutes,
+      sleepScore: sleepResult.sleepScore,
+      hasSteps: stepResult.hasSteps,
+      hasRestingHeartRate: heartRateResult.hasRestingHeartRate,
+      hasSleep: sleepResult.hasSleep,
+      dailySteps: stepResult.dailySteps,
+      dailyStepDates: stepResult.dailyStepDates,
+      dailyRestingHeartRates: heartRateResult.dailyRestingHeartRates,
+      dailySleepMinutes: sleepResult.dailySleepMinutes,
+      dailySleepScores: sleepResult.dailySleepScores,
+      lastSleepStages: sleepResult.lastSleepStages,
+      updatedAt: Date.now()
+    };
+    return snapshot;
+  }
+
+  /**
+   * æ’¤é”€è¿åŠ¨å¥åº·æˆæƒã€‚
+   */
+  async cancelAuthorizations(): Promise<HealthServiceResult> {
+    try {
+      await healthStore.cancelAuthorizations();
+      this.initialized = false;
+      return { success: true, message: this.t('health_auth_revoked') };
+    } catch (error) {
+      const code: number = (error as BusinessError).code;
+      return { success: false, message: this.errorMessage(code) };
+    }
+  }
+
+  private async readSteps(): Promise<StepReadResult> {
+    const endDate: Date = new Date();
+    const startDate: Date = new Date(endDate.getTime() - 6 * 24 * 60 * 60 * 1000);
+    const request: healthStore.AggregateRequest = {
+      dataType: this.dataTypes.dailyActivities,
+      metrics: { step: ['sum'] },
+      groupBy: { unitType: healthStore.GroupUnitType.DAY },
+      startLocalDate: HuaweiHealthService.localDate(startDate),
+      endLocalDate: HuaweiHealthService.localDate(endDate)
+    };
+    try {
+      const results: StepAggregateItem[] = await healthStore.aggregateData<StepAggregateItem>(request);
+      const dailySteps: number[] = [];
+      const dailyStepDates: string[] = [];
+      for (let index = 0; index < 7; index++) {
+        const date: Date = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate() - 6 + index);
+        const key: string = HuaweiHealthService.localDate(date);
+        let dayTotal: number = 0;
+        results.forEach((item) => {
+          if (HuaweiHealthService.localDate(new Date(item.startTime)) === key) {
+            dayTotal += item.result.step.sum ?? 0;
+          }
+        });
+        dailySteps.push(dayTotal);
+        dailyStepDates.push(key);
+      }
+      const steps: number = dailySteps.length > 0 ? dailySteps[dailySteps.length - 1] : 0;
+      const hasSteps: boolean = dailySteps.some((value: number) => value > 0);
+      return { steps, hasSteps, dailySteps, dailyStepDates };
+    } catch (error) {
+      return { steps: 0, hasSteps: false, dailySteps: [0, 0, 0, 0, 0, 0, 0], dailyStepDates: [] };
+    }
+  }
+
+  private async readRestingHeartRate(): Promise<HeartRateReadResult> {
+    const endDate: Date = new Date();
+    const startDate: Date = new Date(endDate.getTime() - 6 * 24 * 60 * 60 * 1000);
+    const request: healthStore.SamplePointReadRequest = {
+      samplePointDataType: this.dataTypes.restingHeartRate,
+      startTime: startDate.getTime(),
+      endTime: endDate.getTime(),
+      sortOrder: healthStore.SortOrder.ASC
+    };
+    try {
+      const points: healthStore.samplePointHelper.restingHeartRate.Model[] =
+        await healthStore.readData<healthStore.samplePointHelper.restingHeartRate.Model>(request);
+      const dailyRestingHeartRates: number[] = [];
+      for (let index = 0; index < 7; index++) {
+        const date: Date = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate() - 6 + index);
+        const key: string = HuaweiHealthService.localDate(date);
+        let latestBpm: number = 0;
+        let latestTime: number = 0;
+        points.forEach((point) => {
+          if (HuaweiHealthService.localDate(new Date(point.startTime)) === key && point.modifiedTime >= latestTime) {
+            latestTime = point.modifiedTime;
+            latestBpm = point.fields.restBpm;
+          }
+        });
+        dailyRestingHeartRates.push(latestBpm);
+      }
+      const restingHeartRate: number = dailyRestingHeartRates.length > 0 ? dailyRestingHeartRates[dailyRestingHeartRates.length - 1] : 0;
+      const hasRestingHeartRate: boolean = dailyRestingHeartRates.some((value: number) => value > 0);
+      return { restingHeartRate, hasRestingHeartRate, dailyRestingHeartRates };
+    } catch (error) {
+      return { restingHeartRate: 0, hasRestingHeartRate: false, dailyRestingHeartRates: [0, 0, 0, 0, 0, 0, 0] };
+    }
+  }
+
+  private async readSleep(): Promise<SleepReadResult> {
+    const endDate: Date = new Date();
+    const startDate: Date = new Date(endDate.getTime() - 6 * 24 * 60 * 60 * 1000);
+    const request: healthStore.HealthSequenceReadRequest = {
+      healthSequenceDataType: this.dataTypes.sleepRecord,
+      startTime: startDate.getTime(),
+      endTime: endDate.getTime(),
+      readOptions: { withDetails: true }
+    };
+    try {
+      const records: healthStore.healthSequenceHelper.sleepRecord.Model[] =
+        await healthStore.readData<healthStore.healthSequenceHelper.sleepRecord.Model>(request);
+      const dailySleepMinutes: number[] = [];
+      const dailySleepScores: number[] = [];
+      let todayScore: number = 0;
+      for (let index = 0; index < 7; index++) {
+        const date: Date = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate() - 6 + index);
+        const key: string = HuaweiHealthService.localDate(date);
+        let dayMinutes: number = 0;
+        let dayScore: number = 0;
+        records.forEach((record) => {
+          if (HuaweiHealthService.localDate(new Date(record.startTime)) === key) {
+            dayMinutes += Math.round((record.summaries.duration ?? 0) / 60);
+            const score: number = record.summaries.sleepScore ?? 0;
+            if (score > dayScore) {
+              dayScore = score;
+            }
+            if (index === 6 && score > 0) {
+              todayScore = score;
+            }
+          }
+        });
+        dailySleepMinutes.push(dayMinutes);
+        dailySleepScores.push(dayScore);
+      }
+      const sleepMinutes: number = dailySleepMinutes.length > 0 ? dailySleepMinutes[dailySleepMinutes.length - 1] : 0;
+      const sleepScore: number = todayScore;
+      const hasSleep: boolean = dailySleepMinutes.some((value: number) => value > 0);
+      const lastSleepStages: SleepStages = this.aggregateLatestSleepStages(records);
+      return { sleepMinutes, sleepScore, hasSleep, dailySleepMinutes, dailySleepScores, lastSleepStages };
+    } catch (error) {
+      return {
+        sleepMinutes: 0,
+        sleepScore: 0,
+        hasSleep: false,
+        dailySleepMinutes: [0, 0, 0, 0, 0, 0, 0],
+        dailySleepScores: [0, 0, 0, 0, 0, 0, 0],
+        lastSleepStages: this.emptySleepStages()
+      };
+    }
+  }
+
+  /**
+   * èšåˆæœ€è¿‘ä¸€æ¡åŒ…å«åˆ†æœŸæ˜ç»†çš„ç¡çœ è®°å½•ï¼Œè¾“å‡ºæ·±ç¡/æµ…ç¡/REM/æ¸…é†’åˆ†é’Ÿæ•°ã€‚
+   * 1=æ·±ç¡ 2=æµ…ç¡ 3=REM 4=æ¸…é†’ï¼›å…¶ä½™çŠ¶æ€ï¼ˆ0 æœªçŸ¥ã€5 å°ç¡ã€6 å§åºŠç­‰ï¼‰ä¸çº³å…¥åˆ†æœŸå æ¯”ã€‚
+   */
+  private aggregateLatestSleepStages(records: healthStore.healthSequenceHelper.sleepRecord.Model[]): SleepStages {
+    const empty: SleepStages = this.emptySleepStages();
+    if (records.length === 0) {
+      return empty;
+    }
+    const sorted: healthStore.healthSequenceHelper.sleepRecord.Model[] = records.slice().sort((a, b) => b.startTime - a.startTime);
+    for (let index = 0; index < sorted.length; index++) {
+      const record = sorted[index];
+      const segments: SleepSegment[] | undefined = (record.details as healthStore.healthFields.SleepDetail | undefined)?.sleepSegment;
+      if (segments === undefined || segments.length === 0) {
+        continue;
+      }
+      let deepMinutes: number = 0;
+      let shallowMinutes: number = 0;
+      let dreamMinutes: number = 0;
+      let awakeMinutes: number = 0;
+      let totalMinutes: number = 0;
+      segments.forEach((segment: SleepSegment) => {
+        const minutes: number = Math.round((segment.endTime - segment.startTime) / 60000);
+        if (minutes <= 0) {
+          return;
+        }
+        if (segment.sleepStatus === 1) {
+          deepMinutes += minutes;
+          totalMinutes += minutes;
+        } else if (segment.sleepStatus === 2) {
+          shallowMinutes += minutes;
+          totalMinutes += minutes;
+        } else if (segment.sleepStatus === 3) {
+          dreamMinutes += minutes;
+          totalMinutes += minutes;
+        } else if (segment.sleepStatus === 4) {
+          awakeMinutes += minutes;
+        }
+      });
+      return { deepMinutes, shallowMinutes, dreamMinutes, awakeMinutes, totalMinutes, hasDetails: totalMinutes > 0 };
+    }
+    return empty;
+  }
+
+  private emptySleepStages(): SleepStages {
+    return { deepMinutes: 0, shallowMinutes: 0, dreamMinutes: 0, awakeMinutes: 0, totalMinutes: 0, hasDetails: false };
+  }
+
+  private containsRequiredTypes(grantedTypes: healthStore.DataType[]): boolean {
+    const requiredIds: number[] = this.readDataTypes.map((type: healthStore.DataType) => type.id);
+    for (let index = 0; index < requiredIds.length; index++) {
+      const found: boolean = grantedTypes.some((grantedType: healthStore.DataType) => grantedType.id === requiredIds[index]);
+      if (!found) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private containsAnyRequiredType(requiredTypes: healthStore.DataType[], grantedTypes: healthStore.DataType[]): boolean {
+    return requiredTypes.some((requiredType: healthStore.DataType) =>
+      grantedTypes.some((grantedType: healthStore.DataType) => grantedType.id === requiredType.id));
+  }
+
+  /**
+   * å°†å¥åº·æœåŠ¡é”™è¯¯ç æ˜ å°„ä¸ºç”¨æˆ·å¯è¯»æ–‡æ¡ˆï¼ˆä¸è¾“å‡ºä»»ä½•å¥åº·æ˜ç»†ï¼‰ã€‚
+   */
+  private errorMessage(code: number): string {
+    switch (code) {
+      case 201:
+        return this.t('health_error_config');
+      case 1002701001:
+        return this.t('health_error_network');
+      case 1002702001:
+        return this.t('health_error_account');
+      case 1002702002:
+        return this.t('health_error_unavailable_format', code);
+      case 1002703001:
+        return this.t('health_error_privacy');
+      case 1002700001:
+      case 1002700002:
+        return this.t('health_error_unavailable_format', code);
+      default:
+        return this.t('health_error_unavailable_format', code);
+    }
+  }
+
+  static localDate(date: Date): string {
+    const month: string = `${date.getMonth() + 1}`.padStart(2, '0');
+    const day: string = `${date.getDate()}`.padStart(2, '0');
+    return `${date.getFullYear()}-${month}-${day}`;
+  }
+}
+ÀÔrD‘±@hms.health.storeÔrE—ªassertions¨external¢id¤meta±moduleSideEffectsªresolvedByµsyntheticNamedExportsAÃÙf hvigor_ignore__Applications_DevEco-Studio.app_Contents_sdk_default_hms_ets_api_@hms.health.store.d.tsÔrF‘¯hostModulesInfo‘C±@hms.health.store¥entryÃªoh-resolveÂ“ÔrG–§version¤fileªsourceRoot§sources¥names¨mappings¶HuaweiHealthService.js ‘·HuaweiHealthService.etsÜI–”    ”  	”  ”  ”+  3”,  4””  Ì` ” Ì`” Ì`”  Ì` –” Ìk
+” Ìk” Ìk”
+ Ìk” Ìk” Ìk(—” Ìl” Ìl” Ìl” Ìl” Ìl” Ìl”& Ìl"”” Ìl$” Ìl+” Ìl-” Ìl.•” Ìm” Ìm” Ìm” Ìm” Ìm” Ìm” Ìm$” Ìm(” Ìm)” Ìm0”  Ìm1”/ ÌmÌ@”0 ÌmÌA”ÌC ÌmÌT”ÌD ÌmÌU”ÌH ÌmÌY”ÌI ÌmÌZ”ÌJ ÌmÌ[Ÿ” Ìn” Ìn” Ìn” Ìn” Ìn” Ìn”+ Ìn'”, Ìn(”? Ìn;”Ì@ Ìn<”ÌD ÌnÌ@”ÌF ÌnÌB”ÌK ÌnÌG”ÌL ÌnÌH”ÌM ÌnÌI’” Ìo” Ìo‘” Ìq•” Ìa
+” Ìa” Ìa0”  Ìa9”! Ìa:•” Ìb
+” Ìb” Ìb!”  Ìb&”! Ìb'“” Ìc” Ìc” Ìc0š” Ìd” Ìd” Ìd”( Ìd ”) Ìd!”: Ìd2”; Ìd3”ÌJ ÌdÌB”ÌK ÌdÌC”ÌT ÌdÌLš” Ìe” Ìe” Ìe”) Ìe!”* Ìe"”; Ìe3”< Ìe4”ÌL ÌeÌD”ÌM ÌeÌE”ÌV ÌeÌNš” Ìf” Ìf” Ìf”$ Ìf”% Ìf”9 Ìf1”: Ìf2”ÌE Ìf=”ÌF Ìf>”ÌO ÌfÌG’”	 Ìg”
+ Ìg•” Ìh” Ìh ” Ìh;” Ìh=”  Ìh>•” Ìi” Ìi!” Ìi<”  Ìi>”! Ìi?” Ìr” Ìr” Ìr	” Ìr” Ìr” Ìr”  Ìr”$ Ìr ”% Ìr!”. Ìr*”/ Ìr+”> Ìr:”? Ìr;”Ì@ Ìr<” Ìs” Ìs” Ìs	” Ìs” Ìs” Ìs”  Ìs”$ Ìs ”% Ìs!”. Ìs*”/ Ìs+”? Ìs;”Ì@ Ìs<”ÌA Ìs=” Ìt” Ìt” Ìt	” Ìt” Ìt” Ìt”  Ìt”$ Ìt ”% Ìt!”. Ìt*”/ Ìt+”: Ìt6”; Ìt7”< Ìt8’” Ìu” Ìu“” Ìw” Ìw” Ìw"’” Ìx” Ìx–” Ìy” Ìy” Ìy” Ìy”  Ìy”- Ìy'–” Ìz” Ìz” Ìz”  Ìz”! Ìz”/ Ìz)’”	 Ì{”
+ Ì{’” Ì|” Ì|‘” Ì~‘” Ì€–” Ì”	 Ì”
+ Ì” Ì” Ì” Ì*—” Ì‚” Ì‚” Ì‚	” Ì‚” Ì‚” Ì‚” Ì‚–” Ìƒ” Ìƒ” Ìƒ” Ìƒ” Ìƒ” ÌƒÜ ” Ì„” Ì„” Ì„” Ì„” Ì„”" Ì„”$ Ì„”+ Ì„%”- Ì„'”1 Ì„+”2 Ì„,”3 Ì„-”4 Ì„.”ÌB Ì„<”ÌC Ì„=”ÌE Ì„?”ÌF Ì„Ì@‘”	 Ì…’” Ì†” Ì†™” Ì‡” Ì‡” Ì‡” Ì‡”" Ì‡”# Ì‡”* Ì‡$”+ Ì‡%”, Ì‡&—” Ìˆ” Ìˆ
+” Ìˆ” Ìˆ” Ìˆ”# Ìˆ”$ ÌˆÜ ” Ì‰” Ì‰” Ì‰” Ì‰” Ì‰”" Ì‰”$ Ì‰”+ Ì‰%”- Ì‰'”1 Ì‰+”2 Ì‰,”3 Ì‰-”4 Ì‰.”ÌH Ì‰ÌB”ÌI Ì‰ÌC”ÌK Ì‰ÌE”ÌL Ì‰ÌF‘”	 ÌŠ”” ÌŠ” ÌŠ” ÌŠ” ÌŠ˜” Ì‹” Ì‹” Ì‹” Ì‹” Ì‹3” Ì‹4”# Ì‹8”$ Ì‹9Ü ” ÌŒ” ÌŒ” ÌŒ” ÌŒ” ÌŒ”# ÌŒ”% ÌŒ”, ÌŒ&”. ÌŒ(”2 ÌŒ,”3 ÌŒ-”? ÌŒ9”Ì@ ÌŒ:”ÌD ÌŒ>”ÌE ÌŒ?”ÌG ÌŒÌA”ÌH ÌŒÌB‘”	 Ì’” Ì” Ì‘” Ì‘” Ì’”” Ì“”	 Ì“”
+ Ì“”# Ì“!’” Ì”” Ì”” Ì•” Ì•” Ì•” Ì•5”# Ì•;”. Ì•ÌF”/ Ì•ÌG”Ì@ Ì•ÌX”ÌA Ì•ÌY”ÌE Ì•Ì]”ÌF Ì•Ì^”ÌZ Ì•Ìr”Ì[ Ì•Ì“”Ì\ Ì•Ì”›” Ì–” Ì–” Ì–” Ì–”- Ì–'”. Ì–(”6 Ì–0”7 Ì–1”ÌC Ì–=”ÌD Ì–>”ÌE Ì–?‘”	 Ì—”” Ì—” Ì—” Ì—” Ì—”” Ì˜” Ì˜” Ì˜” Ì˜‘”	 Ì™’” Ìš” Ìš‘” Ìœ‘” Ì–” ÌŸ”	 ÌŸ”
+ ÌŸ” ÌŸ”  ÌŸ”' ÌŸ>œ” Ì ” Ì 
+” Ì ”" Ì 3”( Ì 9”, Ì =”- Ì >”7 Ì ÌH”8 Ì ÌI”? Ì ÌP”Ì@ Ì ÌQ”ÌA Ì ÌR—” Ì¡” Ì¡” Ì¡	” Ì¡” Ì¡”& Ì¡"”( Ì¡$”” Ì¢” Ì¢”$ Ì¢”% Ì¢‘”	 Ì£’” Ì¤” Ì¤Ü ” Ì¥” Ì¥” Ì¥” Ì¥4”" Ì¥:”- Ì¥ÌE”. Ì¥ÌF”ÌC Ì¥Ì[”ÌD Ì¥Ì\”ÌK Ì¥Ìc”ÌM Ì¥Ìe”ÌQ Ì¥Ìi”ÌR Ì¥Ìj”Ìf Ì¥Ì~”Ìg Ì¥ÌŸ”Ìh Ì¥Ì ›” Ì¦” Ì¦
+” Ì¦” Ì¦”* Ì¦$”+ Ì¦%”2 Ì¦,”3 Ì¦-”? Ì¦9”Ì@ Ì¦:”ÌB Ì¦<Ü ” Ì§” Ì§” Ì§”  Ì§”" Ì§”& Ì§”( Ì§ ”/ Ì§'”1 Ì§)”5 Ì§-”6 Ì§.”7 Ì§/”8 Ì§0”ÌI Ì§ÌA”ÌJ Ì§ÌB”ÌL Ì§ÌD”ÌM Ì§ÌE‘” Ì¨Ÿ” Ì©” Ì©
+” Ì©” Ì©”, Ì©&”- Ì©'”1 Ì©+”2 Ì©,”? Ì©9”ÌA Ì©;”ÌH Ì©ÌB”ÌI Ì©ÌC”ÌU Ì©ÌO”ÌV Ì©ÌP”ÌX Ì©ÌRÜ ” Ìª” Ìª” Ìª”  Ìª”" Ìª”' Ìª”) Ìª!”0 Ìª(”2 Ìª*”6 Ìª.”7 Ìª/”8 Ìª0”9 Ìª1”ÌN ÌªÌF”ÌO ÌªÌG”ÌQ ÌªÌI”ÌR ÌªÌJ‘” Ì«Ü ” Ì¬” Ì¬” Ì¬” Ì¬” Ì¬”# Ì¬”% Ì¬”, Ì¬&”. Ì¬(”2 Ì¬,”3 Ì¬-”4 Ì¬.”5 Ì¬/”ÌG Ì¬ÌA”ÌH Ì¬ÌB”ÌJ Ì¬ÌD”ÌK Ì¬ÌE‘”	 Ì­”” Ì­” Ì­” Ì­” Ì­˜” Ì®” Ì®” Ì®” Ì®” Ì®3” Ì®4”# Ì®8”$ Ì®9Ü ” Ì¯” Ì¯” Ì¯” Ì¯” Ì¯”# Ì¯”% Ì¯”, Ì¯&”. Ì¯(”2 Ì¯,”3 Ì¯-”? Ì¯9”Ì@ Ì¯:”ÌD Ì¯>”ÌE Ì¯?”ÌG Ì¯ÌA”ÌH Ì¯ÌB‘”	 Ì°’” Ì±” Ì±‘” Ì³‘” Ìµ”” Ì¶”	 Ì¶”
+ Ì¶” Ì¶š” Ì·” Ì·
+” Ì·” Ì·'”! Ì·-”% Ì·1”& Ì·2”/ Ì·;”1 Ì·=”2 Ì·>š” Ì¸” Ì¸
+” Ì¸”  Ì¸1”& Ì¸7”* Ì¸;”+ Ì¸<”? Ì¸ÌP”ÌA Ì¸ÌR”ÌB Ì¸ÌSš” Ì¹” Ì¹
+” Ì¹” Ì¹)”" Ì¹/”& Ì¹3”' Ì¹4”0 Ì¹=”2 Ì¹?”3 Ì¹Ì@”” Ìº” Ìº
+” Ìº” Ìº+–” Ì»” Ì»” Ì»” Ì»” Ì»”# Ì»–” Ì¼” Ì¼” Ì¼”- Ì¼'”. Ì¼(”> Ì¼8–” Ì½” Ì½” Ì½”% Ì½”& Ì½ ”2 Ì½,–” Ì¾” Ì¾” Ì¾”# Ì¾”$ Ì¾”. Ì¾(–” Ì¿” Ì¿” Ì¿”  Ì¿”! Ì¿”) Ì¿#–” ÌÀ” ÌÀ”! ÌÀ”0 ÌÀ*”1 ÌÀ+”ÌD ÌÀ>–” ÌÁ” ÌÁ” ÌÁ”! ÌÁ”" ÌÁ”* ÌÁ$–” ÌÂ” ÌÂ” ÌÂ”" ÌÂ”# ÌÂ”- ÌÂ'–” ÌÃ” ÌÃ” ÌÃ”& ÌÃ ”' ÌÃ!”5 ÌÃ/–” ÌÄ”" ÌÄ”$ ÌÄ”3 ÌÄ-”4 ÌÄ.”ÌJ ÌÄÌD–” ÌÅ” ÌÅ” ÌÅ”* ÌÅ$”+ ÌÅ%”< ÌÅ6–” ÌÆ” ÌÆ” ÌÆ”) ÌÆ#”* ÌÆ$”: ÌÆ4–” ÌÇ” ÌÇ” ÌÇ”( ÌÇ"”) ÌÇ#”8 ÌÇ2—” ÌÈ” ÌÈ” ÌÈ” ÌÈ” ÌÈ” ÌÈ”! ÌÈ’”	 ÌÉ”
+ ÌÉ”” ÌÊ” ÌÊ” ÌÊ” ÌÊ’” ÌË” ÌË‘” ÌÍ‘” ÌÏ”” ÌĞ”	 ÌĞ”
+ ÌĞ” ÌĞ’” ÌÑ” ÌÑ—” ÌÒ” ÌÒ” ÌÒ” ÌÒ”2 ÌÒ,”4 ÌÒ.”5 ÌÒ/—” ÌÓ” ÌÓ
+” ÌÓ” ÌÓ” ÌÓ”$ ÌÓ”% ÌÓÜ ” ÌÔ” ÌÔ” ÌÔ” ÌÔ” ÌÔ”" ÌÔ”$ ÌÔ”+ ÌÔ%”- ÌÔ'”1 ÌÔ+”2 ÌÔ,”3 ÌÔ-”4 ÌÔ.”ÌI ÌÔÌC”ÌJ ÌÔÌD”ÌL ÌÔÌF”ÌM ÌÔÌG‘”	 ÌÕ”” ÌÕ” ÌÕ” ÌÕ” ÌÕ˜” ÌÖ” ÌÖ” ÌÖ” ÌÖ” ÌÖ3” ÌÖ4”# ÌÖ8”$ ÌÖ9Ü ” Ì×” Ì×” Ì×” Ì×” Ì×”# Ì×”% Ì×”, Ì×&”. Ì×(”2 Ì×,”3 Ì×-”? Ì×9”Ì@ Ì×:”ÌD Ì×>”ÌE Ì×?”ÌG Ì×ÌA”ÌH Ì×ÌB‘”	 ÌØ’” ÌÙ” ÌÙ”” ÌÛ
+”	 ÌÛ”
+ ÌÛ” ÌÛ˜” ÌÜ” ÌÜ
+” ÌÜ” ÌÜ” ÌÜ”  ÌÜ"”" ÌÜ$”# ÌÜ%Ü ” Ìİ” Ìİ
+” Ìİ” Ìİ” Ìİ ”" Ìİ$”# Ìİ%”* Ìİ,”+ Ìİ-”2 Ìİ4”4 Ìİ6”7 Ìİ9”8 Ìİ:”; Ìİ=”= Ìİ?”Ì@ ÌİÌB”ÌB ÌİÌD”ÌE ÌİÌG”ÌG ÌİÌI”ÌJ ÌİÌL”ÌN ÌİÌP”ÌO ÌİÌQ”ÌP ÌİÌR”” ÌŞ” ÌŞ
+” ÌŞ” ÌŞ2˜” Ìß” Ìß” Ìß” Ìß” Ìß”$ Ìß”% Ìß”4 Ìß.š” Ìà” Ìà” Ìà” Ìà” Ìà” Ìà” Ìà”# Ìà”$ Ìà”& Ìà œ” Ìá” Ìá” Ìá” Ìá” Ìá”! Ìá”, Ìá&”- Ìá'”: Ìá4”; Ìá5”> Ìá8”Ì@ Ìá:™” Ìâ” Ìâ” Ìâ”/ Ìâ)”0 Ìâ*”9 Ìâ3”: Ìâ4”ÌC Ìâ=”ÌD Ìâ>™” Ìã” Ìã” Ìã”- Ìã'”. Ìã(”7 Ìã1”8 Ìã2”? Ìã9”Ì@ Ìã:’”	 Ìä”
+ Ìä’” Ìå” Ìåœ” Ìæ” Ìæ” Ìæ” Ìæ+”" Ìæ1”- Ìæ<”. Ìæ=”; ÌæÌJ”< ÌæÌ^”ÌC ÌæÌe”ÌD ÌæÌf”ÌE ÌæÌg–” Ìç” Ìç” Ìç” Ìç#”! Ìç%”" Ìç&–” Ìè” Ìè”  Ìè”# Ìè'”% Ìè)”& Ìè*” Ìé” Ìé” Ìé” Ìé” Ìé” Ìé”  Ìé”% Ìé”( Ìé"”) Ìé#”+ Ìé%”0 Ìé*”2 Ìé,”4 Ìé.Ü ” Ìê” Ìê” Ìê” Ìê”! Ìê”% Ìê#”& Ìê$”- Ìê+”. Ìê,”9 Ìê7”; Ìê9”= Ìê;”ÌD ÌêÌB”ÌE ÌêÌC”ÌM ÌêÌK”ÌO ÌêÌM”ÌQ ÌêÌO”ÌX ÌêÌV”ÌY ÌêÌW”Ì` ÌêÌ^”Ìb ÌêÌ`”Ìe ÌêÌc”Ìf ÌêÌd”Ìi ÌêÌg”Ìn ÌêÌl”Ìo ÌêÌm”Ìp ÌêÌn›” Ìë” Ìë” Ìë” Ìë”/ Ìë/”0 Ìë0”9 Ìë9”: Ìë:”> Ìë>”? Ìë?”Ì@ ÌëÌ@–” Ìì” Ìì” Ìì” Ìì”  Ìì ”! Ìì!™” Ìí” Ìí” Ìí” Ìí”  Ìí”! Ìí”% Ìí”' Ìí”) Ìí!Ü ” Ìî
+” Ìî”+ Ìî!”, Ìî"”5 Ìî+”6 Ìî,”: Ìî0”> Ìî4”? Ìî5”ÌC Ìî9”ÌD Ìî:”ÌM ÌîÌC”ÌN ÌîÌD”ÌO ÌîÌE”ÌT ÌîÌJ”ÌW ÌîÌM”ÌY ÌîÌO” Ìï”  Ìï”$ Ìï”( Ìï”) Ìï”/ Ìï#”0 Ìï$”4 Ìï(”5 Ìï)”8 Ìï,”< Ìï0”= Ìï1”> Ìï2‘” Ìğ”” Ìñ” Ìñ	” Ìñ
+” Ìñ˜” Ìò” Ìò” Ìò” Ìò”  Ìò”( Ìò ”) Ìò!”* Ìò"˜” Ìó” Ìó” Ìó”# Ìó”$ Ìó”' Ìó”( Ìó ”) Ìó!‘” ÌôÜ ” Ìõ” Ìõ” Ìõ” Ìõ”$ Ìõ&”% Ìõ'”+ Ìõ-”. Ìõ0”/ Ìõ1”0 Ìõ2”1 Ìõ3”2 Ìõ4”< Ìõ>”= Ìõ?”ÌG ÌõÌI”ÌH ÌõÌJ”ÌN ÌõÌP”ÌQ ÌõÌS”ÌR ÌõÌT”ÌS ÌõÌU”ÌT ÌõÌV”ÌU ÌõÌW”ÌV ÌõÌX”ÌW ÌõÌY”ÌX ÌõÌZÜ ” Ìö” Ìö” Ìö” Ìö ”' Ìö*”( Ìö+”, Ìö/”- Ìö0”. Ìö1”3 Ìö>”5 ÌöÌ@”7 ÌöÌB”8 ÌöÌC”= ÌöÌH”Ì@ ÌöÌK”ÌA ÌöÌL”ÌB ÌöÌM”ÌC ÌöÌNœ” Ì÷” Ì÷” Ì÷” Ì÷” Ì÷”$ Ì÷”& Ì÷ ”0 Ì÷*”2 Ì÷,”Ì@ Ì÷:”ÌB Ì÷<”ÌC Ì÷=‘”	 Ìø”” Ìø” Ìø” Ìø” ÌøÜ "” Ìù” Ìù” Ìù” Ìù” Ìù” Ìù” Ìù”' Ìù!”) Ìù#”. Ìù(”0 Ìù*”: Ìù4”< Ìù6”= Ìù7”> Ìù8”Ì@ Ìù:”ÌA Ìù;”ÌC Ìù=”ÌD Ìù>”ÌF ÌùÌ@”ÌG ÌùÌA”ÌI ÌùÌC”ÌJ ÌùÌD”ÌL ÌùÌF”ÌM ÌùÌG”ÌO ÌùÌI”ÌP ÌùÌJ”ÌQ ÌùÌK”ÌS ÌùÌM”Ìa ÌùÌ[”Ìc ÌùÌ]”Ìe ÌùÌ_”Ìg ÌùÌa”Ìh ÌùÌb‘”	 Ìú’” Ìû” Ìû”” Ìı
+”	 Ìı”
+ Ìı” Ìı$˜” Ìş” Ìş
+” Ìş” Ìş” Ìş”  Ìş"”" Ìş$”# Ìş%Ü ” Ìÿ” Ìÿ
+” Ìÿ” Ìÿ” Ìÿ ”" Ìÿ$”# Ìÿ%”* Ìÿ,”+ Ìÿ-”2 Ìÿ4”4 Ìÿ6”7 Ìÿ9”8 Ìÿ:”; Ìÿ=”= Ìÿ?”Ì@ ÌÿÌB”ÌB ÌÿÌD”ÌE ÌÿÌG”ÌG ÌÿÌI”ÌJ ÌÿÌL”ÌN ÌÿÌP”ÌO ÌÿÌQ”ÌP ÌÿÌR”” Í ” Í 
+” Í ” Í 8˜” Í” Í”! Í”% Í”& Í ”/ Í)”0 Í*”Ì@ Í:—” Í” Í” Í”  Í”! Í”( Í"”* Í$—” Í” Í” Í” Í” Í”$ Í”& Í ˜” Í” Í” Í”" Í”# Í”, Í&”- Í'”0 Í*’”	 Í”
+ Í’” Í” Íœ” Í” Í” Í” Í”! Í”, Í”- Í”5 Í"”6 ÍÌY”= ÍÌ`”> ÍÌa”? ÍÌb–” Í	” Í	”( Í	"”+ Í	/”- Í	1”. Í	2” Í
+” Í
+” Í
+” Í
+” Í
+” Í
+”  Í
+”% Í
+”( Í
+"”) Í
+#”+ Í
+%”0 Í
+*”2 Í
+,”4 Í
+.Ü ” Í” Í” Í” Í”! Í”% Í#”& Í$”- Í+”. Í,”9 Í7”; Í9”= Í;”ÌD ÍÌB”ÌE ÍÌC”ÌM ÍÌK”ÌO ÍÌM”ÌQ ÍÌO”ÌX ÍÌV”ÌY ÍÌW”Ì` ÍÌ^”Ìb ÍÌ`”Ìe ÍÌc”Ìf ÍÌd”Ìi ÍÌg”Ìn ÍÌl”Ìo ÍÌm”Ìp ÍÌn›” Í” Í” Í” Í”/ Í/”0 Í0”9 Í9”: Í:”> Í>”? Í?”Ì@ ÍÌ@–” Í” Í” Í”  Í ”! Í!”" Í"–” Í” Í” Í”! Í!”" Í"”# Í#™” Í” Í” Í” Í” Í”  Í”% Í”' Í”) Í!Ü ” Í
+” Í”+ Í!”, Í"”5 Í+”6 Í,”: Í0”> Í4”? Í5”ÌD Í:”ÌE Í;”ÌN ÍÌD”ÌO ÍÌE”ÌP ÍÌF”ÌU ÍÌK”ÌX ÍÌN”Ì\ ÍÌR”Ìa ÍÌW”Ìb ÍÌX”Ìn ÍÌd”Ìr ÍÌh”Ì| ÍÌr”Ì~ ÍÌt—” Í”" Í”% Í”* Í”+ Í”7 Í+”8 Í,™” Í”! Í”$ Í”) Í”* Í”0 Í$”1 Í%”8 Í,”9 Í-‘” Í”” Í” Í	” Í
+” Í˜” Í”& Í”' Í”+ Í#”, Í$”5 Í-”6 Í.”7 Í/‘” ÍÜ ” Í” Í”" Í”% Í'”; Í=”< Í>”ÌB ÍÌD”ÌE ÍÌG”ÌF ÍÌH”ÌG ÍÌI”ÌH ÍÌJ”ÌI ÍÌK”Ì_ ÍÌa”Ì` ÍÌb”Ìv ÍÌx”Ìw ÍÌy”Ì} ÍÌ”Ì€ ÍÌ‚”Ì ÍÌƒ”Ì‚ ÍÌ„”Ìƒ ÍÌ…”Ì„ ÍÌ†”Ì… ÍÌ‡”Ì† ÍÌˆ”Ì‡ ÍÌ‰Ü ” Í” Í”% Í”( Í+”> ÍÌA”? ÍÌB”ÌC ÍÌF”ÌD ÍÌG”ÌE ÍÌH”ÌJ ÍÌU”ÌL ÍÌW”ÌN ÍÌY”ÌO ÍÌZ”ÌT ÍÌ_”ÌW ÍÌb”ÌX ÍÌc”ÌY ÍÌd”ÌZ ÍÌeš” Í” Í” Í”% Í”' Í!”: Í4”< Í6”ÌR ÍÌL”ÌT ÍÌN”ÌU ÍÌO‘”	 Í”” Í” Í” Í” ÍÜ ” Í” Í” Í”% Í”' Í!”( Í"”* Í$”= Í7”? Í9”ÌD Í>”ÌF ÍÌ@”Ì\ ÍÌV”Ì^ ÍÌX”Ì_ ÍÌY”Ì` ÍÌZ”Ìb ÍÌ\”Ìc ÍÌ]”Ìe ÍÌ_”Ìf ÍÌ`”Ìh ÍÌb”Ìi ÍÌc”Ìk ÍÌe”Ìl ÍÌf”Ìn ÍÌh”Ìo ÍÌi”Ìq ÍÌk”Ìr ÍÌl”Ìs ÍÌm”Ìu ÍÌo”Ìv ÍÌp‘”	 Í’” Í” Í”” Í
+”	 Í”
+ Í” Í˜” Í ” Í 
+” Í ” Í ” Í ”  Í "”" Í $”# Í %Ü ” Í!” Í!
+” Í!” Í!” Í! ”" Í!$”# Í!%”* Í!,”+ Í!-”2 Í!4”4 Í!6”7 Í!9”8 Í!:”; Í!=”= Í!?”Ì@ Í!ÌB”ÌB Í!ÌD”ÌE Í!ÌG”ÌG Í!ÌI”ÌJ Í!ÌL”ÌN Í!ÌP”ÌO Í!ÌQ”ÌP Í!ÌR”” Í"” Í"
+” Í"” Í";˜” Í#”" Í#”$ Í#”( Í#"”) Í##”2 Í#,”3 Í#-”> Í#8—” Í$” Í$” Í$”  Í$”! Í$”( Í$"”* Í$$—” Í%” Í%” Í%” Í%” Í%”$ Í%”& Í% ˜” Í&” Í&” Í&” Í&”& Í& ”( Í&"”, Í&&”. Í&(’”	 Í'”
+ Í'’” Í(” Í(œ” Í)” Í)” Í)” Í*”" Í*”- Í*”. Í*”6 Í*"”7 Í*ÌW”> Í*Ì^”? Í*Ì_”Ì@ Í*Ì`–” Í+” Í+”# Í+”& Í+*”( Í+,”) Í+-–” Í,” Í,”" Í,”% Í,)”' Í,+”( Í,,–” Í-” Í-
+” Í-” Í-” Í- ” Í-!” Í.” Í.” Í.” Í.” Í.” Í.”  Í.”% Í.”( Í."”) Í.#”+ Í.%”0 Í.*”2 Í.,”4 Í..Ü ” Í/” Í/” Í/” Í/”! Í/”% Í/#”& Í/$”- Í/+”. Í/,”9 Í/7”; Í/9”= Í/;”ÌD Í/ÌB”ÌE Í/ÌC”ÌM Í/ÌK”ÌO Í/ÌM”ÌQ Í/ÌO”ÌX Í/ÌV”ÌY Í/ÌW”Ì` Í/Ì^”Ìb Í/Ì`”Ìe Í/Ìc”Ìf Í/Ìd”Ìi Í/Ìg”Ìn Í/Ìl”Ìo Í/Ìm”Ìp Í/Ìn›” Í0” Í0” Í0” Í0”/ Í0/”0 Í00”9 Í09”: Í0:”> Í0>”? Í0?”Ì@ Í0Ì@–” Í1” Í1” Í1”! Í1!”" Í1"”# Í1#–” Í2” Í2” Í2” Í2”  Í2 ”! Í2!™” Í3” Í3” Í3” Í3”  Í3”! Í3”' Í3”) Í3!”+ Í3#Ü ” Í4
+” Í4”+ Í4!”, Í4"”5 Í4+”6 Í4,”: Í40”> Í44”? Í45”ÌE Í4;”ÌF Í4<”ÌO Í4ÌE”ÌP Í4ÌF”ÌQ Í4ÌG”ÌV Í4ÌL”ÌY Í4ÌO”Ì[ Í4ÌQÜ ” Í5”" Í5”& Í5”* Í5”+ Í5”0 Í5$”1 Í5%”2 Í5&”8 Í5,”9 Í5-”ÌB Í56”ÌC Í57”ÌK Í5?”ÌO Í5ÌC”ÌP Í5ÌD”ÌQ Í5ÌE”ÌT Í5ÌH”ÌV Í5ÌJ”ÌW Í5ÌK”ÌX Í5ÌLœ” Í6” Í6”# Í6”& Í6"”, Í6(”- Í6)”6 Í62”7 Í63”ÌA Í6=”ÌE Í6ÌA”ÌF Í6ÌB”ÌG Í6ÌC–” Í7” Í7”! Í7”$ Í7”, Í7 ”. Í7"•” Í8”$ Í8”' Í8”, Í8”- Í8‘” Í9š” Í:” Í:”! Í:”& Í:”' Í:”+ Í:”0 Í:$”3 Í:'”4 Í:(”6 Í:*•” Í;”& Í;”) Í;”. Í; ”/ Í;!‘” Í<‘” Í=”” Í>” Í>	” Í>
+” Í>˜” Í?”! Í?”" Í?”& Í?”' Í?”1 Í?)”2 Í?*”3 Í?+˜” Í@”  Í@”! Í@”% Í@”& Í@”. Í@&”/ Í@'”0 Í@(‘” ÍAÜ ” ÍB” ÍB” ÍB”! ÍB#”2 ÍB4”3 ÍB5”9 ÍB;”< ÍB>”= ÍB?”> ÍBÌ@”? ÍBÌA”Ì@ ÍBÌB”ÌQ ÍBÌS”ÌR ÍBÌT”Ìc ÍBÌe”Ìd ÍBÌf”Ìj ÍBÌl”Ìm ÍBÌo”Ìn ÍBÌp”Ìo ÍBÌq”Ìp ÍBÌr”Ìq ÍBÌs”Ìr ÍBÌt”Ìs ÍBÌu”Ìt ÍBÌv–” ÍC” ÍC” ÍC” ÍC!”) ÍC+”* ÍC,Ü ” ÍD” ÍD” ÍD” ÍD ”. ÍD1”/ ÍD2”3 ÍD6”4 ÍD7”5 ÍD8”: ÍDÌE”< ÍDÌG”> ÍDÌI”? ÍDÌJ”ÌD ÍDÌO”ÌG ÍDÌR”ÌH ÍDÌS”ÌI ÍDÌT”ÌJ ÍDÌU›” ÍE” ÍE”! ÍE”$ ÍE+”( ÍE/”) ÍE0”ÌC ÍEÌJ”ÌD ÍEÌK”ÌK ÍEÌR”ÌL ÍEÌS”ÌM ÍEÌTÜ ” ÍF” ÍF” ÍF”! ÍF”# ÍF”- ÍF'”/ ÍF)”7 ÍF1”9 ÍF3”ÌJ ÍFÌD”ÌL ÍFÌF”Ì\ ÍFÌV”Ì^ ÍFÌX”Ìm ÍFÌg”Ìo ÍFÌi”Ìp ÍFÌj‘”	 ÍG”” ÍG” ÍG” ÍG” ÍG’” ÍH” ÍH”” ÍI” ÍI” ÍI” ÍI”” ÍJ” ÍJ” ÍJ” ÍJ”” ÍK” ÍK” ÍK” ÍKÜ ” ÍL”! ÍL”# ÍL”$ ÍL”% ÍL”' ÍL”( ÍL ”* ÍL"”+ ÍL#”- ÍL%”. ÍL&”0 ÍL(”1 ÍL)”3 ÍL+”4 ÍL,”6 ÍL.”7 ÍL/”8 ÍL0Ü ” ÍM”  ÍM”" ÍM”# ÍM”$ ÍM”& ÍM”' ÍM”) ÍM!”* ÍM"”, ÍM$”- ÍM%”/ ÍM'”0 ÍM(”2 ÍM*”3 ÍM+”5 ÍM-”6 ÍM.”7 ÍM/—” ÍN” ÍN”! ÍN”% ÍN”& ÍN”6 ÍN.”8 ÍN0’” ÍO” ÍO‘”	 ÍP’” ÍQ” ÍQ‘” ÍS‘” ÍV”” ÍW
+” ÍW$” ÍW%”& ÍWÌb™” ÍX” ÍX
+” ÍX” ÍX” ÍX#” ÍX$”+ ÍX4”- ÍX6”. ÍX7˜” ÍY” ÍY” ÍY” ÍY” ÍY” ÍY”  ÍY”" ÍY”” ÍZ” ÍZ” ÍZ” ÍZ‘”	 Í[Ü ” Í\” Í\
+” Í\” Í\ÌI” Í\ÌP” Í\ÌQ”$ Í\ÌV”& Í\ÌX”' Í\ÌY”+ Í\Ì]”, Í\Ì^”- Í\Ì_”. Í\Ì`”0 Í\Ìb”1 Í\Ìc”3 Í\Ìe”5 Í\Ìg”6 Í\Ìh”7 Í\Ìi”8 Í\Ìj”ÌA Í\Ìs”ÌD Í\Ìv”ÌE Í\Ìw”ÌF Í\Ìx”ÌO Í\Ì”ÌP Í\Ì‚”ÌQ Í\ÌƒÜ ” Í]” Í]	” Í]” Í]” Í]” Í]” Í]”! Í]”$ Í] ”* Í]&”+ Í]'”1 Í]-”3 Í]/”8 Í]4”: Í]6”< Í]8™” Í^” Í^” Í^” Í^”! Í^”" Í^”' Í^!”( Í^"”) Í^#š” Í_” Í_” Í_” Í_4”# Í_:”$ Í_;”+ Í_Ìw”- Í_Ìy”9 Í_Ì…”: Í_Ì†œ” Í`” Í`
+” Í`” Í`”& Í` ”* Í`$”2 Í`,”3 Í`-”9 Í`3”> Í`8”? Í`9”ÌA Í`;’” Ía” Ía‘” Íb–” Íc” Íc
+” Íc” Íc ” Íc!”  Íc"–” Íd” Íd
+” Íd”! Íd#”" Íd$”# Íd%–” Íe” Íe
+” Íe” Íe!”  Íe"”! Íe#–” Íf” Íf
+” Íf” Íf!”  Íf"”! Íf#–” Íg” Íg
+” Íg” Íg!”  Íg"”! Íg#™” Íh” Íh” Íh” Íh” Íh” Íh”% Íh-”' Íh/”) Íh1Ü ” Íi” Íi” Íi”  Íi ”$ Íi$”% Íi%”* Íi*”+ Íi+”, Íi,”3 Íi3”4 Íi4”; Íi;”> Íi>”ÌE ÍiÌE”ÌF ÍiÌF”ÌO ÍiÌO”ÌP ÍiÌP”ÌS ÍiÌS”ÌX ÍiÌX”ÌY ÍiÌY”ÌZ ÍiÌZ–” Íj” Íj” Íj” Íj”  Íj”" Íj’” Ík
+” Ík‘” Íl	˜” Ím” Ím” Ím” Ím”' Ím”, Ím$”- Ím%”/ Ím'•” Ín
+” Ín”# Ín”* Ín ”+ Ín!•” Ío
+”  Ío”$ Ío”+ Ío!”, Ío"‘” Íp	˜” Íp” Íp”  Íp”! Íp”, Íp&”1 Íp+”2 Íp,”4 Íp.•” Íq
+”" Íq”& Íq”- Íq#”. Íq$•” Ír
+”  Ír”$ Ír”+ Ír!”, Ír"‘” Ís	˜” Ís” Ís”  Ís”! Ís”, Ís&”1 Ís+”2 Ís,”4 Ís.•” Ít
+”  Ít”$ Ít”+ Ít!”, Ít"•” Íu
+”  Íu”$ Íu”+ Íu!”, Íu"‘” Ív	˜” Ív” Ív”  Ív”! Ív”, Ív&”1 Ív+”2 Ív,”4 Ív.•” Íw
+”  Íw”$ Íw”+ Íw!”, Íw"‘” Íx	”” Íy” Íy” Íy” Íy	Ü ” Íz” Íz” Íz”  Íz”" Íz”0 Íz*”2 Íz,”> Íz8”Ì@ Íz:”ÌL ÍzÌF”ÌN ÍzÌH”ÌZ ÍzÌT”Ì\ ÍzÌV”Ìf ÍzÌ`”Ìh ÍzÌb”Ìt ÍzÌn”Ìw ÍzÌq”Ìx ÍzÌr”Ìz ÍzÌt”Ì{ ÍzÌu‘”	 Í{”” Í|” Í|” Í|” Í|’” Í}” Í}’” Í
+” ÍÜ ” Í€” Í€” Í€” Í€” Í€” Í€”! Í€”/ Í€+”1 Í€-”2 Í€.”4 Í€0”Ì@ Í€<”ÌB Í€>”ÌC Í€?”ÌE Í€ÌA”ÌQ Í€ÌM”ÌS Í€ÌO”ÌT Í€ÌP”ÌV Í€ÌR”Ìb Í€Ì^”Ìd Í€Ì`”Ìe Í€Ìa”Ìg Í€Ìc”Ìq Í€Ìm”Ìs Í€Ìo”Ìx Í€Ìt”Ìz Í€Ìv”Ì{ Í€Ìw’” Í” Í”” Íƒ
+” Íƒ” Íƒ ”& ÍƒÌDÜ ” Í„” Í„
+” Í„” Í„"”  Í„&”! Í„'”. Í„4”/ Í„5”2 Í„8”3 Í„9”4 Í„:”8 Í„ÌT”: Í„ÌV”< Í„ÌX”= Í„ÌY”ÌA Í„Ì]”ÌB Í„Ì^”ÌD Í„Ì`”ÌE Í„Ìa”ÌF Í„ÌbÜ ” Í…” Í…	” Í…” Í…” Í…” Í…” Í…”! Í…”$ Í… ”/ Í…+”0 Í…,”6 Í…2”8 Í…4”= Í…9”? Í…;”ÌA Í…=Ü ” Í†” Í†” Í†” Í†”& Í†)”' Í†*”+ Í†.”, Í†/”- Í†0”8 Í†ÌQ”: Í†ÌS”< Í†ÌU”= Í†ÌV”ÌH Í†Ìa”ÌI Í†Ìb”ÌK Í†Ìd”ÌP Í†Ìi”Ì[ Í†Ìt”Ì\ Í†Ìu”Ìa Í†Ìz”Ìb Í†Ì{”Ìc Í†Ì|”Ìd Í†Ì}•” Í‡” Í‡
+” Í‡” Í‡” Í‡”” Íˆ” Íˆ” Íˆ” Íˆ‘” Í‰‘”	 ÍŠ”” Í‹” Í‹” Í‹” Í‹’” ÍŒ” ÍŒ–” Í
+” Í!” Í"”) ÍÌG”+ ÍÌI”7 ÍÌmÜ ” Í” Í” Í” Í”! Í”" Í”# Í”/ ÍÌA”1 ÍÌC”3 ÍÌE”4 Í”Ì@ Í”ÌA Í”ÌE Í”ÌF Í”ÌG Í”ÌR Í:”ÌT Í<”ÌV Í>”ÌW Í?”Ìb ÍÌJ”Ìc ÍÌK”Ìe ÍÌM”Ìj ÍÌR”Ìv ÍÌ^”Ìw ÍÌ_”Ìy ÍÌa”Ìz ÍÌb”Ì{ ÍÌc”Ì| ÍÌd’” Í‘” Í‘‘” Í“‘” Í•”” Í–
+” Í–” Í–” Í–#”” Í—” Í—” Í—” Í—“” Í˜” Í˜” Í˜™” Í™” Í™” Í™” Í™” Í™” Í™”3 Í™+”4 Í™,”5 Í™-“” Íš” Íš” Íš™” Í›” Í›” Í›” Í›” Í›” Í›”4 Í›,”5 Í›-”6 Í›.“” Íœ” Íœ” Íœ™” Í” Í” Í” Í” Í” Í”4 Í,”5 Í-”6 Í.“” Í” Í” Í›” ÍŸ” ÍŸ” ÍŸ” ÍŸ” ÍŸ” ÍŸ”? ÍŸ7”ÌA ÍŸ9”ÌE ÍŸ=”ÌF ÍŸ>”ÌG ÍŸ?“” Í ” Í ” Í ™” Í¡” Í¡” Í¡” Í¡” Í¡” Í¡”4 Í¡,”5 Í¡-”6 Í¡.”” Í¢” Í¢” Í¢” Í¢“” Í£” Í£” Í£›” Í¤” Í¤” Í¤” Í¤” Í¤” Í¤”? Í¤7”ÌA Í¤9”ÌE Í¤=”ÌF Í¤>”ÌG Í¤?‘” Í¥›” Í¦” Í¦” Í¦” Í¦” Í¦” Í¦”? Í¦7”ÌA Í¦9”ÌE Í¦=”ÌF Í¦>”ÌG Í¦?‘”	 Í§’” Í¨” Í¨–” Íª”
+ Íª” Íª	” Íª” Íª” ÍªÜ ” Í«” Í«
+” Í«” Í«” Í«” Í«!” Í«"”& Í«*”( Í«,”+ Í«/”, Í«0”. Í«2”/ Í«3”7 Í«;”8 Í«<”9 Í«=”; Í«?”> Í«ÌB”? Í«ÌC”Ì@ Í«ÌDÜ ” Í¬” Í¬
+” Í¬” Í¬” Í¬” Í¬” Í¬ ”# Í¬'”% Í¬)”' Í¬+”( Í¬,”0 Í¬4”1 Í¬5”2 Í¬6”4 Í¬8”7 Í¬;”8 Í¬<”9 Í¬=” Í­” Í­” Í­” Í­” Í­”" Í­”$ Í­ ”( Í­$”- Í­)”1 Í­-”4 Í­0”6 Í­2”7 Í­3’” Í®” Í®‘” Í¯ÔrH–§version¤file§sources®sourcesContent¥names¨mappingsÀ‘À‘ÀÜJ‘”    ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”  	 ‘”  
+ ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”    ‘”  ! ‘”  " ‘”  # ‘”  $ ‘”  % ‘”  & ‘”  ' ‘”  ( ‘”  ) ‘”  * ‘”  + ‘”  , ‘”  - ‘”  . ‘”  / ‘”  0 ‘”  1 ‘”  2 ‘”  3 ‘”  4 ‘”  5 ‘”  6 ‘”  7 ‘”  8 ‘”  9 ‘”  : ‘”  ; ‘”  < ‘”  = ‘”  > ‘”  ? ‘”  Ì@ ‘”  ÌA ‘”  ÌB ‘”  ÌC ‘”  ÌD ‘”  ÌE ‘”  ÌF ‘”  ÌG ‘”  ÌH ‘”  ÌI ‘”  ÌJ ‘”  ÌK ‘”  ÌL ‘”  ÌM ‘”  ÌN ‘”  ÌO ‘”  ÌP ‘”  ÌQ ‘”  ÌR ‘”  ÌS ‘”  ÌT ‘”  ÌU ‘”  ÌV ‘”  ÌW ‘”  ÌX ‘”  ÌY ‘”  ÌZ ‘”  Ì[ ‘”  Ì\ ‘”  Ì] ‘”  Ì^ ‘”  Ì_ ‘”  Ì` ‘”  Ìa ‘”  Ìb ‘”  Ìc ‘”  Ìd ‘”  Ìe ‘”  Ìf ‘”  Ìg ‘”  Ìh ‘”  Ìi ‘”  Ìj ‘”  Ìk ‘”  Ìl ‘”  Ìm ‘”  Ìn ‘”  Ìo ‘”  Ìp ‘”  Ìq ‘”  Ìr ‘”  Ìs ‘”  Ìt ‘”  Ìu ‘”  Ìv ‘”  Ìw ‘”  Ìx ‘”  Ìy ‘”  Ìz ‘”  Ì{ ‘”  Ì| ‘”  Ì} ‘”  Ì~ ‘”  Ì ‘”  Ì€ ‘”  Ì ‘”  Ì‚ ‘”  Ìƒ ‘”  Ì„ ‘”  Ì… ‘”  Ì† ‘”  Ì‡ ‘”  Ìˆ ‘”  Ì‰ ‘”  ÌŠ ‘”  Ì‹ ‘”  ÌŒ ‘”  Ì ‘”  Ì ‘”  Ì ‘”  Ì ‘”  Ì‘ ‘”  Ì’ ‘”  Ì“ ‘”  Ì” ‘”  Ì• ‘”  Ì– ‘”  Ì— ‘”  Ì˜ ‘”  Ì™ ‘”  Ìš ‘”  Ì› ‘”  Ìœ ‘”  Ì ‘”  Ì ‘”  ÌŸ ‘”  Ì  ‘”  Ì¡ ‘”  Ì¢ ‘”  Ì£ ‘”  Ì¤ ‘”  Ì¥ ‘”  Ì¦ ‘”  Ì§ ‘”  Ì¨ ‘”  Ì© ‘”  Ìª ‘”  Ì« ‘”  Ì¬ ‘”  Ì­ ‘”  Ì® ‘”  Ì¯ ‘”  Ì° ‘”  Ì± ‘”  Ì² ‘”  Ì³ ‘”  Ì´ ‘”  Ìµ ‘”  Ì¶ ‘”  Ì· ‘”  Ì¸ ‘”  Ì¹ ‘”  Ìº ‘”  Ì» ‘”  Ì¼ ‘”  Ì½ ‘”  Ì¾ ‘”  Ì¿ ‘”  ÌÀ ‘”  ÌÁ ‘”  ÌÂ ‘”  ÌÃ ‘”  ÌÄ ‘”  ÌÅ ‘”  ÌÆ ‘”  ÌÇ ‘”  ÌÈ ‘”  ÌÉ ‘”  ÌÊ ‘”  ÌË ‘”  ÌÌ ‘”  ÌÍ ‘”  ÌÎ ‘”  ÌÏ ‘”  ÌĞ ‘”  ÌÑ ‘”  ÌÒ ‘”  ÌÓ ‘”  ÌÔ ‘”  ÌÕ ‘”  ÌÖ ‘”  Ì× ‘”  ÌØ ‘”  ÌÙ ‘”  ÌÚ ‘”  ÌÛ ‘”  ÌÜ ‘”  Ìİ ‘”  ÌŞ ‘”  Ìß ‘”  Ìà ‘”  Ìá ‘”  Ìâ ‘”  Ìã ‘”  Ìä ‘”  Ìå ‘”  Ìæ ‘”  Ìç ‘”  Ìè ‘”  Ìé ‘”  Ìê ‘”  Ìë ‘”  Ìì ‘”  Ìí ‘”  Ìî ‘”  Ìï ‘”  Ìğ ‘”  Ìñ ‘”  Ìò ‘”  Ìó ‘”  Ìô ‘”  Ìõ ‘”  Ìö ‘”  Ì÷ ‘”  Ìø ‘”  Ìù ‘”  Ìú ‘”  Ìû ‘”  Ìü ‘”  Ìı ‘”  Ìş ‘”  Ìÿ ‘”  Í  ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í	 ‘”  Í
+ ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í  ‘”  Í! ‘”  Í" ‘”  Í# ‘”  Í$ ‘”  Í% ‘”  Í& ‘”  Í' ‘”  Í( ‘”  Í) ‘”  Í* ‘”  Í+ ‘”  Í, ‘”  Í- ‘”  Í. ‘”  Í/ ‘”  Í0 ‘”  Í1 ‘”  Í2 ‘”  Í3 ‘”  Í4 ‘”  Í5 ‘”  Í6 ‘”  Í7 ‘”  Í8 ‘”  Í9 ‘”  Í: ‘”  Í; ‘”  Í< ‘”  Í= ‘”  Í> ‘”  Í? ‘”  Í@ ‘”  ÍA ‘”  ÍB ‘”  ÍC ‘”  ÍD ‘”  ÍE ‘”  ÍF ‘”  ÍG ‘”  ÍH ‘”  ÍI ÔrI’§missing¦pluginÃ¦genAbcÂÔ  ÔrJ”²dynamicImportCache¹exportAllDeclarationCache»exportNamedDeclarationCache«importCache‘ÔrK–¤type¥start£end«declarationªspecifiers¦source¶ExportNamedDeclaration.Í6¨ÔrL–¤type¥start£end¢idªsuperClass¤body°ClassDeclaration5Í6¨ÔrM”¤type¥start£end¤nameªIdentifier;ÌN³HuaweiHealthServiceÀÔrN”¤type¥start£end¤body©ClassBodyÌOÍ6¨Ü ÔrO˜¤type¥start£end¦static¨computed£key¤kind¥value°MethodDefinitionÌVÍkÂÂMªIdentifierÌVÌW¡t¦methodÔrP™¤type¥start£end¢idªexpression©generator¥async¦params¤body²FunctionExpressionÌWÍkÀÂÂÂ’MªIdentifierÌXÌ\¤nameMªIdentifierÌ^Ìc¥firstN®BlockStatementÌeÍk“ÔrQ–¤type¥start£end¤testªconsequent©alternate«IfStatementÌpÌ§ÔrR–¤type¥start£end¤left¨operator¥right°BinaryExpressionÌtÌÔrS—¤type¥start£end¦object¨property¨computed¨optional°MemberExpressionÌtÌ€ÔrT“¤type¥start£end®ThisExpressionÌtÌxMªIdentifierÌyÌ€§contextÂÂ£===MªIdentifierÌ…Ì©undefinedÔrU”¤type¥start£end¨argument¯ReturnStatementÌÌ§ÔrV•¤type¥start£end¥value£raw§LiteralÌ¤Ì¦ ¢''ÀQ«IfStatementÌ±ÍR°BinaryExpressionÌµÌÈMªIdentifierÌµÌº¥first£===MªIdentifierÌ¿ÌÈ©undefinedU¯ReturnStatementÌ×ÍÔrW–¤type¥start£end¦callee©arguments¨optional®CallExpressionÌŞÍS°MemberExpressionÌŞÍS°MemberExpressionÌŞÌúS°MemberExpressionÌŞÌêT®ThisExpressionÌŞÌâMªIdentifierÌãÌê§contextÂÂMªIdentifierÌëÌú¯resourceManagerÂÂMªIdentifierÌûÍ³getStringByNameSyncÂÂ‘MªIdentifierÍÍ¤nameÂÀU¯ReturnStatementÍÍdW®CallExpressionÍ&ÍcS°MemberExpressionÍ&ÍVS°MemberExpressionÍ&ÍBS°MemberExpressionÍ&Í2T®ThisExpressionÍ&Í*MªIdentifierÍ+Í2§contextÂÂMªIdentifierÍ3ÍB¯resourceManagerÂÂMªIdentifierÍCÍV³getStringByNameSyncÂÂ’MªIdentifierÍWÍ[¤nameMªIdentifierÍ]Íb¥firstÂO°MethodDefinitionÍqÍşÂÂMªIdentifierÍqÍ|«constructor«constructorP²FunctionExpressionÍ|ÍşÀÂÂÂN®BlockStatementÍÍş˜ÔrX”¤type¥start£endªexpression³ExpressionStatementÍŠÍ£ÔrY–¤type¥start£end¨operator¤left¥right´AssignmentExpressionÍŠÍ¢¡=S°MemberExpressionÍŠÍ–T®ThisExpressionÍŠÍMªIdentifierÍÍ–§contextÂÂMªIdentifierÍ™Í¢©undefinedX³ExpressionStatementÍ­ÍÆY´AssignmentExpressionÍ­ÍÅ¡=S°MemberExpressionÍ­Í½T®ThisExpressionÍ­Í±MªIdentifierÍ²Í½«initializedÂÂV§LiteralÍÀÍÅÂ¥falseX³ExpressionStatementÍĞÍïY´AssignmentExpressionÍĞÍî¡=S°MemberExpressionÍĞÍŞT®ThisExpressionÍĞÍÔMªIdentifierÍÕÍŞ©dataTypesÂÂÔrZ”¤type¥start£endªproperties°ObjectExpressionÍáÍî“Ôr[™¤type¥start£end¦method©shorthand¨computed£key¥value¤kind¨PropertyÍğÍ8ÂÂÂMªIdentifierÍğÍÿ¯dailyActivitiesS°MemberExpressionÍÍ8S°MemberExpressionÍÍ.S°MemberExpressionÍÍMªIdentifierÍÍ«healthStoreMªIdentifierÍÍ±samplePointHelperÂÂMªIdentifierÍÍ.¯dailyActivitiesÂÂMªIdentifierÍ/Í8©DATA_TYPEÂÂ¤init[¨PropertyÍGÍ‘ÂÂÂMªIdentifierÍGÍW°restingHeartRateS°MemberExpressionÍYÍ‘S°MemberExpressionÍYÍ‡S°MemberExpressionÍYÍvMªIdentifierÍYÍd«healthStoreMªIdentifierÍeÍv±samplePointHelperÂÂMªIdentifierÍwÍ‡°restingHeartRateÂÂMªIdentifierÍˆÍ‘©DATA_TYPEÂÂ¤init[¨PropertyÍ ÍãÂÂÂMªIdentifierÍ Í««sleepRecordS°MemberExpressionÍ­ÍãS°MemberExpressionÍ­ÍÙS°MemberExpressionÍ­ÍÍMªIdentifierÍ­Í¸«healthStoreMªIdentifierÍ¹ÍÍ´healthSequenceHelperÂÂMªIdentifierÍÎÍÙ«sleepRecordÂÂMªIdentifierÍÚÍã©DATA_TYPEÂÂ¤initX³ExpressionStatementÍùÍY´AssignmentExpressionÍùÍ¡=S°MemberExpressionÍùÍT®ThisExpressionÍùÍıMªIdentifierÍşÍ­readDataTypesÂÂÔr\”¤type¥start£end¨elements¯ArrayExpressionÍÍX³ExpressionStatementÍÍ4Y´AssignmentExpressionÍÍ3¡=S°MemberExpressionÍÍ.T®ThisExpressionÍÍMªIdentifierÍ Í.®writeDataTypesÂÂ\¯ArrayExpressionÍ1Í3X³ExpressionStatementÍ>ÍvW®CallExpressionÍ>ÍuS°MemberExpressionÍ>ÍUS°MemberExpressionÍ>ÍPT®ThisExpressionÍ>ÍBMªIdentifierÍCÍP­readDataTypesÂÂMªIdentifierÍQÍU¤pushÂÂ‘S°MemberExpressionÍVÍtS°MemberExpressionÍVÍdT®ThisExpressionÍVÍZMªIdentifierÍ[Íd©dataTypesÂÂMªIdentifierÍeÍt¯dailyActivitiesÂÂÂX³ExpressionStatementÍ€Í¹W®CallExpressionÍ€Í¸S°MemberExpressionÍ€Í—S°MemberExpressionÍ€Í’T®ThisExpressionÍ€Í„MªIdentifierÍ…Í’­readDataTypesÂÂMªIdentifierÍ“Í—¤pushÂÂ‘S°MemberExpressionÍ˜Í·S°MemberExpressionÍ˜Í¦T®ThisExpressionÍ˜ÍœMªIdentifierÍÍ¦©dataTypesÂÂMªIdentifierÍ§Í·°restingHeartRateÂÂÂX³ExpressionStatementÍÃÍ÷W®CallExpressionÍÃÍöS°MemberExpressionÍÃÍÚS°MemberExpressionÍÃÍÕT®ThisExpressionÍÃÍÇMªIdentifierÍÈÍÕ­readDataTypesÂÂMªIdentifierÍÖÍÚ¤pushÂÂ‘S°MemberExpressionÍÛÍõS°MemberExpressionÍÛÍéT®ThisExpressionÍÛÍßMªIdentifierÍàÍé©dataTypesÂÂMªIdentifierÍêÍõ«sleepRecordÂÂÂO°MethodDefinitionÍÍ¦ÂÂMªIdentifierÍÍ´authorizationRequest£getP²FunctionExpressionÍÍ¦ÀÂÂÂN®BlockStatementÍÍ¦‘U¯ReturnStatementÍ*ÍŸZ°ObjectExpressionÍ1Í’[¨PropertyÍ@ÍaÂÂÂMªIdentifierÍ@ÍM­readDataTypesS°MemberExpressionÍOÍaT®ThisExpressionÍOÍSMªIdentifierÍTÍa­readDataTypesÂÂ¤init[¨PropertyÍpÍ“ÂÂÂMªIdentifierÍpÍ~®writeDataTypesS°MemberExpressionÍ€Í“T®ThisExpressionÍ€Í„MªIdentifierÍ…Í“®writeDataTypesÂÂ¤initO°MethodDefinitionÍëÍòÂÂMªIdentifierÍñÍûªinitialize¦methodP²FunctionExpressionÍûÍòÀÂÂÃ‘MªIdentifierÍüÍ§contextN®BlockStatementÍÍò“X³ExpressionStatementÍÍ'Y´AssignmentExpressionÍÍ&¡=S°MemberExpressionÍÍT®ThisExpressionÍÍMªIdentifierÍÍ§contextÂÂMªIdentifierÍÍ&§contextQ«IfStatementÍ1Í›S°MemberExpressionÍ5ÍET®ThisExpressionÍ5Í9MªIdentifierÍ:ÍE«initializedÂÂN®BlockStatementÍGÍ›‘U¯ReturnStatementÍVÍZ°ObjectExpressionÍ]Í’[¨PropertyÍ_ÍlÂÂÂMªIdentifierÍ_Íf§successV§LiteralÍhÍlÃ¤true¤init[¨PropertyÍnÍÂÂÂMªIdentifierÍnÍu§messageW®CallExpressionÍwÍS°MemberExpressionÍwÍ}T®ThisExpressionÍwÍ{MªIdentifierÍ|Í}¡tÂÂ‘V§LiteralÍ~ÍŒ¬health_ready®'health_ready'Â¤initÀÔr]–¤type¥start£end¥block§handler©finalizer¬TryStatementÍ¥ÍëN®BlockStatementÍ©ÍW“X³ExpressionStatementÍ¸ÍØU¯AwaitExpressionÍ¸Í×W®CallExpressionÍ¾Í×S°MemberExpressionÍ¾ÍÎMªIdentifierÍ¾ÍÉ«healthStoreMªIdentifierÍÊÍÎ¤initÂÂ‘MªIdentifierÍÏÍÖ§contextÂX³ExpressionStatementÍæÍşY´AssignmentExpressionÍæÍı¡=S°MemberExpressionÍæÍöT®ThisExpressionÍæÍêMªIdentifierÍëÍö«initializedÂÂV§LiteralÍùÍıÃ¤trueU¯ReturnStatementÍÍLZ°ObjectExpressionÍÍK’[¨PropertyÍÍ"ÂÂÂMªIdentifierÍÍ§successV§LiteralÍÍ"Ã¤true¤init[¨PropertyÍ$ÍIÂÂÂMªIdentifierÍ$Í+§messageW®CallExpressionÍ-ÍIS°MemberExpressionÍ-Í3T®ThisExpressionÍ-Í1MªIdentifierÍ2Í3¡tÂÂ‘V§LiteralÍ4ÍH²health_initialized´'health_initialized'Â¤initÔr^•¤type¥start£end¥param¤body«CatchClauseÍaÍëMªIdentifierÍhÍm¥errorN®BlockStatementÍoÍë’Ôr_•¤type¥start£end¬declarations¤kind³VariableDeclarationÍ~Í–‘Ôr`•¤type¥start£end¢id¤init²VariableDeclaratorÍ„Í•MªIdentifierÍ„Íˆ¤codeS°MemberExpressionÍ‹Í•MªIdentifierÍ‹Í¥errorMªIdentifierÍ‘Í•¤codeÂÂ¥constU¯ReturnStatementÍ¤ÍàZ°ObjectExpressionÍ«Íß’[¨PropertyÍ­Í»ÂÂÂMªIdentifierÍ­Í´§successV§LiteralÍ¶Í»Â¥false¤init[¨PropertyÍ½ÍİÂÂÂMªIdentifierÍ½ÍÄ§messageW®CallExpressionÍÆÍİS°MemberExpressionÍÆÍ×T®ThisExpressionÍÆÍÊMªIdentifierÍËÍ×¬errorMessageÂÂ‘MªIdentifierÍØÍÜ¤codeÂ¤initÀO°MethodDefinitionÍ!ÍIÂÂMªIdentifierÍ'Í@¹hasRequiredAuthorizations¦methodP²FunctionExpressionÍ@ÍIÀÂÂÃN®BlockStatementÍCÍI‘]¬TryStatementÍNÍBN®BlockStatementÍRÍ’_³VariableDeclarationÍaÍ±‘`²VariableDeclaratorÍgÍ°MªIdentifierÍgÍo¨responseU¯AwaitExpressionÍrÍ°W®CallExpressionÍxÍ°S°MemberExpressionÍxÍ•MªIdentifierÍxÍƒ«healthStoreMªIdentifierÍ„Í•±getAuthorizationsÂÂ‘S°MemberExpressionÍ–Í¯T®ThisExpressionÍ–ÍšMªIdentifierÍ›Í¯´authorizationRequestÂÂÂ¥constU¯ReturnStatementÍ¿ÍøW®CallExpressionÍÆÍ÷S°MemberExpressionÍÆÍàT®ThisExpressionÍÆÍÊMªIdentifierÍËÍàµcontainsRequiredTypesÂÂ‘S°MemberExpressionÍáÍöMªIdentifierÍáÍé¨responseMªIdentifierÍêÍö¬grantedTypesÂÂÂ^«CatchClauseÍÍBMªIdentifierÍÍ¥errorN®BlockStatementÍÍB‘U¯ReturnStatementÍ*Í7V§LiteralÍ1Í6Â¥falseÀO°MethodDefinitionÍ}ÍÂÂMªIdentifierÍƒÍ˜µrequestAuthorizations¦methodP²FunctionExpressionÍ˜ÍÀÂÂÃ‘MªIdentifierÍ™Í §contextN®BlockStatementÍ¢Í“_³VariableDeclarationÍ­Íæ‘`²VariableDeclaratorÍ³ÍåMªIdentifierÍ³ÍÄ±initializedResultU¯AwaitExpressionÍÇÍåW®CallExpressionÍÍÍåS°MemberExpressionÍÍÍÜT®ThisExpressionÍÍÍÑMªIdentifierÍÒÍÜªinitializeÂÂ‘MªIdentifierÍİÍä§contextÂ¥constQ«IfStatementÍğÍ	CÔra–¤type¥start£end¨operator¦prefix¨argument¯UnaryExpressionÍôÍ	¡!ÃS°MemberExpressionÍõÍ	MªIdentifierÍõÍ	±initializedResultMªIdentifierÍ	Í	§successÂÂN®BlockStatementÍ	Í	C‘U¯ReturnStatementÍ	Í	8MªIdentifierÍ	&Í	7±initializedResultÀ]¬TryStatementÍ	MÍ	N®BlockStatementÍ	QÍu”_³VariableDeclarationÍ	`Í	¼‘`²VariableDeclaratorÍ	fÍ	»MªIdentifierÍ	fÍ	m§grantedU¯AwaitExpressionÍ	pÍ	»W®CallExpressionÍ	vÍ	»S°MemberExpressionÍ	vÍ	—MªIdentifierÍ	vÍ	«healthStoreMªIdentifierÍ	‚Í	—µrequestAuthorizationsÂÂ’MªIdentifierÍ	˜Í	Ÿ§contextS°MemberExpressionÍ	¡Í	ºT®ThisExpressionÍ	¡Í	¥MªIdentifierÍ	¦Í	º´authorizationRequestÂÂÂ¥constQ«IfStatementÍ	ÊÍ
+_W®CallExpressionÍ	ÎÍ	şS°MemberExpressionÍ	ÎÍ	èT®ThisExpressionÍ	ÎÍ	ÒMªIdentifierÍ	ÓÍ	èµcontainsRequiredTypesÂÂ‘S°MemberExpressionÍ	éÍ	ıMªIdentifierÍ	éÍ	ğ§grantedMªIdentifierÍ	ñÍ	ı¬grantedTypesÂÂÂN®BlockStatementÍ
+ Í
+_‘U¯ReturnStatementÍ
+Í
+PZ°ObjectExpressionÍ
+Í
+O’[¨PropertyÍ
+Í
+)ÂÂÂMªIdentifierÍ
+Í
+#§successV§LiteralÍ
+%Í
+)Ã¤true¤init[¨PropertyÍ
++Í
+MÂÂÂMªIdentifierÍ
++Í
+2§messageW®CallExpressionÍ
+4Í
+MS°MemberExpressionÍ
+4Í
+:T®ThisExpressionÍ
+4Í
+8MªIdentifierÍ
+9Í
+:¡tÂÂ‘V§LiteralÍ
+;Í
+L¯health_auth_all±'health_auth_all'Â¤initÀQ«IfStatementÍ
+mÍW®CallExpressionÍ
+qÍ
+·S°MemberExpressionÍ
+qÍ
+T®ThisExpressionÍ
+qÍ
+uMªIdentifierÍ
+vÍ
+·containsAnyRequiredTypeÂÂ’S°MemberExpressionÍ
+Í
+ T®ThisExpressionÍ
+Í
+’MªIdentifierÍ
+“Í
+ ­readDataTypesÂÂS°MemberExpressionÍ
+¢Í
+¶MªIdentifierÍ
+¢Í
+©§grantedMªIdentifierÍ
+ªÍ
+¶¬grantedTypesÂÂÂN®BlockStatementÍ
+¹Í‘U¯ReturnStatementÍ
+ÌÍZ°ObjectExpressionÍ
+ÓÍ’[¨PropertyÍ
+ÕÍ
+ãÂÂÂMªIdentifierÍ
+ÕÍ
+Ü§successV§LiteralÍ
+ŞÍ
+ãÂ¥false¤init[¨PropertyÍ
+åÍÂÂÂMªIdentifierÍ
+åÍ
+ì§messageW®CallExpressionÍ
+îÍS°MemberExpressionÍ
+îÍ
+ôT®ThisExpressionÍ
+îÍ
+òMªIdentifierÍ
+óÍ
+ô¡tÂÂ‘V§LiteralÍ
+õÍ
+³health_auth_partialµ'health_auth_partial'Â¤initÀU¯ReturnStatementÍ+ÍjZ°ObjectExpressionÍ2Íi’[¨PropertyÍ4ÍBÂÂÂMªIdentifierÍ4Í;§successV§LiteralÍ=ÍBÂ¥false¤init[¨PropertyÍDÍgÂÂÂMªIdentifierÍDÍK§messageW®CallExpressionÍMÍgS°MemberExpressionÍMÍST®ThisExpressionÍMÍQMªIdentifierÍRÍS¡tÂÂ‘V§LiteralÍTÍf°health_auth_none²'health_auth_none'Â¤init^«CatchClauseÍÍ	MªIdentifierÍ†Í‹¥errorN®BlockStatementÍÍ	’_³VariableDeclarationÍœÍ´‘`²VariableDeclaratorÍ¢Í³MªIdentifierÍ¢Í¦¤codeS°MemberExpressionÍ©Í³MªIdentifierÍ©Í®¥errorMªIdentifierÍ¯Í³¤codeÂÂ¥constU¯ReturnStatementÍÂÍşZ°ObjectExpressionÍÉÍı’[¨PropertyÍËÍÙÂÂÂMªIdentifierÍËÍÒ§successV§LiteralÍÔÍÙÂ¥false¤init[¨PropertyÍÛÍûÂÂÂMªIdentifierÍÛÍâ§messageW®CallExpressionÍäÍûS°MemberExpressionÍäÍõT®ThisExpressionÍäÍèMªIdentifierÍéÍõ¬errorMessageÂÂ‘MªIdentifierÍöÍú¤codeÂ¤initÀO°MethodDefinitionÍ@ÍMÂÂMªIdentifierÍFÍW±readTodaySnapshot¦methodP²FunctionExpressionÍWÍMÀÂÂÃN®BlockStatementÍZÍM•_³VariableDeclarationÍeÍ‘`²VariableDeclaratorÍkÍMªIdentifierÍkÍuªstepResultU¯AwaitExpressionÍxÍW®CallExpressionÍ~ÍS°MemberExpressionÍ~ÍŒT®ThisExpressionÍ~Í‚MªIdentifierÍƒÍŒ©readStepsÂÂÂ¥const_³VariableDeclarationÍ™ÍÓ‘`²VariableDeclaratorÍŸÍÒMªIdentifierÍŸÍ®¯heartRateResultU¯AwaitExpressionÍ±ÍÒW®CallExpressionÍ·ÍÒS°MemberExpressionÍ·ÍĞT®ThisExpressionÍ·Í»MªIdentifierÍ¼ÍĞ´readRestingHeartRateÂÂÂ¥const_³VariableDeclarationÍİÍ‘`²VariableDeclaratorÍãÍMªIdentifierÍãÍî«sleepResultU¯AwaitExpressionÍñÍW®CallExpressionÍ÷ÍS°MemberExpressionÍ÷ÍT®ThisExpressionÍ÷ÍûMªIdentifierÍüÍ©readSleepÂÂÂ¥const_³VariableDeclarationÍÍ,‘`²VariableDeclaratorÍÍ+MªIdentifierÍÍ ¨snapshotZ°ObjectExpressionÍ#Í+[¨PropertyÍ2ÍIÂÂÂMªIdentifierÍ2Í7¥stepsS°MemberExpressionÍ9ÍIMªIdentifierÍ9ÍCªstepResultMªIdentifierÍDÍI¥stepsÂÂ¤init[¨PropertyÍXÍŠÂÂÂMªIdentifierÍXÍh°restingHeartRateS°MemberExpressionÍjÍŠMªIdentifierÍjÍy¯heartRateResultMªIdentifierÍzÍŠ°restingHeartRateÂÂ¤init[¨PropertyÍ™Í¿ÂÂÂMªIdentifierÍ™Í¥¬sleepMinutesS°MemberExpressionÍ§Í¿MªIdentifierÍ§Í²«sleepResultMªIdentifierÍ³Í¿¬sleepMinutesÂÂ¤init[¨PropertyÍÎÍğÂÂÂMªIdentifierÍÎÍØªsleepScoreS°MemberExpressionÍÚÍğMªIdentifierÍÚÍå«sleepResultMªIdentifierÍæÍğªsleepScoreÂÂ¤init[¨PropertyÍÿÍÂÂÂMªIdentifierÍÿÍ¨hasStepsS°MemberExpressionÍ	ÍMªIdentifierÍ	ÍªstepResultMªIdentifierÍÍ¨hasStepsÂÂ¤init[¨PropertyÍ+ÍcÂÂÂMªIdentifierÍ+Í>³hasRestingHeartRateS°MemberExpressionÍ@ÍcMªIdentifierÍ@ÍO¯heartRateResultMªIdentifierÍPÍc³hasRestingHeartRateÂÂ¤init[¨PropertyÍrÍÂÂÂMªIdentifierÍrÍz¨hasSleepS°MemberExpressionÍ|ÍMªIdentifierÍ|Í‡«sleepResultMªIdentifierÍˆÍ¨hasSleepÂÂ¤init[¨PropertyÍŸÍÀÂÂÂMªIdentifierÍŸÍ©ªdailyStepsS°MemberExpressionÍ«ÍÀMªIdentifierÍ«ÍµªstepResultMªIdentifierÍ¶ÍÀªdailyStepsÂÂ¤init[¨PropertyÍÏÍøÂÂÂMªIdentifierÍÏÍİ®dailyStepDatesS°MemberExpressionÍßÍøMªIdentifierÍßÍéªstepResultMªIdentifierÍêÍø®dailyStepDatesÂÂ¤init[¨PropertyÍÍEÂÂÂMªIdentifierÍÍ¶dailyRestingHeartRatesS°MemberExpressionÍÍEMªIdentifierÍÍ.¯heartRateResultMªIdentifierÍ/ÍE¶dailyRestingHeartRatesÂÂ¤init[¨PropertyÍTÍ„ÂÂÂMªIdentifierÍTÍe±dailySleepMinutesS°MemberExpressionÍgÍ„MªIdentifierÍgÍr«sleepResultMªIdentifierÍsÍ„±dailySleepMinutesÂÂ¤init[¨PropertyÍ“ÍÁÂÂÂMªIdentifierÍ“Í£°dailySleepScoresS°MemberExpressionÍ¥ÍÁMªIdentifierÍ¥Í°«sleepResultMªIdentifierÍ±ÍÁ°dailySleepScoresÂÂ¤init[¨PropertyÍĞÍüÂÂÂMªIdentifierÍĞÍß¯lastSleepStagesS°MemberExpressionÍáÍüMªIdentifierÍáÍì«sleepResultMªIdentifierÍíÍü¯lastSleepStagesÂÂ¤init[¨PropertyÍÍ ÂÂÂMªIdentifierÍÍ©updatedAtW®CallExpressionÍÍ S°MemberExpressionÍÍMªIdentifierÍÍ¤DateMªIdentifierÍÍ£nowÂÂÂ¤init¥constU¯ReturnStatementÍ6ÍFMªIdentifierÍ=ÍE¨snapshotO°MethodDefinitionÍwÍ÷ÂÂMªIdentifierÍ}Í‘´cancelAuthorizations¦methodP²FunctionExpressionÍ‘Í÷ÀÂÂÃN®BlockStatementÍ”Í÷‘]¬TryStatementÍŸÍğN®BlockStatementÍ£Í\“X³ExpressionStatementÍ²ÍÛU¯AwaitExpressionÍ²ÍÚW®CallExpressionÍ¸ÍÚS°MemberExpressionÍ¸ÍØMªIdentifierÍ¸ÍÃ«healthStoreMªIdentifierÍÄÍØ´cancelAuthorizationsÂÂÂX³ExpressionStatementÍéÍY´AssignmentExpressionÍéÍ¡=S°MemberExpressionÍéÍùT®ThisExpressionÍéÍíMªIdentifierÍîÍù«initializedÂÂV§LiteralÍüÍÂ¥falseU¯ReturnStatementÍÍQZ°ObjectExpressionÍÍP’[¨PropertyÍÍ&ÂÂÂMªIdentifierÍÍ §successV§LiteralÍ"Í&Ã¤true¤init[¨PropertyÍ(ÍNÂÂÂMªIdentifierÍ(Í/§messageW®CallExpressionÍ1ÍNS°MemberExpressionÍ1Í7T®ThisExpressionÍ1Í5MªIdentifierÍ6Í7¡tÂÂ‘V§LiteralÍ8ÍM³health_auth_revokedµ'health_auth_revoked'Â¤init^«CatchClauseÍfÍğMªIdentifierÍmÍr¥errorN®BlockStatementÍtÍğ’_³VariableDeclarationÍƒÍ›‘`²VariableDeclaratorÍ‰ÍšMªIdentifierÍ‰Í¤codeS°MemberExpressionÍÍšMªIdentifierÍÍ•¥errorMªIdentifierÍ–Íš¤codeÂÂ¥constU¯ReturnStatementÍ©ÍåZ°ObjectExpressionÍ°Íä’[¨PropertyÍ²ÍÀÂÂÂMªIdentifierÍ²Í¹§successV§LiteralÍ»ÍÀÂ¥false¤init[¨PropertyÍÂÍâÂÂÂMªIdentifierÍÂÍÉ§messageW®CallExpressionÍËÍâS°MemberExpressionÍËÍÜT®ThisExpressionÍËÍÏMªIdentifierÍĞÍÜ¬errorMessageÂÂ‘MªIdentifierÍİÍá¤codeÂ¤initÀO°MethodDefinitionÍıÍiÂÂMªIdentifierÍÍ©readSteps¦methodP²FunctionExpressionÍÍiÀÂÂÃN®BlockStatementÍÍi”_³VariableDeclarationÍÍ5‘`²VariableDeclaratorÍ Í4MªIdentifierÍ Í'§endDateÔrb•¤type¥start£end¦callee©arguments­NewExpressionÍ*Í4MªIdentifierÍ.Í2¤Date¥const_³VariableDeclarationÍ?Í‡‘`²VariableDeclaratorÍEÍ†MªIdentifierÍEÍN©startDateb­NewExpressionÍQÍ†MªIdentifierÍUÍY¤Date‘R°BinaryExpressionÍZÍ…W®CallExpressionÍZÍkS°MemberExpressionÍZÍiMªIdentifierÍZÍa§endDateMªIdentifierÍbÍi§getTimeÂÂÂ¡-R°BinaryExpressionÍnÍ…R°BinaryExpressionÍnÍ~R°BinaryExpressionÍnÍyR°BinaryExpressionÍnÍtV§LiteralÍnÍo¡6¡*V§LiteralÍrÍt¢24¡*V§LiteralÍwÍy<¢60¡*V§LiteralÍ|Í~<¢60¡*V§LiteralÍÍ…Íè¤1000¥const_³VariableDeclarationÍ‘ÍÚ‘`²VariableDeclaratorÍ—ÍÙMªIdentifierÍ—Í§requestZ°ObjectExpressionÍ¡ÍÙ•[¨PropertyÍ°ÍØÂÂÂMªIdentifierÍ°Í¸¨dataTypeS°MemberExpressionÍºÍØS°MemberExpressionÍºÍÈT®ThisExpressionÍºÍ¾MªIdentifierÍ¿ÍÈ©dataTypesÂÂMªIdentifierÍÉÍØ¯dailyActivitiesÂÂ¤init[¨PropertyÍçÍÂÂÂMªIdentifierÍçÍî§metricsZ°ObjectExpressionÍğÍ‘[¨PropertyÍòÍÿÂÂÂMªIdentifierÍòÍö¤step\¯ArrayExpressionÍøÍÿ‘V§LiteralÍùÍş£sum¥'sum'¤init¤init[¨PropertyÍÍDÂÂÂMªIdentifierÍÍ§groupByZ°ObjectExpressionÍÍD‘[¨PropertyÍÍBÂÂÂMªIdentifierÍÍ#¨unitTypeS°MemberExpressionÍ%ÍBS°MemberExpressionÍ%Í>MªIdentifierÍ%Í0«healthStoreMªIdentifierÍ1Í>­GroupUnitTypeÂÂMªIdentifierÍ?ÍB£DAYÂÂ¤init¤init[¨PropertyÍSÍ‹ÂÂÂMªIdentifierÍSÍa®startLocalDateW®CallExpressionÍcÍ‹S°MemberExpressionÍcÍ€MªIdentifierÍcÍv³HuaweiHealthServiceMªIdentifierÍwÍ€©localDateÂÂ‘MªIdentifierÍÍŠ©startDateÂ¤init[¨PropertyÍšÍÎÂÂÂMªIdentifierÍšÍ¦¬endLocalDateW®CallExpressionÍ¨ÍÎS°MemberExpressionÍ¨ÍÅMªIdentifierÍ¨Í»³HuaweiHealthServiceMªIdentifierÍ¼ÍÅ©localDateÂÂ‘MªIdentifierÍÆÍÍ§endDateÂ¤init¥const]¬TryStatementÍäÍbN®BlockStatementÍèÍÔ—_³VariableDeclarationÍ÷Í0‘`²VariableDeclaratorÍıÍ/MªIdentifierÍıÍ§resultsU¯AwaitExpressionÍÍ/W®CallExpressionÍÍ/S°MemberExpressionÍÍ&MªIdentifierÍÍ«healthStoreMªIdentifierÍÍ&­aggregateDataÂÂ‘MªIdentifierÍ'Í.§requestÂ¥const_³VariableDeclarationÍ>ÍT‘`²VariableDeclaratorÍDÍSMªIdentifierÍDÍNªdailySteps\¯ArrayExpressionÍQÍS¥const_³VariableDeclarationÍbÍ|‘`²VariableDeclaratorÍhÍ{MªIdentifierÍhÍv®dailyStepDates\¯ArrayExpressionÍyÍ{¥constÔrc—¤type¥start£end¤init¤test¦update¤body¬ForStatementÍŠÍå_³VariableDeclarationÍÍœ‘`²VariableDeclaratorÍ“ÍœMªIdentifierÍ“Í˜¥indexV§LiteralÍ›Íœ ¡0£letR°BinaryExpressionÍÍ§MªIdentifierÍÍ£¥index¡<V§LiteralÍ¦Í§¡7a°UpdateExpressionÍ©Í°¢++ÂMªIdentifierÍ©Í®¥indexN®BlockStatementÍ²Íå–_³VariableDeclarationÍÅÍ%‘`²VariableDeclaratorÍËÍ$MªIdentifierÍËÍÏ¤dateb­NewExpressionÍÒÍ$MªIdentifierÍÖÍÚ¤Date“W®CallExpressionÍÛÍğS°MemberExpressionÍÛÍîMªIdentifierÍÛÍâ§endDateMªIdentifierÍãÍî«getFullYearÂÂÂW®CallExpressionÍòÍS°MemberExpressionÍòÍMªIdentifierÍòÍù§endDateMªIdentifierÍúÍ¨getMonthÂÂÂR°BinaryExpressionÍÍ#R°BinaryExpressionÍÍW®CallExpressionÍÍS°MemberExpressionÍÍMªIdentifierÍÍ§endDateMªIdentifierÍÍ§getDateÂÂÂ¡-V§LiteralÍÍ¡6¡+MªIdentifierÍÍ#¥index¥const_³VariableDeclarationÍ7Íg‘`²VariableDeclaratorÍ=ÍfMªIdentifierÍ=Í@£keyW®CallExpressionÍCÍfS°MemberExpressionÍCÍ`MªIdentifierÍCÍV³HuaweiHealthServiceMªIdentifierÍWÍ`©localDateÂÂ‘MªIdentifierÍaÍe¤dateÂ¥const_³VariableDeclarationÍyÍŠ‘`²VariableDeclaratorÍ}Í‰MªIdentifierÍ}Í…¨dayTotalV§LiteralÍˆÍ‰ ¡0£letX³ExpressionStatementÍœÍW®CallExpressionÍœÍ~S°MemberExpressionÍœÍ«MªIdentifierÍœÍ£§resultsMªIdentifierÍ¤Í«§forEachÂÂ‘P·ArrowFunctionExpressionÍ¬Í}ÀÂÂÂ‘MªIdentifierÍ­Í±¤itemN®BlockStatementÍ¶Í}‘Q«IfStatementÍÍÍjR°BinaryExpressionÍÑÍW®CallExpressionÍÑÍS°MemberExpressionÍÑÍîMªIdentifierÍÑÍä³HuaweiHealthServiceMªIdentifierÍåÍî©localDateÂÂ‘b­NewExpressionÍïÍMªIdentifierÍóÍ÷¤Date‘S°MemberExpressionÍøÍMªIdentifierÍøÍü¤itemMªIdentifierÍıÍ©startTimeÂÂÂ£===MªIdentifierÍÍ£keyN®BlockStatementÍÍj‘X³ExpressionStatementÍ-ÍSY´AssignmentExpressionÍ-ÍR¢+=MªIdentifierÍ-Í5¨dayTotalR±LogicalExpressionÍ9ÍRS°MemberExpressionÍ9ÍMS°MemberExpressionÍ9ÍIS°MemberExpressionÍ9ÍDMªIdentifierÍ9Í=¤itemMªIdentifierÍ>ÍD¦resultÂÂMªIdentifierÍEÍI¤stepÂÂMªIdentifierÍJÍM£sumÂÂ¢??V§LiteralÍQÍR ¡0ÀÂX³ExpressionStatementÍ‘Í«W®CallExpressionÍ‘ÍªS°MemberExpressionÍ‘Í MªIdentifierÍ‘Í›ªdailyStepsMªIdentifierÍœÍ ¤pushÂÂ‘MªIdentifierÍ¡Í©¨dayTotalÂX³ExpressionStatementÍ½ÍÖW®CallExpressionÍ½ÍÕS°MemberExpressionÍ½ÍĞMªIdentifierÍ½ÍË®dailyStepDatesMªIdentifierÍÌÍĞ¤pushÂÂ‘MªIdentifierÍÑÍÔ£keyÂ_³VariableDeclarationÍóÍ?‘`²VariableDeclaratorÍùÍ>MªIdentifierÍùÍş¥stepsQµConditionalExpressionÍÍ>R°BinaryExpressionÍÍS°MemberExpressionÍÍMªIdentifierÍÍªdailyStepsMªIdentifierÍÍ¦lengthÂÂ¡>V§LiteralÍÍ ¡0S°MemberExpressionÍÍ:MªIdentifierÍÍ#ªdailyStepsR°BinaryExpressionÍ$Í9S°MemberExpressionÍ$Í5MªIdentifierÍ$Í.ªdailyStepsMªIdentifierÍ/Í5¦lengthÂÂ¡-V§LiteralÍ8Í9¡1ÃÂV§LiteralÍ=Í> ¡0¥const_³VariableDeclarationÍMÍ„‘`²VariableDeclaratorÍSÍƒMªIdentifierÍSÍ[¨hasStepsW®CallExpressionÍ^ÍƒS°MemberExpressionÍ^ÍmMªIdentifierÍ^ÍhªdailyStepsMªIdentifierÍiÍm¤someÂÂ‘P·ArrowFunctionExpressionÍnÍ‚ÀÃÂÂ‘MªIdentifierÍoÍt¥valueR°BinaryExpressionÍyÍ‚MªIdentifierÍyÍ~¥value¡>V§LiteralÍÍ‚ ¡0Â¥constU¯ReturnStatementÍ’ÍÉZ°ObjectExpressionÍ™ÍÈ”Ôrd™¤type¥start£end¦method©shorthand¨computed£key¤kind¥value¨PropertyÍ›Í ÂÃÂMªIdentifierÍ›Í ¥steps¤initMªIdentifierÍ›Í ¥stepsd¨PropertyÍ¢ÍªÂÃÂMªIdentifierÍ¢Íª¨hasSteps¤initMªIdentifierÍ¢Íª¨hasStepsd¨PropertyÍ¬Í¶ÂÃÂMªIdentifierÍ¬Í¶ªdailySteps¤initMªIdentifierÍ¬Í¶ªdailyStepsd¨PropertyÍ¸ÍÆÂÃÂMªIdentifierÍ¸ÍÆ®dailyStepDates¤initMªIdentifierÍ¸ÍÆ®dailyStepDates^«CatchClauseÍŞÍbMªIdentifierÍåÍê¥errorN®BlockStatementÍìÍb‘U¯ReturnStatementÍûÍWZ°ObjectExpressionÍÍV”[¨PropertyÍÍÂÂÂMªIdentifierÍÍ	¥stepsV§LiteralÍÍ ¡0¤init[¨PropertyÍÍÂÂÂMªIdentifierÍÍ¨hasStepsV§LiteralÍÍÂ¥false¤init[¨PropertyÍÍ@ÂÂÂMªIdentifierÍÍ)ªdailySteps\¯ArrayExpressionÍ+Í@—V§LiteralÍ,Í- ¡0V§LiteralÍ/Í0 ¡0V§LiteralÍ2Í3 ¡0V§LiteralÍ5Í6 ¡0V§LiteralÍ8Í9 ¡0V§LiteralÍ;Í< ¡0V§LiteralÍ>Í? ¡0¤init[¨PropertyÍBÍTÂÂÂMªIdentifierÍBÍP®dailyStepDates\¯ArrayExpressionÍRÍT¤initÀO°MethodDefinitionÍoÍ+ÂÂMªIdentifierÍuÍ‰´readRestingHeartRate¦methodP²FunctionExpressionÍ‰Í+ÀÂÂÃN®BlockStatementÍŒÍ+”_³VariableDeclarationÍ—Í²‘`²VariableDeclaratorÍÍ±MªIdentifierÍÍ¤§endDateb­NewExpressionÍ§Í±MªIdentifierÍ«Í¯¤Date¥const_³VariableDeclarationÍ¼Í‘`²VariableDeclaratorÍÂÍMªIdentifierÍÂÍË©startDateb­NewExpressionÍÎÍMªIdentifierÍÒÍÖ¤Date‘R°BinaryExpressionÍ×ÍW®CallExpressionÍ×ÍèS°MemberExpressionÍ×ÍæMªIdentifierÍ×ÍŞ§endDateMªIdentifierÍßÍæ§getTimeÂÂÂ¡-R°BinaryExpressionÍëÍR°BinaryExpressionÍëÍûR°BinaryExpressionÍëÍöR°BinaryExpressionÍëÍñV§LiteralÍëÍì¡6¡*V§LiteralÍïÍñ¢24¡*V§LiteralÍôÍö<¢60¡*V§LiteralÍùÍû<¢60¡*V§LiteralÍşÍÍè¤1000¥const_³VariableDeclarationÍÍö‘`²VariableDeclaratorÍÍõMªIdentifierÍÍ§requestZ°ObjectExpressionÍÍõ”[¨PropertyÍ-ÍaÂÂÂMªIdentifierÍ-Í@³samplePointDataTypeS°MemberExpressionÍBÍaS°MemberExpressionÍBÍPT®ThisExpressionÍBÍFMªIdentifierÍGÍP©dataTypesÂÂMªIdentifierÍQÍa°restingHeartRateÂÂ¤init[¨PropertyÍpÍÂÂÂMªIdentifierÍpÍy©startTimeW®CallExpressionÍ{ÍS°MemberExpressionÍ{ÍŒMªIdentifierÍ{Í„©startDateMªIdentifierÍ…ÍŒ§getTimeÂÂÂ¤init[¨PropertyÍÍ·ÂÂÂMªIdentifierÍÍ¤§endTimeW®CallExpressionÍ¦Í·S°MemberExpressionÍ¦ÍµMªIdentifierÍ¦Í­§endDateMªIdentifierÍ®Íµ§getTimeÂÂÂ¤init[¨PropertyÍÆÍêÂÂÂMªIdentifierÍÆÍÏ©sortOrderS°MemberExpressionÍÑÍêS°MemberExpressionÍÑÍæMªIdentifierÍÑÍÜ«healthStoreMªIdentifierÍİÍæ©SortOrderÂÂMªIdentifierÍçÍê£ASCÂÂ¤init¥const]¬TryStatementÍ Í$N®BlockStatementÍÍˆ–_³VariableDeclarationÍÍF‘`²VariableDeclaratorÍÍEMªIdentifierÍÍ¦pointsU¯AwaitExpressionÍ"ÍEW®CallExpressionÍ(ÍES°MemberExpressionÍ(Í<MªIdentifierÍ(Í3«healthStoreMªIdentifierÍ4Í<¨readDataÂÂ‘MªIdentifierÍ=ÍD§requestÂ¥const_³VariableDeclarationÍTÍv‘`²VariableDeclaratorÍZÍuMªIdentifierÍZÍp¶dailyRestingHeartRates\¯ArrayExpressionÍsÍu¥constc¬ForStatementÍ„ÍA_³VariableDeclarationÍ‰Í–‘`²VariableDeclaratorÍÍ–MªIdentifierÍÍ’¥indexV§LiteralÍ•Í– ¡0£letR°BinaryExpressionÍ˜Í¡MªIdentifierÍ˜Í¥index¡<V§LiteralÍ Í¡¡7a°UpdateExpressionÍ£Íª¢++ÂMªIdentifierÍ£Í¨¥indexN®BlockStatementÍ¬ÍA–_³VariableDeclarationÍ¿Í‘`²VariableDeclaratorÍÅÍMªIdentifierÍÅÍÉ¤dateb­NewExpressionÍÌÍMªIdentifierÍĞÍÔ¤Date“W®CallExpressionÍÕÍêS°MemberExpressionÍÕÍèMªIdentifierÍÕÍÜ§endDateMªIdentifierÍİÍè«getFullYearÂÂÂW®CallExpressionÍìÍşS°MemberExpressionÍìÍüMªIdentifierÍìÍó§endDateMªIdentifierÍôÍü¨getMonthÂÂÂR°BinaryExpressionÍ ÍR°BinaryExpressionÍ ÍW®CallExpressionÍ ÍS°MemberExpressionÍ ÍMªIdentifierÍ Í§endDateMªIdentifierÍÍ§getDateÂÂÂ¡-V§LiteralÍÍ¡6¡+MªIdentifierÍÍ¥index¥const_³VariableDeclarationÍ1Ía‘`²VariableDeclaratorÍ7Í`MªIdentifierÍ7Í:£keyW®CallExpressionÍ=Í`S°MemberExpressionÍ=ÍZMªIdentifierÍ=ÍP³HuaweiHealthServiceMªIdentifierÍQÍZ©localDateÂÂ‘MªIdentifierÍ[Í_¤dateÂ¥const_³VariableDeclarationÍsÍ…‘`²VariableDeclaratorÍwÍ„MªIdentifierÍwÍ€©latestBpmV§LiteralÍƒÍ„ ¡0£let_³VariableDeclarationÍ—Íª‘`²VariableDeclaratorÍ›Í©MªIdentifierÍ›Í¥ªlatestTimeV§LiteralÍ¨Í© ¡0£letX³ExpressionStatementÍ¼ÍùW®CallExpressionÍ¼ÍøS°MemberExpressionÍ¼ÍÊMªIdentifierÍ¼ÍÂ¦pointsMªIdentifierÍÃÍÊ§forEachÂÂ‘P·ArrowFunctionExpressionÍËÍ÷ÀÂÂÂ‘MªIdentifierÍÌÍÑ¥pointN®BlockStatementÍÖÍ÷‘Q«IfStatementÍíÍäR±LogicalExpressionÍñÍUR°BinaryExpressionÍñÍ1W®CallExpressionÍñÍ)S°MemberExpressionÍñÍMªIdentifierÍñÍ³HuaweiHealthServiceMªIdentifierÍÍ©localDateÂÂ‘b­NewExpressionÍÍ(MªIdentifierÍÍ¤Date‘S°MemberExpressionÍÍ'MªIdentifierÍÍ¥pointMªIdentifierÍÍ'©startTimeÂÂÂ£===MªIdentifierÍ.Í1£key¢&&R°BinaryExpressionÍ5ÍUS°MemberExpressionÍ5ÍGMªIdentifierÍ5Í:¥pointMªIdentifierÍ;ÍG¬modifiedTimeÂÂ¢>=MªIdentifierÍKÍUªlatestTimeN®BlockStatementÍWÍä’X³ExpressionStatementÍrÍ’Y´AssignmentExpressionÍrÍ‘¡=MªIdentifierÍrÍ|ªlatestTimeS°MemberExpressionÍÍ‘MªIdentifierÍÍ„¥pointMªIdentifierÍ…Í‘¬modifiedTimeÂÂX³ExpressionStatementÍ¬ÍÍY´AssignmentExpressionÍ¬ÍÌ¡=MªIdentifierÍ¬Íµ©latestBpmS°MemberExpressionÍ¸ÍÌS°MemberExpressionÍ¸ÍÄMªIdentifierÍ¸Í½¥pointMªIdentifierÍ¾ÍÄ¦fieldsÂÂMªIdentifierÍÅÍÌ§restBpmÂÂÀÂX³ExpressionStatementÍÍ2W®CallExpressionÍÍ1S°MemberExpressionÍÍ&MªIdentifierÍÍ!¶dailyRestingHeartRatesMªIdentifierÍ"Í&¤pushÂÂ‘MªIdentifierÍ'Í0©latestBpmÂ_³VariableDeclarationÍOÍÊ‘`²VariableDeclaratorÍUÍÉMªIdentifierÍUÍe°restingHeartRateQµConditionalExpressionÍhÍÉR°BinaryExpressionÍhÍ‰S°MemberExpressionÍhÍ…MªIdentifierÍhÍ~¶dailyRestingHeartRatesMªIdentifierÍÍ…¦lengthÂÂ¡>V§LiteralÍˆÍ‰ ¡0S°MemberExpressionÍŒÍÅMªIdentifierÍŒÍ¢¶dailyRestingHeartRatesR°BinaryExpressionÍ£ÍÄS°MemberExpressionÍ£ÍÀMªIdentifierÍ£Í¹¶dailyRestingHeartRatesMªIdentifierÍºÍÀ¦lengthÂÂ¡-V§LiteralÍÃÍÄ¡1ÃÂV§LiteralÍÈÍÉ ¡0¥const_³VariableDeclarationÍØÍ&‘`²VariableDeclaratorÍŞÍ%MªIdentifierÍŞÍñ³hasRestingHeartRateW®CallExpressionÍôÍ%S°MemberExpressionÍôÍMªIdentifierÍôÍ
+¶dailyRestingHeartRatesMªIdentifierÍÍ¤someÂÂ‘P·ArrowFunctionExpressionÍÍ$ÀÃÂÂ‘MªIdentifierÍÍ¥valueR°BinaryExpressionÍÍ$MªIdentifierÍÍ ¥value¡>V§LiteralÍ#Í$ ¡0Â¥constU¯ReturnStatementÍ4Í}Z°ObjectExpressionÍ;Í|“d¨PropertyÍ=ÍMÂÃÂMªIdentifierÍ=ÍM°restingHeartRate¤initMªIdentifierÍ=ÍM°restingHeartRated¨PropertyÍOÍbÂÃÂMªIdentifierÍOÍb³hasRestingHeartRate¤initMªIdentifierÍOÍb³hasRestingHeartRated¨PropertyÍdÍzÂÃÂMªIdentifierÍdÍz¶dailyRestingHeartRates¤initMªIdentifierÍdÍz¶dailyRestingHeartRates^«CatchClauseÍ’Í$MªIdentifierÍ™Í¥errorN®BlockStatementÍ Í$‘U¯ReturnStatementÍ¯ÍZ°ObjectExpressionÍ¶Í“[¨PropertyÍ¸ÍËÂÂÂMªIdentifierÍ¸ÍÈ°restingHeartRateV§LiteralÍÊÍË ¡0¤init[¨PropertyÍÍÍçÂÂÂMªIdentifierÍÍÍà³hasRestingHeartRateV§LiteralÍâÍçÂ¥false¤init[¨PropertyÍéÍÂÂÂMªIdentifierÍéÍÿ¶dailyRestingHeartRates\¯ArrayExpressionÍÍ—V§LiteralÍÍ ¡0V§LiteralÍÍ ¡0V§LiteralÍÍ	 ¡0V§LiteralÍÍ ¡0V§LiteralÍÍ ¡0V§LiteralÍÍ ¡0V§LiteralÍÍ ¡0¤initÀO°MethodDefinitionÍ1Í(“ÂÂMªIdentifierÍ7Í@©readSleep¦methodP²FunctionExpressionÍ@Í(“ÀÂÂÃN®BlockStatementÍCÍ(“”_³VariableDeclarationÍNÍi‘`²VariableDeclaratorÍTÍhMªIdentifierÍTÍ[§endDateb­NewExpressionÍ^ÍhMªIdentifierÍbÍf¤Date¥const_³VariableDeclarationÍsÍ»‘`²VariableDeclaratorÍyÍºMªIdentifierÍyÍ‚©startDateb­NewExpressionÍ…ÍºMªIdentifierÍ‰Í¤Date‘R°BinaryExpressionÍÍ¹W®CallExpressionÍÍŸS°MemberExpressionÍÍMªIdentifierÍÍ•§endDateMªIdentifierÍ–Í§getTimeÂÂÂ¡-R°BinaryExpressionÍ¢Í¹R°BinaryExpressionÍ¢Í²R°BinaryExpressionÍ¢Í­R°BinaryExpressionÍ¢Í¨V§LiteralÍ¢Í£¡6¡*V§LiteralÍ¦Í¨¢24¡*V§LiteralÍ«Í­<¢60¡*V§LiteralÍ°Í²<¢60¡*V§LiteralÍµÍ¹Íè¤1000¥const_³VariableDeclarationÍÅÍ ©‘`²VariableDeclaratorÍËÍ ¨MªIdentifierÍËÍÒ§requestZ°ObjectExpressionÍÕÍ ¨”[¨PropertyÍäÍ ÂÂÂMªIdentifierÍäÍú¶healthSequenceDataTypeS°MemberExpressionÍüÍ S°MemberExpressionÍüÍ 
+T®ThisExpressionÍüÍ  MªIdentifierÍ Í 
+©dataTypesÂÂMªIdentifierÍ Í «sleepRecordÂÂ¤init[¨PropertyÍ %Í CÂÂÂMªIdentifierÍ %Í .©startTimeW®CallExpressionÍ 0Í CS°MemberExpressionÍ 0Í AMªIdentifierÍ 0Í 9©startDateMªIdentifierÍ :Í A§getTimeÂÂÂ¤init[¨PropertyÍ RÍ lÂÂÂMªIdentifierÍ RÍ Y§endTimeW®CallExpressionÍ [Í lS°MemberExpressionÍ [Í jMªIdentifierÍ [Í b§endDateMªIdentifierÍ cÍ j§getTimeÂÂÂ¤init[¨PropertyÍ {Í ÂÂÂMªIdentifierÍ {Í †«readOptionsZ°ObjectExpressionÍ ˆÍ ‘[¨PropertyÍ ŠÍ ›ÂÂÂMªIdentifierÍ ŠÍ •«withDetailsV§LiteralÍ —Í ›Ã¤true¤init¤init¥const]¬TryStatementÍ ³Í(ŒN®BlockStatementÍ ·Í'/š_³VariableDeclarationÍ ÆÍ ú‘`²VariableDeclaratorÍ ÌÍ ùMªIdentifierÍ ÌÍ Ó§recordsU¯AwaitExpressionÍ ÖÍ ùW®CallExpressionÍ ÜÍ ùS°MemberExpressionÍ ÜÍ ğMªIdentifierÍ ÜÍ ç«healthStoreMªIdentifierÍ èÍ ğ¨readDataÂÂ‘MªIdentifierÍ ñÍ ø§requestÂ¥const_³VariableDeclarationÍ!Í!%‘`²VariableDeclaratorÍ!Í!$MªIdentifierÍ!Í!±dailySleepMinutes\¯ArrayExpressionÍ!"Í!$¥const_³VariableDeclarationÍ!3Í!O‘`²VariableDeclaratorÍ!9Í!NMªIdentifierÍ!9Í!I°dailySleepScores\¯ArrayExpressionÍ!LÍ!N¥const_³VariableDeclarationÍ!]Í!p‘`²VariableDeclaratorÍ!aÍ!oMªIdentifierÍ!aÍ!kªtodayScoreV§LiteralÍ!nÍ!o ¡0£letc¬ForStatementÍ!~Í%u_³VariableDeclarationÍ!ƒÍ!‘`²VariableDeclaratorÍ!‡Í!MªIdentifierÍ!‡Í!Œ¥indexV§LiteralÍ!Í! ¡0£letR°BinaryExpressionÍ!’Í!›MªIdentifierÍ!’Í!—¥index¡<V§LiteralÍ!šÍ!›¡7a°UpdateExpressionÍ!Í!¤¢++ÂMªIdentifierÍ!Í!¢¥indexN®BlockStatementÍ!¦Í%u—_³VariableDeclarationÍ!¹Í"‘`²VariableDeclaratorÍ!¿Í"MªIdentifierÍ!¿Í!Ã¤dateb­NewExpressionÍ!ÆÍ"MªIdentifierÍ!ÊÍ!Î¤Date“W®CallExpressionÍ!ÏÍ!äS°MemberExpressionÍ!ÏÍ!âMªIdentifierÍ!ÏÍ!Ö§endDateMªIdentifierÍ!×Í!â«getFullYearÂÂÂW®CallExpressionÍ!æÍ!øS°MemberExpressionÍ!æÍ!öMªIdentifierÍ!æÍ!í§endDateMªIdentifierÍ!îÍ!ö¨getMonthÂÂÂR°BinaryExpressionÍ!úÍ"R°BinaryExpressionÍ!úÍ"W®CallExpressionÍ!úÍ"S°MemberExpressionÍ!úÍ"	MªIdentifierÍ!úÍ"§endDateMªIdentifierÍ"Í"	§getDateÂÂÂ¡-V§LiteralÍ"Í"¡6¡+MªIdentifierÍ"Í"¥index¥const_³VariableDeclarationÍ"+Í"[‘`²VariableDeclaratorÍ"1Í"ZMªIdentifierÍ"1Í"4£keyW®CallExpressionÍ"7Í"ZS°MemberExpressionÍ"7Í"TMªIdentifierÍ"7Í"J³HuaweiHealthServiceMªIdentifierÍ"KÍ"T©localDateÂÂ‘MªIdentifierÍ"UÍ"Y¤dateÂ¥const_³VariableDeclarationÍ"mÍ"€‘`²VariableDeclaratorÍ"qÍ"MªIdentifierÍ"qÍ"{ªdayMinutesV§LiteralÍ"~Í" ¡0£let_³VariableDeclarationÍ"’Í"£‘`²VariableDeclaratorÍ"–Í"¢MªIdentifierÍ"–Í"¨dayScoreV§LiteralÍ"¡Í"¢ ¡0£letX³ExpressionStatementÍ"µÍ$ÿW®CallExpressionÍ"µÍ$şS°MemberExpressionÍ"µÍ"ÄMªIdentifierÍ"µÍ"¼§recordsMªIdentifierÍ"½Í"Ä§forEachÂÂ‘P·ArrowFunctionExpressionÍ"ÅÍ$ıÀÂÂÂ‘MªIdentifierÍ"ÆÍ"Ì¦recordN®BlockStatementÍ"ÑÍ$ı‘Q«IfStatementÍ"èÍ$êR°BinaryExpressionÍ"ìÍ#-W®CallExpressionÍ"ìÍ#%S°MemberExpressionÍ"ìÍ#	MªIdentifierÍ"ìÍ"ÿ³HuaweiHealthServiceMªIdentifierÍ# Í#	©localDateÂÂ‘b­NewExpressionÍ#
+Í#$MªIdentifierÍ#Í#¤Date‘S°MemberExpressionÍ#Í##MªIdentifierÍ#Í#¦recordMªIdentifierÍ#Í##©startTimeÂÂÂ£===MªIdentifierÍ#*Í#-£keyN®BlockStatementÍ#/Í$ê”X³ExpressionStatementÍ#JÍ#ŠY´AssignmentExpressionÍ#JÍ#‰¢+=MªIdentifierÍ#JÍ#TªdayMinutesW®CallExpressionÍ#XÍ#‰S°MemberExpressionÍ#XÍ#bMªIdentifierÍ#XÍ#\¤MathMªIdentifierÍ#]Í#b¥roundÂÂ‘R°BinaryExpressionÍ#cÍ#ˆR±LogicalExpressionÍ#dÍ#‚S°MemberExpressionÍ#dÍ#}S°MemberExpressionÍ#dÍ#tMªIdentifierÍ#dÍ#j¦recordMªIdentifierÍ#kÍ#t©summariesÂÂMªIdentifierÍ#uÍ#}¨durationÂÂ¢??V§LiteralÍ#Í#‚ ¡0¡/V§LiteralÍ#†Í#ˆ<¢60Â_³VariableDeclarationÍ#¤Í#Ó‘`²VariableDeclaratorÍ#ªÍ#ÒMªIdentifierÍ#ªÍ#¯¥scoreR±LogicalExpressionÍ#²Í#ÒS°MemberExpressionÍ#²Í#ÍS°MemberExpressionÍ#²Í#ÂMªIdentifierÍ#²Í#¸¦recordMªIdentifierÍ#¹Í#Â©summariesÂÂMªIdentifierÍ#ÃÍ#ÍªsleepScoreÂÂ¢??V§LiteralÍ#ÑÍ#Ò ¡0¥constQ«IfStatementÍ#íÍ$NR°BinaryExpressionÍ#ñÍ$MªIdentifierÍ#ñÍ#ö¥score¡>MªIdentifierÍ#ùÍ$¨dayScoreN®BlockStatementÍ$Í$N‘X³ExpressionStatementÍ$"Í$3Y´AssignmentExpressionÍ$"Í$2¡=MªIdentifierÍ$"Í$*¨dayScoreMªIdentifierÍ$-Í$2¥scoreÀQ«IfStatementÍ$hÍ$ÓR±LogicalExpressionÍ$lÍ$„R°BinaryExpressionÍ$lÍ$wMªIdentifierÍ$lÍ$q¥index£===V§LiteralÍ$vÍ$w¡6¢&&R°BinaryExpressionÍ${Í$„MªIdentifierÍ${Í$€¥score¡>V§LiteralÍ$ƒÍ$„ ¡0N®BlockStatementÍ$†Í$Ó‘X³ExpressionStatementÍ$¥Í$¸Y´AssignmentExpressionÍ$¥Í$·¡=MªIdentifierÍ$¥Í$¯ªtodayScoreMªIdentifierÍ$²Í$·¥scoreÀÀÂX³ExpressionStatementÍ%Í%4W®CallExpressionÍ%Í%3S°MemberExpressionÍ%Í%'MªIdentifierÍ%Í%"±dailySleepMinutesMªIdentifierÍ%#Í%'¤pushÂÂ‘MªIdentifierÍ%(Í%2ªdayMinutesÂX³ExpressionStatementÍ%FÍ%fW®CallExpressionÍ%FÍ%eS°MemberExpressionÍ%FÍ%[MªIdentifierÍ%FÍ%V°dailySleepScoresMªIdentifierÍ%WÍ%[¤pushÂÂ‘MªIdentifierÍ%\Í%d¨dayScoreÂ_³VariableDeclarationÍ%ƒÍ%ë‘`²VariableDeclaratorÍ%‰Í%êMªIdentifierÍ%‰Í%•¬sleepMinutesQµConditionalExpressionÍ%˜Í%êR°BinaryExpressionÍ%˜Í%´S°MemberExpressionÍ%˜Í%°MªIdentifierÍ%˜Í%©±dailySleepMinutesMªIdentifierÍ%ªÍ%°¦lengthÂÂ¡>V§LiteralÍ%³Í%´ ¡0S°MemberExpressionÍ%·Í%æMªIdentifierÍ%·Í%È±dailySleepMinutesR°BinaryExpressionÍ%ÉÍ%åS°MemberExpressionÍ%ÉÍ%áMªIdentifierÍ%ÉÍ%Ú±dailySleepMinutesMªIdentifierÍ%ÛÍ%á¦lengthÂÂ¡-V§LiteralÍ%äÍ%å¡1ÃÂV§LiteralÍ%éÍ%ê ¡0¥const_³VariableDeclarationÍ%ùÍ&‘`²VariableDeclaratorÍ%ÿÍ&MªIdentifierÍ%ÿÍ&	ªsleepScoreMªIdentifierÍ&Í&ªtodayScore¥const_³VariableDeclarationÍ&%Í&c‘`²VariableDeclaratorÍ&+Í&bMªIdentifierÍ&+Í&3¨hasSleepW®CallExpressionÍ&6Í&bS°MemberExpressionÍ&6Í&LMªIdentifierÍ&6Í&G±dailySleepMinutesMªIdentifierÍ&HÍ&L¤someÂÂ‘P·ArrowFunctionExpressionÍ&MÍ&aÀÃÂÂ‘MªIdentifierÍ&NÍ&S¥valueR°BinaryExpressionÍ&XÍ&aMªIdentifierÍ&XÍ&]¥value¡>V§LiteralÍ&`Í&a ¡0Â¥const_³VariableDeclarationÍ&qÍ&²‘`²VariableDeclaratorÍ&wÍ&±MªIdentifierÍ&wÍ&†¯lastSleepStagesW®CallExpressionÍ&‰Í&±S°MemberExpressionÍ&‰Í&¨T®ThisExpressionÍ&‰Í&MªIdentifierÍ&Í&¨ºaggregateLatestSleepStagesÂÂ‘MªIdentifierÍ&©Í&°§recordsÂ¥constU¯ReturnStatementÍ&ÀÍ'$Z°ObjectExpressionÍ&ÇÍ'#–d¨PropertyÍ&ÉÍ&ÕÂÃÂMªIdentifierÍ&ÉÍ&Õ¬sleepMinutes¤initMªIdentifierÍ&ÉÍ&Õ¬sleepMinutesd¨PropertyÍ&×Í&áÂÃÂMªIdentifierÍ&×Í&áªsleepScore¤initMªIdentifierÍ&×Í&áªsleepScored¨PropertyÍ&ãÍ&ëÂÃÂMªIdentifierÍ&ãÍ&ë¨hasSleep¤initMªIdentifierÍ&ãÍ&ë¨hasSleepd¨PropertyÍ&íÍ&şÂÃÂMªIdentifierÍ&íÍ&ş±dailySleepMinutes¤initMªIdentifierÍ&íÍ&ş±dailySleepMinutesd¨PropertyÍ' Í'ÂÃÂMªIdentifierÍ' Í'°dailySleepScores¤initMªIdentifierÍ' Í'°dailySleepScoresd¨PropertyÍ'Í'!ÂÃÂMªIdentifierÍ'Í'!¯lastSleepStages¤initMªIdentifierÍ'Í'!¯lastSleepStages^«CatchClauseÍ'9Í(ŒMªIdentifierÍ'@Í'E¥errorN®BlockStatementÍ'GÍ(Œ‘U¯ReturnStatementÍ'VÍ(Z°ObjectExpressionÍ']Í(€–[¨PropertyÍ'pÍ'ÂÂÂMªIdentifierÍ'pÍ'|¬sleepMinutesV§LiteralÍ'~Í' ¡0¤init[¨PropertyÍ'’Í'ŸÂÂÂMªIdentifierÍ'’Í'œªsleepScoreV§LiteralÍ'Í'Ÿ ¡0¤init[¨PropertyÍ'²Í'ÁÂÂÂMªIdentifierÍ'²Í'º¨hasSleepV§LiteralÍ'¼Í'ÁÂ¥false¤init[¨PropertyÍ'ÔÍ'üÂÂÂMªIdentifierÍ'ÔÍ'å±dailySleepMinutes\¯ArrayExpressionÍ'çÍ'ü—V§LiteralÍ'èÍ'é ¡0V§LiteralÍ'ëÍ'ì ¡0V§LiteralÍ'îÍ'ï ¡0V§LiteralÍ'ñÍ'ò ¡0V§LiteralÍ'ôÍ'õ ¡0V§LiteralÍ'÷Í'ø ¡0V§LiteralÍ'úÍ'û ¡0¤init[¨PropertyÍ(Í(6ÂÂÂMªIdentifierÍ(Í(°dailySleepScores\¯ArrayExpressionÍ(!Í(6—V§LiteralÍ("Í(# ¡0V§LiteralÍ(%Í(& ¡0V§LiteralÍ((Í() ¡0V§LiteralÍ(+Í(, ¡0V§LiteralÍ(.Í(/ ¡0V§LiteralÍ(1Í(2 ¡0V§LiteralÍ(4Í(5 ¡0¤init[¨PropertyÍ(IÍ(qÂÂÂMªIdentifierÍ(IÍ(X¯lastSleepStagesW®CallExpressionÍ(ZÍ(qS°MemberExpressionÍ(ZÍ(oT®ThisExpressionÍ(ZÍ(^MªIdentifierÍ(_Í(o°emptySleepStagesÂÂÂ¤initÀO°MethodDefinitionÍ)Í/ÅÂÂMªIdentifierÍ)Í)-ºaggregateLatestSleepStages¦methodP²FunctionExpressionÍ)-Í/ÅÀÂÂÂ‘MªIdentifierÍ).Í)5§recordsN®BlockStatementÍ)7Í/Å•_³VariableDeclarationÍ)BÍ)h‘`²VariableDeclaratorÍ)HÍ)gMªIdentifierÍ)HÍ)M¥emptyW®CallExpressionÍ)PÍ)gS°MemberExpressionÍ)PÍ)eT®ThisExpressionÍ)PÍ)TMªIdentifierÍ)UÍ)e°emptySleepStagesÂÂÂ¥constQ«IfStatementÍ)rÍ)³R°BinaryExpressionÍ)vÍ)ŠS°MemberExpressionÍ)vÍ)„MªIdentifierÍ)vÍ)}§recordsMªIdentifierÍ)~Í)„¦lengthÂÂ£===V§LiteralÍ)‰Í)Š ¡0N®BlockStatementÍ)ŒÍ)³‘U¯ReturnStatementÍ)›Í)¨MªIdentifierÍ)¢Í)§¥emptyÀ_³VariableDeclarationÍ)½Í*‘`²VariableDeclaratorÍ)ÃÍ*MªIdentifierÍ)ÃÍ)É¦sortedW®CallExpressionÍ)ÌÍ*S°MemberExpressionÍ)ÌÍ)àW®CallExpressionÍ)ÌÍ)ÛS°MemberExpressionÍ)ÌÍ)ÙMªIdentifierÍ)ÌÍ)Ó§recordsMªIdentifierÍ)ÔÍ)Ù¥sliceÂÂÂMªIdentifierÍ)ÜÍ)à¤sortÂÂ‘P·ArrowFunctionExpressionÍ)áÍ*ÀÃÂÂ’MªIdentifierÍ)âÍ)ã¡aMªIdentifierÍ)åÍ)æ¡bR°BinaryExpressionÍ)ëÍ*S°MemberExpressionÍ)ëÍ)öMªIdentifierÍ)ëÍ)ì¡bMªIdentifierÍ)íÍ)ö©startTimeÂÂ¡-S°MemberExpressionÍ)ùÍ*MªIdentifierÍ)ùÍ)ú¡aMªIdentifierÍ)ûÍ*©startTimeÂÂÂ¥constc¬ForStatementÍ*Í/§_³VariableDeclarationÍ*Í*"‘`²VariableDeclaratorÍ*Í*"MªIdentifierÍ*Í*¥indexV§LiteralÍ*!Í*" ¡0£letR°BinaryExpressionÍ*$Í*9MªIdentifierÍ*$Í*)¥index¡<S°MemberExpressionÍ*,Í*9MªIdentifierÍ*,Í*2¦sortedMªIdentifierÍ*3Í*9¦lengthÂÂa°UpdateExpressionÍ*;Í*B¢++ÂMªIdentifierÍ*;Í*@¥indexN®BlockStatementÍ*DÍ/§š_³VariableDeclarationÍ*SÍ*p‘`²VariableDeclaratorÍ*YÍ*oMªIdentifierÍ*YÍ*_¦recordS°MemberExpressionÍ*bÍ*oMªIdentifierÍ*bÍ*h¦sortedMªIdentifierÍ*iÍ*n¥indexÃÂ¥const_³VariableDeclarationÍ*~Í*¬‘`²VariableDeclaratorÍ*„Í*«MªIdentifierÍ*„Í*Œ¨segmentsX¯ChainExpressionÍ*Í*«S°MemberExpressionÍ*Í*«S°MemberExpressionÍ*Í*MªIdentifierÍ*Í*•¦recordMªIdentifierÍ*–Í*§detailsÂÂMªIdentifierÍ*ŸÍ*«¬sleepSegmentÂÃ¥constQ«IfStatementÍ*ºÍ+R±LogicalExpressionÍ*¾Í*íR°BinaryExpressionÍ*¾Í*ÔMªIdentifierÍ*¾Í*Æ¨segments£===MªIdentifierÍ*ËÍ*Ô©undefined¢||R°BinaryExpressionÍ*ØÍ*íS°MemberExpressionÍ*ØÍ*çMªIdentifierÍ*ØÍ*à¨segmentsMªIdentifierÍ*áÍ*ç¦lengthÂÂ£===V§LiteralÍ*ìÍ*í ¡0N®BlockStatementÍ*ïÍ+‘Ôre”¤type¥start£end¥label±ContinueStatementÍ+Í+ÀÀ_³VariableDeclarationÍ+(Í+<‘`²VariableDeclaratorÍ+,Í+;MªIdentifierÍ+,Í+7«deepMinutesV§LiteralÍ+:Í+; ¡0£let_³VariableDeclarationÍ+JÍ+a‘`²VariableDeclaratorÍ+NÍ+`MªIdentifierÍ+NÍ+\®shallowMinutesV§LiteralÍ+_Í+` ¡0£let_³VariableDeclarationÍ+oÍ+„‘`²VariableDeclaratorÍ+sÍ+ƒMªIdentifierÍ+sÍ+¬dreamMinutesV§LiteralÍ+‚Í+ƒ ¡0£let_³VariableDeclarationÍ+’Í+§‘`²VariableDeclaratorÍ+–Í+¦MªIdentifierÍ+–Í+¢¬awakeMinutesV§LiteralÍ+¥Í+¦ ¡0£let_³VariableDeclarationÍ+µÍ+Ê‘`²VariableDeclaratorÍ+¹Í+ÉMªIdentifierÍ+¹Í+Å¬totalMinutesV§LiteralÍ+ÈÍ+É ¡0£letX³ExpressionStatementÍ+ØÍ/W®CallExpressionÍ+ØÍ/S°MemberExpressionÍ+ØÍ+èMªIdentifierÍ+ØÍ+à¨segmentsMªIdentifierÍ+áÍ+è§forEachÂÂ‘P·ArrowFunctionExpressionÍ+éÍ/ÀÂÂÂ‘MªIdentifierÍ+êÍ+ñ§segmentN®BlockStatementÍ+öÍ/“_³VariableDeclarationÍ,	Í,S‘`²VariableDeclaratorÍ,Í,RMªIdentifierÍ,Í,§minutesW®CallExpressionÍ,Í,RS°MemberExpressionÍ,Í,#MªIdentifierÍ,Í,¤MathMªIdentifierÍ,Í,#¥roundÂÂ‘R°BinaryExpressionÍ,$Í,QR°BinaryExpressionÍ,%Í,HS°MemberExpressionÍ,%Í,4MªIdentifierÍ,%Í,,§segmentMªIdentifierÍ,-Í,4§endTimeÂÂ¡-S°MemberExpressionÍ,7Í,HMªIdentifierÍ,7Í,>§segmentMªIdentifierÍ,?Í,H©startTimeÂÂ¡/V§LiteralÍ,LÍ,QÍê`¥60000Â¥constQ«IfStatementÍ,eÍ,¨R°BinaryExpressionÍ,iÍ,uMªIdentifierÍ,iÍ,p§minutes¢<=V§LiteralÍ,tÍ,u ¡0N®BlockStatementÍ,wÍ,¨‘U¯ReturnStatementÍ,Í,•ÀÀQ«IfStatementÍ,ºÍ/R°BinaryExpressionÍ,¾Í,×S°MemberExpressionÍ,¾Í,ÑMªIdentifierÍ,¾Í,Å§segmentMªIdentifierÍ,ÆÍ,Ñ«sleepStatusÂÂ£===V§LiteralÍ,ÖÍ,×¡1N®BlockStatementÍ,ÙÍ-H’X³ExpressionStatementÍ,ğÍ-Y´AssignmentExpressionÍ,ğÍ-¢+=MªIdentifierÍ,ğÍ,û«deepMinutesMªIdentifierÍ,ÿÍ-§minutesX³ExpressionStatementÍ-Í-5Y´AssignmentExpressionÍ-Í-4¢+=MªIdentifierÍ-Í-)¬totalMinutesMªIdentifierÍ--Í-4§minutesQ«IfStatementÍ-_Í/R°BinaryExpressionÍ-cÍ-|S°MemberExpressionÍ-cÍ-vMªIdentifierÍ-cÍ-j§segmentMªIdentifierÍ-kÍ-v«sleepStatusÂÂ£===V§LiteralÍ-{Í-|¡2N®BlockStatementÍ-~Í-ğ’X³ExpressionStatementÍ-•Í-¯Y´AssignmentExpressionÍ-•Í-®¢+=MªIdentifierÍ-•Í-£®shallowMinutesMªIdentifierÍ-§Í-®§minutesX³ExpressionStatementÍ-ÅÍ-İY´AssignmentExpressionÍ-ÅÍ-Ü¢+=MªIdentifierÍ-ÅÍ-Ñ¬totalMinutesMªIdentifierÍ-ÕÍ-Ü§minutesQ«IfStatementÍ.Í/R°BinaryExpressionÍ.Í.$S°MemberExpressionÍ.Í.MªIdentifierÍ.Í.§segmentMªIdentifierÍ.Í.«sleepStatusÂÂ£===V§LiteralÍ.#Í.$¡3N®BlockStatementÍ.&Í.–’X³ExpressionStatementÍ.=Í.UY´AssignmentExpressionÍ.=Í.T¢+=MªIdentifierÍ.=Í.I¬dreamMinutesMªIdentifierÍ.MÍ.T§minutesX³ExpressionStatementÍ.kÍ.ƒY´AssignmentExpressionÍ.kÍ.‚¢+=MªIdentifierÍ.kÍ.w¬totalMinutesMªIdentifierÍ.{Í.‚§minutesQ«IfStatementÍ.­Í/R°BinaryExpressionÍ.±Í.ÊS°MemberExpressionÍ.±Í.ÄMªIdentifierÍ.±Í.¸§segmentMªIdentifierÍ.¹Í.Ä«sleepStatusÂÂ£===V§LiteralÍ.ÉÍ.Ê¡4N®BlockStatementÍ.ÌÍ/‘X³ExpressionStatementÍ.ãÍ.ûY´AssignmentExpressionÍ.ãÍ.ú¢+=MªIdentifierÍ.ãÍ.ï¬awakeMinutesMªIdentifierÍ.óÍ.ú§minutesÀÂU¯ReturnStatementÍ/-Í/œZ°ObjectExpressionÍ/4Í/›–d¨PropertyÍ/6Í/AÂÃÂMªIdentifierÍ/6Í/A«deepMinutes¤initMªIdentifierÍ/6Í/A«deepMinutesd¨PropertyÍ/CÍ/QÂÃÂMªIdentifierÍ/CÍ/Q®shallowMinutes¤initMªIdentifierÍ/CÍ/Q®shallowMinutesd¨PropertyÍ/SÍ/_ÂÃÂMªIdentifierÍ/SÍ/_¬dreamMinutes¤initMªIdentifierÍ/SÍ/_¬dreamMinutesd¨PropertyÍ/aÍ/mÂÃÂMªIdentifierÍ/aÍ/m¬awakeMinutes¤initMªIdentifierÍ/aÍ/m¬awakeMinutesd¨PropertyÍ/oÍ/{ÂÃÂMªIdentifierÍ/oÍ/{¬totalMinutes¤initMªIdentifierÍ/oÍ/{¬totalMinutes[¨PropertyÍ/}Í/™ÂÂÂMªIdentifierÍ/}Í/‡ªhasDetailsR°BinaryExpressionÍ/‰Í/™MªIdentifierÍ/‰Í/•¬totalMinutes¡>V§LiteralÍ/˜Í/™ ¡0¤initU¯ReturnStatementÍ/±Í/¾MªIdentifierÍ/¸Í/½¥emptyO°MethodDefinitionÍ/ËÍ0cÂÂMªIdentifierÍ/ËÍ/Û°emptySleepStages¦methodP²FunctionExpressionÍ/ÛÍ0cÀÂÂÂN®BlockStatementÍ/ŞÍ0c‘U¯ReturnStatementÍ/éÍ0\Z°ObjectExpressionÍ/ğÍ0[–[¨PropertyÍ/òÍ0 ÂÂÂMªIdentifierÍ/òÍ/ı«deepMinutesV§LiteralÍ/ÿÍ0  ¡0¤init[¨PropertyÍ0Í0ÂÂÂMªIdentifierÍ0Í0®shallowMinutesV§LiteralÍ0Í0 ¡0¤init[¨PropertyÍ0Í0$ÂÂÂMªIdentifierÍ0Í0!¬dreamMinutesV§LiteralÍ0#Í0$ ¡0¤init[¨PropertyÍ0&Í05ÂÂÂMªIdentifierÍ0&Í02¬awakeMinutesV§LiteralÍ04Í05 ¡0¤init[¨PropertyÍ07Í0FÂÂÂMªIdentifierÍ07Í0C¬totalMinutesV§LiteralÍ0EÍ0F ¡0¤init[¨PropertyÍ0HÍ0YÂÂÂMªIdentifierÍ0HÍ0RªhasDetailsV§LiteralÍ0TÍ0YÂ¥false¤initO°MethodDefinitionÍ0iÍ1ñÂÂMªIdentifierÍ0iÍ0~µcontainsRequiredTypes¦methodP²FunctionExpressionÍ0~Í1ñÀÂÂÂ‘MªIdentifierÍ0Í0‹¬grantedTypesN®BlockStatementÍ0Í1ñ“_³VariableDeclarationÍ0˜Í0Ö‘`²VariableDeclaratorÍ0Í0ÕMªIdentifierÍ0Í0©«requiredIdsW®CallExpressionÍ0¬Í0ÕS°MemberExpressionÍ0¬Í0ÂS°MemberExpressionÍ0¬Í0¾T®ThisExpressionÍ0¬Í0°MªIdentifierÍ0±Í0¾­readDataTypesÂÂMªIdentifierÍ0¿Í0Â£mapÂÂ‘P·ArrowFunctionExpressionÍ0ÃÍ0ÔÀÃÂÂ‘MªIdentifierÍ0ÄÍ0È¤typeS°MemberExpressionÍ0ÍÍ0ÔMªIdentifierÍ0ÍÍ0Ñ¤typeMªIdentifierÍ0ÒÍ0Ô¢idÂÂÂ¥constc¬ForStatementÍ0àÍ1Ô_³VariableDeclarationÍ0åÍ0ò‘`²VariableDeclaratorÍ0éÍ0òMªIdentifierÍ0éÍ0î¥indexV§LiteralÍ0ñÍ0ò ¡0£letR°BinaryExpressionÍ0ôÍ1MªIdentifierÍ0ôÍ0ù¥index¡<S°MemberExpressionÍ0üÍ1MªIdentifierÍ0üÍ1«requiredIdsMªIdentifierÍ1Í1¦lengthÂÂa°UpdateExpressionÍ1Í1¢++ÂMªIdentifierÍ1Í1¥indexN®BlockStatementÍ1Í1Ô’_³VariableDeclarationÍ1(Í1€‘`²VariableDeclaratorÍ1.Í1MªIdentifierÍ1.Í13¥foundW®CallExpressionÍ16Í1S°MemberExpressionÍ16Í1GMªIdentifierÍ16Í1B¬grantedTypesMªIdentifierÍ1CÍ1G¤someÂÂ‘P·ArrowFunctionExpressionÍ1HÍ1~ÀÃÂÂ‘MªIdentifierÍ1IÍ1T«grantedTypeR°BinaryExpressionÍ1YÍ1~S°MemberExpressionÍ1YÍ1gMªIdentifierÍ1YÍ1d«grantedTypeMªIdentifierÍ1eÍ1g¢idÂÂ£===S°MemberExpressionÍ1lÍ1~MªIdentifierÍ1lÍ1w«requiredIdsMªIdentifierÍ1xÍ1}¥indexÃÂÂ¥constQ«IfStatementÍ1Í1Éa¯UnaryExpressionÍ1’Í1˜¡!ÃMªIdentifierÍ1“Í1˜¥foundN®BlockStatementÍ1šÍ1É‘U¯ReturnStatementÍ1­Í1ºV§LiteralÍ1´Í1¹Â¥falseÀU¯ReturnStatementÍ1ŞÍ1êV§LiteralÍ1åÍ1éÃ¤trueO°MethodDefinitionÍ1÷Í2²ÂÂMªIdentifierÍ1÷Í2·containsAnyRequiredType¦methodP²FunctionExpressionÍ2Í2²ÀÂÂÂ’MªIdentifierÍ2Í2­requiredTypesMªIdentifierÍ2Í2*¬grantedTypesN®BlockStatementÍ2,Í2²‘U¯ReturnStatementÍ27Í2«W®CallExpressionÍ2>Í2ªS°MemberExpressionÍ2>Í2PMªIdentifierÍ2>Í2K­requiredTypesMªIdentifierÍ2LÍ2P¤someÂÂ‘P·ArrowFunctionExpressionÍ2QÍ2©ÀÃÂÂ‘MªIdentifierÍ2RÍ2^¬requiredTypeW®CallExpressionÍ2cÍ2©S°MemberExpressionÍ2cÍ2tMªIdentifierÍ2cÍ2o¬grantedTypesMªIdentifierÍ2pÍ2t¤someÂÂ‘P·ArrowFunctionExpressionÍ2uÍ2¨ÀÃÂÂ‘MªIdentifierÍ2vÍ2«grantedTypeR°BinaryExpressionÍ2†Í2¨S°MemberExpressionÍ2†Í2”MªIdentifierÍ2†Í2‘«grantedTypeMªIdentifierÍ2’Í2”¢idÂÂ£===S°MemberExpressionÍ2™Í2¨MªIdentifierÍ2™Í2¥¬requiredTypeMªIdentifierÍ2¦Í2¨¢idÂÂÂÂO°MethodDefinitionÍ2ğÍ5ÊÂÂMªIdentifierÍ2ğÍ2ü¬errorMessage¦methodP²FunctionExpressionÍ2üÍ5ÊÀÂÂÂ‘MªIdentifierÍ2ıÍ3¤codeN®BlockStatementÍ3Í5Ê‘Ôrf•¤type¥start£end¬discriminant¥cases¯SwitchStatementÍ3Í5ÃMªIdentifierÍ3Í3¤code˜Ôrg•¤type¥start£endªconsequent¤testªSwitchCaseÍ3+Í3k‘U¯ReturnStatementÍ3FÍ3kW®CallExpressionÍ3MÍ3jS°MemberExpressionÍ3MÍ3ST®ThisExpressionÍ3MÍ3QMªIdentifierÍ3RÍ3S¡tÂÂ‘V§LiteralÍ3TÍ3i³health_error_configµ'health_error_config'ÂV§LiteralÍ30Í33ÌÉ£201gªSwitchCaseÍ3yÍ3Á‘U¯ReturnStatementÍ3›Í3ÁW®CallExpressionÍ3¢Í3ÀS°MemberExpressionÍ3¢Í3¨T®ThisExpressionÍ3¢Í3¦MªIdentifierÍ3§Í3¨¡tÂÂ‘V§LiteralÍ3©Í3¿´health_error_network¶'health_error_network'ÂV§LiteralÍ3~Í3ˆÎ;Ä Éª1002701001gªSwitchCaseÍ3ÏÍ4‘U¯ReturnStatementÍ3ñÍ4W®CallExpressionÍ3øÍ4S°MemberExpressionÍ3øÍ3şT®ThisExpressionÍ3øÍ3üMªIdentifierÍ3ıÍ3ş¡tÂÂ‘V§LiteralÍ3ÿÍ4´health_error_account¶'health_error_account'ÂV§LiteralÍ3ÔÍ3ŞÎ;Ä±ª1002702001gªSwitchCaseÍ4%Í4~‘U¯ReturnStatementÍ4GÍ4~W®CallExpressionÍ4NÍ4}S°MemberExpressionÍ4NÍ4TT®ThisExpressionÍ4NÍ4RMªIdentifierÍ4SÍ4T¡tÂÂ’V§LiteralÍ4UÍ4v¿health_error_unavailable_formatÙ!'health_error_unavailable_format'MªIdentifierÍ4xÍ4|¤codeÂV§LiteralÍ4*Í44Î;Ä²ª1002702002gªSwitchCaseÍ4ŒÍ4Ô‘U¯ReturnStatementÍ4®Í4ÔW®CallExpressionÍ4µÍ4ÓS°MemberExpressionÍ4µÍ4»T®ThisExpressionÍ4µÍ4¹MªIdentifierÍ4ºÍ4»¡tÂÂ‘V§LiteralÍ4¼Í4Ò´health_error_privacy¶'health_error_privacy'ÂV§LiteralÍ4‘Í4›Î;Ä™ª1002703001gªSwitchCaseÍ4âÍ4òV§LiteralÍ4çÍ4ñÎ;Ãüáª1002700001gªSwitchCaseÍ5 Í5Y‘U¯ReturnStatementÍ5"Í5YW®CallExpressionÍ5)Í5XS°MemberExpressionÍ5)Í5/T®ThisExpressionÍ5)Í5-MªIdentifierÍ5.Í5/¡tÂÂ’V§LiteralÍ50Í5Q¿health_error_unavailable_formatÙ!'health_error_unavailable_format'MªIdentifierÍ5SÍ5W¤codeÂV§LiteralÍ5Í5Î;Ãüâª1002700002gªSwitchCaseÍ5gÍ5¸‘U¯ReturnStatementÍ5Í5¸W®CallExpressionÍ5ˆÍ5·S°MemberExpressionÍ5ˆÍ5T®ThisExpressionÍ5ˆÍ5ŒMªIdentifierÍ5Í5¡tÂÂ’V§LiteralÍ5Í5°¿health_error_unavailable_formatÙ!'health_error_unavailable_format'MªIdentifierÍ5²Í5¶¤codeÂÀO°MethodDefinitionÍ5ĞÍ6¥ÃÂMªIdentifierÍ5×Í5à©localDate¦methodP²FunctionExpressionÍ5àÍ6¥ÀÂÂÂ‘MªIdentifierÍ5áÍ5å¤dateN®BlockStatementÍ5çÍ6¥“_³VariableDeclarationÍ5òÍ6*‘`²VariableDeclaratorÍ5øÍ6)MªIdentifierÍ5øÍ5ı¥monthW®CallExpressionÍ6 Í6)S°MemberExpressionÍ6 Í6!Ôrh•¤type¥start£end«expressions¦quasis¯TemplateLiteralÍ6 Í6‘R°BinaryExpressionÍ6Í6W®CallExpressionÍ6Í6S°MemberExpressionÍ6Í6MªIdentifierÍ6Í6¤dateMªIdentifierÍ6Í6¨getMonthÂÂÂ¡+V§LiteralÍ6Í6¡1’Ôri•¤type¥start£end¥value¤tail¯TemplateElementÍ6Í6Ôrj’£raw¦cooked  Âi¯TemplateElementÍ6Í6j  ÃMªIdentifierÍ6Í6!¨padStartÂÂ’V§LiteralÍ6"Í6#¡2V§LiteralÍ6%Í6(¡0£'0'Â¥const_³VariableDeclarationÍ64Í6e‘`²VariableDeclaratorÍ6:Í6dMªIdentifierÍ6:Í6=£dayW®CallExpressionÍ6@Í6dS°MemberExpressionÍ6@Í6\h¯TemplateLiteralÍ6@Í6S‘W®CallExpressionÍ6CÍ6QS°MemberExpressionÍ6CÍ6OMªIdentifierÍ6CÍ6G¤dateMªIdentifierÍ6HÍ6O§getDateÂÂÂ’i¯TemplateElementÍ6AÍ6Aj  Âi¯TemplateElementÍ6RÍ6Rj  ÃMªIdentifierÍ6TÍ6\¨padStartÂÂ’V§LiteralÍ6]Í6^¡2V§LiteralÍ6`Í6c¡0£'0'Â¥constU¯ReturnStatementÍ6oÍ6h¯TemplateLiteralÍ6vÍ6“W®CallExpressionÍ6yÍ6‹S°MemberExpressionÍ6yÍ6‰MªIdentifierÍ6yÍ6}¤dateMªIdentifierÍ6~Í6‰«getFullYearÂÂÂMªIdentifierÍ6Í6”¥monthMªIdentifierÍ6˜Í6›£day”i¯TemplateElementÍ6wÍ6wj  Âi¯TemplateElementÍ6ŒÍ6j¡-¡-Âi¯TemplateElementÍ6•Í6–j¡-¡-Âi¯TemplateElementÍ6œÍ6œj  ÃÀ‘Ôrk•¤type¥start£endªspecifiers¦source±ImportDeclaration ,‘Ôrl”¤type¥start£end¥local¶ImportDefaultSpecifierMªIdentifier«healthStoreV§Literal+±@hms.health.store³"@hms.health.store"

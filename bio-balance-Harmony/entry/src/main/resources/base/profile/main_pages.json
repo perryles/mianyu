@@ -1,0 +1,10 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/SleepDetailPage",
+    "pages/ReminderSettingsPage",
+    "pages/CheckinDetailPage",
+    "pages/PrivacyPage",
+    "pages/AccountSyncPage"
+  ]
+}

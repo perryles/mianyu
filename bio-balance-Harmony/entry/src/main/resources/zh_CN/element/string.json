@@ -1,0 +1,596 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "眠屿 健康节律与每日恢复管理"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "眠屿 主页面"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "眠屿"
+    },
+    {
+      "name": "local_only",
+      "value": "仅保存在本机"
+    },
+    {
+      "name": "local_storage_unavailable",
+      "value": "本地存储暂不可用"
+    },
+    {
+      "name": "saved_on_device",
+      "value": "已保存到本机"
+    },
+    {
+      "name": "save_failed",
+      "value": "保存失败，请稍后重试"
+    },
+    {
+      "name": "context_unavailable",
+      "value": "无法获取应用上下文"
+    },
+    {
+      "name": "loading",
+      "value": "加载中…"
+    },
+    {
+      "name": "cancel",
+      "value": "取消"
+    },
+    {
+      "name": "delete",
+      "value": "删除"
+    },
+    {
+      "name": "save",
+      "value": "保存"
+    },
+    {
+      "name": "minutes_format",
+      "value": "%1$d 分钟"
+    },
+    {
+      "name": "duration_format",
+      "value": "%1$d 小时 %2$d 分"
+    },
+    {
+      "name": "score_format",
+      "value": "%1$d 分"
+    },
+    {
+      "name": "steps_format",
+      "value": "%1$d 步"
+    },
+    {
+      "name": "heart_rate_format",
+      "value": "%1$d 次/分"
+    },
+    {
+      "name": "days_format",
+      "value": "%1$d 天"
+    },
+    {
+      "name": "weekday_sun",
+      "value": "日"
+    },
+    {
+      "name": "weekday_mon",
+      "value": "一"
+    },
+    {
+      "name": "weekday_tue",
+      "value": "二"
+    },
+    {
+      "name": "weekday_wed",
+      "value": "三"
+    },
+    {
+      "name": "weekday_thu",
+      "value": "四"
+    },
+    {
+      "name": "weekday_fri",
+      "value": "五"
+    },
+    {
+      "name": "weekday_sat",
+      "value": "六"
+    },
+    {
+      "name": "today_short",
+      "value": "今"
+    },
+    {
+      "name": "checkin_sunlight_title",
+      "value": "日照记录"
+    },
+    {
+      "name": "checkin_caffeine_title",
+      "value": "咖啡因记录"
+    },
+    {
+      "name": "checkin_medication_title",
+      "value": "用药记录"
+    },
+    {
+      "name": "checkin_symptom_title",
+      "value": "症状记录"
+    },
+    {
+      "name": "checkin_private_subtitle",
+      "value": "仅保存在本机，不上传健康明细"
+    },
+    {
+      "name": "checkin_invalid_minutes",
+      "value": "请输入 0-1440 之间的分钟数"
+    },
+    {
+      "name": "checkin_sunlight_saved",
+      "value": "已保存日照记录"
+    },
+    {
+      "name": "checkin_caffeine_saved",
+      "value": "已记录咖啡因摄入"
+    },
+    {
+      "name": "checkin_medication_name_required",
+      "value": "请填写药名"
+    },
+    {
+      "name": "checkin_medication_saved",
+      "value": "已记录用药"
+    },
+    {
+      "name": "checkin_symptom_saved",
+      "value": "已记录症状"
+    },
+    {
+      "name": "checkin_not_recorded",
+      "value": "尚未记录"
+    },
+    {
+      "name": "checkin_not_recorded_today",
+      "value": "今天还没记录"
+    },
+    {
+      "name": "checkin_sunlight_help",
+      "value": "建议记录每天户外自然光照时长，帮助评估作息节律。"
+    },
+    {
+      "name": "checkin_sunlight_placeholder",
+      "value": "户外分钟数，如 30"
+    },
+    {
+      "name": "checkin_record_intake",
+      "value": "记录一次摄入"
+    },
+    {
+      "name": "checkin_add_once",
+      "value": "+ 记录一次"
+    },
+    {
+      "name": "checkin_record_medication",
+      "value": "记录一次用药"
+    },
+    {
+      "name": "checkin_medication_name_placeholder",
+      "value": "药名，如 维生素 D"
+    },
+    {
+      "name": "checkin_medication_dose_placeholder",
+      "value": "剂量（可选），如 1 片"
+    },
+    {
+      "name": "checkin_add_medication",
+      "value": "+ 记录用药"
+    },
+    {
+      "name": "checkin_record_symptom",
+      "value": "记录一次症状"
+    },
+    {
+      "name": "checkin_intensity",
+      "value": "强度"
+    },
+    {
+      "name": "checkin_add_symptom",
+      "value": "+ 记录症状"
+    },
+    {
+      "name": "checkin_privacy_emergency",
+      "value": "记录仅保存在本机，不会上传健康明细；如出现紧急症状请立即联系当地急救服务。"
+    },
+    {
+      "name": "symptom_headache",
+      "value": "头痛"
+    },
+    {
+      "name": "symptom_fatigue",
+      "value": "乏力"
+    },
+    {
+      "name": "symptom_anxiety",
+      "value": "焦虑"
+    },
+    {
+      "name": "symptom_insomnia",
+      "value": "失眠"
+    },
+    {
+      "name": "symptom_neck_pain",
+      "value": "肩颈酸痛"
+    },
+    {
+      "name": "symptom_other",
+      "value": "其他"
+    },
+    {
+      "name": "intensity_very_light",
+      "value": "很轻"
+    },
+    {
+      "name": "intensity_light",
+      "value": "较轻"
+    },
+    {
+      "name": "intensity_medium",
+      "value": "中等"
+    },
+    {
+      "name": "intensity_heavy",
+      "value": "较重"
+    },
+    {
+      "name": "intensity_severe",
+      "value": "严重"
+    },
+    {
+      "name": "sleep_reading",
+      "value": "正在读取睡眠数据"
+    },
+    {
+      "name": "sleep_auth_check_failed",
+      "value": "暂时无法检查睡眠数据授权"
+    },
+    {
+      "name": "sleep_auth_required",
+      "value": "需要授权睡眠数据后才能查看详情"
+    },
+    {
+      "name": "sleep_read_failed",
+      "value": "睡眠数据读取失败，请稍后重试"
+    },
+    {
+      "name": "sleep_source",
+      "value": "数据来自本机已授权的华为运动健康"
+    },
+    {
+      "name": "sleep_empty",
+      "value": "暂无可用的睡眠记录"
+    },
+    {
+      "name": "sleep_stage_deep",
+      "value": "深睡"
+    },
+    {
+      "name": "sleep_stage_shallow",
+      "value": "浅睡"
+    },
+    {
+      "name": "sleep_stage_rem",
+      "value": "REM 快速眼动"
+    },
+    {
+      "name": "sleep_stage_awake",
+      "value": "清醒"
+    },
+    {
+      "name": "sleep_stage_empty",
+      "value": "暂无分期明细；部分穿戴设备只返回汇总时长，不提供分期数据。"
+    },
+    {
+      "name": "sleep_hint_good",
+      "value": "深睡占比表现不错，继续保持规律的作息。"
+    },
+    {
+      "name": "sleep_hint_low",
+      "value": "深睡占比偏低时，可尝试固定入睡时间并减少睡前强光刺激。"
+    },
+    {
+      "name": "sleep_hint_unknown",
+      "value": "暂未获得分期数据，请以华为运动健康的睡眠明细为准。"
+    },
+    {
+      "name": "sleep_detail_title",
+      "value": "睡眠详情"
+    },
+    {
+      "name": "sleep_last_night",
+      "value": "最近一晚"
+    },
+    {
+      "name": "sleep_score",
+      "value": "睡眠评分"
+    },
+    {
+      "name": "sleep_week_duration",
+      "value": "近 7 天睡眠时长"
+    },
+    {
+      "name": "sleep_week_score",
+      "value": "近 7 天睡眠评分"
+    },
+    {
+      "name": "sleep_stages",
+      "value": "睡眠分期"
+    },
+    {
+      "name": "sleep_stage_total_format",
+      "value": "共 %1$s"
+    },
+    {
+      "name": "sleep_no_details",
+      "value": "暂无明细"
+    },
+    {
+      "name": "sleep_privacy_disclaimer",
+      "value": "睡眠数据仅从本机已授权来源读取，不保存、不上传；仅供参考，不作医学诊断。"
+    },
+    {
+      "name": "reminder_storage_unavailable",
+      "value": "本地存储暂不可用"
+    },
+    {
+      "name": "reminder_permission_required",
+      "value": "需要通知权限才能开启提醒，请在系统设置中允许通知"
+    },
+    {
+      "name": "reminder_enabled_format",
+      "value": "已开启「%1$s」"
+    },
+    {
+      "name": "reminder_disabled_format",
+      "value": "已关闭「%1$s」"
+    },
+    {
+      "name": "reminder_time_saved_format",
+      "value": "已设置「%1$s」为 %2$s"
+    },
+    {
+      "name": "reminder_time_save_failed",
+      "value": "保存提醒时间失败，请稍后重试"
+    },
+    {
+      "name": "reminder_daily",
+      "value": "每天提醒"
+    },
+    {
+      "name": "reminder_off",
+      "value": "未开启"
+    },
+    {
+      "name": "reminder_time",
+      "value": "提醒时间"
+    },
+    {
+      "name": "reminder_title",
+      "value": "健康提醒"
+    },
+    {
+      "name": "reminder_subtitle",
+      "value": "每天定时提醒，仅保存在本机"
+    },
+    {
+      "name": "reminder_disclaimer",
+      "value": "提醒仅用于日常健康管理提示，不构成医疗建议。"
+    },
+    {
+      "name": "reminder_water_title",
+      "value": "喝水提醒"
+    },
+    {
+      "name": "reminder_water_content",
+      "value": "记得喝一杯水，保持身体水分充足。"
+    },
+    {
+      "name": "reminder_medication_title",
+      "value": "用药提醒"
+    },
+    {
+      "name": "reminder_medication_content",
+      "value": "到用药时间了，请按医嘱服药。"
+    },
+    {
+      "name": "reminder_sedentary_title",
+      "value": "久坐提醒"
+    },
+    {
+      "name": "reminder_sedentary_content",
+      "value": "坐了一会儿了，起来活动一下吧。"
+    },
+    {
+      "name": "reminder_fallback_content",
+      "value": "到时间了，记得照顾自己。"
+    },
+    {
+      "name": "health_ready",
+      "value": "运动健康服务已就绪"
+    },
+    {
+      "name": "health_initialized",
+      "value": "运动健康服务已初始化"
+    },
+    {
+      "name": "health_auth_all",
+      "value": "已授权读取步数、静息心率和睡眠"
+    },
+    {
+      "name": "health_auth_partial",
+      "value": "已获得部分健康数据权限，可读取已授权项目"
+    },
+    {
+      "name": "health_auth_none",
+      "value": "未获得健康数据权限，可稍后重新授权"
+    },
+    {
+      "name": "health_auth_revoked",
+      "value": "已撤销「眠屿」的运动健康授权"
+    },
+    {
+      "name": "health_error_config",
+      "value": "请检查 AppGallery Connect Client ID 与应用签名配置"
+    },
+    {
+      "name": "health_error_network",
+      "value": "网络不可用，暂时无法同步运动健康数据"
+    },
+    {
+      "name": "health_error_account",
+      "value": "请先在设备上登录华为账号"
+    },
+    {
+      "name": "health_error_unavailable_format",
+      "value": "运动健康服务暂不可用（%1$d）"
+    },
+    {
+      "name": "health_error_privacy",
+      "value": "请先打开华为运动健康 App 并同意隐私协议"
+    },
+    {
+      "name": "privacy_page_title",
+      "value": "隐私与数据"
+    },
+    {
+      "name": "privacy_page_subtitle",
+      "value": "健康数据边界与权限用途"
+    },
+    {
+      "name": "privacy_section_permission",
+      "value": "权限用途说明"
+    },
+    {
+      "name": "privacy_permission_body",
+      "value": "眠屿 需要读取你的步数、静息心率与睡眠（含最近一晚睡眠分期），用于展示健康概览、近 7 天趋势、睡眠详情与本机健康评分，不会用于其他用途。"
+    },
+    {
+      "name": "privacy_section_scope",
+      "value": "读取范围"
+    },
+    {
+      "name": "privacy_scope_steps",
+      "value": "步数：今日步数与近 7 天每日步数"
+    },
+    {
+      "name": "privacy_scope_heart",
+      "value": "静息心率：近 7 天每日静息心率"
+    },
+    {
+      "name": "privacy_scope_sleep",
+      "value": "睡眠：近 7 天时长与评分、最近一晚深睡/浅睡/REM/清醒分期"
+    },
+    {
+      "name": "privacy_section_boundary",
+      "value": "数据边界"
+    },
+    {
+      "name": "privacy_boundary_readonly",
+      "value": "只读不写：不会写入或删除任何健康数据"
+    },
+    {
+      "name": "privacy_boundary_local",
+      "value": "数据仅保存在本机，不上传任何健康明细"
+    },
+    {
+      "name": "privacy_boundary_backup",
+      "value": "应用不参与系统云备份与云恢复"
+    },
+    {
+      "name": "privacy_boundary_sync",
+      "value": "未来云同步仅同步白名单摘要，默认关闭"
+    },
+    {
+      "name": "privacy_section_revoke",
+      "value": "授权管理"
+    },
+    {
+      "name": "privacy_revoke_body",
+      "value": "可在「我的」页随时撤销「眠屿」的华为运动健康授权，撤销后立即停止读取，本机已有记录不受影响。"
+    },
+    {
+      "name": "privacy_section_disclaimer",
+      "value": "说明"
+    },
+    {
+      "name": "privacy_disclaimer_body",
+      "value": "健康数据仅供参考，不构成医疗诊断；如出现紧急症状请立即联系当地急救服务。"
+    },
+    {
+      "name": "account_sync_running",
+      "value": "同步中…"
+    },
+    {
+      "name": "account_sync_success",
+      "value": "同步完成"
+    },
+    {
+      "name": "account_sync_failed",
+      "value": "同步失败"
+    },
+    {
+      "name": "account_sync_partial",
+      "value": "部分完成"
+    },
+    {
+      "name": "account_sync_account_changed",
+      "value": "账号已变更"
+    },
+    {
+      "name": "account_sync_idle",
+      "value": "待同步"
+    },
+    {
+      "name": "account_sync_title",
+      "value": "跨设备同步"
+    },
+    {
+      "name": "account_sync_subtitle",
+      "value": "同步白名单摘要，健康原始数据不上云"
+    },
+    {
+      "name": "account_sync_signed_in",
+      "value": "已登录"
+    },
+    {
+      "name": "account_sync_signed_out",
+      "value": "未登录"
+    },
+    {
+      "name": "account_sync_sign_out",
+      "value": "退出登录"
+    },
+    {
+      "name": "account_sync_sign_in",
+      "value": "登录华为账号"
+    },
+    {
+      "name": "account_sync_switch",
+      "value": "启用跨设备同步"
+    },
+    {
+      "name": "account_sync_switch_note",
+      "value": "开启后将同步白名单摘要到您的华为云空间，健康原始数据及本机明细不会上传。"
+    },
+    {
+      "name": "account_sync_whitelist",
+      "value": "当前白名单字段：睡眠评分、步数摘要、静息心率周均值。更多字段将在后续版本加入。"
+    },
+    {
+      "name": "account_sync_now",
+      "value": "立即同步"
+    }
+  ]
+}

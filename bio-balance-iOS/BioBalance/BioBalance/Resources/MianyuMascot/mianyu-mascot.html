@@ -1,0 +1,870 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
+  <style>
+    :root {
+      color-scheme: light dark;
+      --accent: #48cc92;
+      --accent-2: #42a9f5;
+      --tempo: 3.4s;
+      --core-opacity: .42;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: transparent;
+      -webkit-user-select: none;
+      user-select: none;
+      touch-action: none;
+    }
+
+    body {
+      display: grid;
+      place-items: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    #stage {
+      width: min(100vw, 100vh);
+      height: min(100vw, 100vh);
+      overflow: visible;
+      cursor: grab;
+    }
+
+    #stage.dragging { cursor: grabbing; }
+
+    #float-layer {
+      transform-origin: 180px 170px;
+      transform-box: view-box;
+      animation: mascotFloat var(--tempo) cubic-bezier(.45, 0, .55, 1) infinite;
+    }
+
+    #body-shell,
+    #face-disc {
+      transform-origin: center;
+      transform-box: fill-box;
+      animation: breathe 2.65s ease-in-out infinite;
+    }
+
+    #shell-sheen {
+      transform-origin: 180px 169px;
+      animation: sheenDrift 5.8s ease-in-out infinite;
+    }
+
+    #tide-line {
+      stroke-dasharray: 18 13 7 11;
+      animation: tideFlow 4.4s linear infinite;
+    }
+
+    #core-ring {
+      transform-origin: 180px 165px;
+      transform-box: view-box;
+      animation: corePulse calc(var(--tempo) * .92) ease-in-out infinite;
+    }
+
+    #left-hand {
+      transform-origin: 116px 194px;
+      animation: handSway 2.9s ease-in-out infinite;
+    }
+
+    #right-hand {
+      transform-origin: 250px 150px;
+      animation: handWave 3.8s ease-in-out infinite;
+    }
+
+    #companion-orb {
+      transform-origin: 270px 112px;
+      animation: orbBob 2.45s ease-in-out infinite;
+      transition: opacity .35s ease, filter .35s ease;
+    }
+
+    #orb-ring {
+      transform-origin: 270px 112px;
+      transform-box: view-box;
+      animation: orbitReverse 6.4s linear infinite;
+      transition: opacity .35s ease, stroke .35s ease;
+    }
+
+    #orb-core {
+      transform-origin: 270px 112px;
+      transform-box: view-box;
+      animation: orbCorePulse calc(var(--tempo) * .68) ease-in-out infinite;
+    }
+
+    #heartbeat {
+      stroke-dasharray: 138;
+      stroke-dashoffset: 138;
+      animation: heartbeatDraw 2.2s cubic-bezier(.2, .7, .2, 1) infinite;
+    }
+
+    #pupils,
+    #eyes,
+    #left-eye,
+    #right-eye,
+    #brows,
+    #mouths,
+    #tear,
+    #state-mark {
+      transition: transform .22s ease, opacity .28s ease;
+    }
+
+    #eyes {
+      transform-origin: 180px 154px;
+      transform-box: view-box;
+    }
+
+    .pupil {
+      transform-origin: center;
+      transform-box: fill-box;
+      transition: transform .13s ease-out;
+    }
+
+    #eyes.blinking { transform: scaleY(.08) !important; }
+
+    .eye-glint {
+      transform-origin: center;
+      transform-box: fill-box;
+      transition: transform .08s ease;
+    }
+
+    .mouth {
+      opacity: 0;
+      transition: opacity .28s ease, transform .28s ease;
+      transform-origin: 180px 180px;
+    }
+
+    [data-mood="waiting"] #mouth-neutral,
+    [data-mood="steady"] #mouth-smile,
+    [data-mood="recovered"] #mouth-open,
+    [data-mood="watchful"] #mouth-small,
+    [data-mood="caution"] #mouth-concern,
+    [data-mood="strained"] #mouth-frown { opacity: 1; }
+
+    [data-mood="waiting"] #brows { opacity: .35; }
+    [data-mood="recovered"] #brows,
+    [data-mood="steady"] #brows { opacity: 0; }
+    [data-mood="watchful"] #brows { opacity: .55; transform: translateY(1px); }
+    [data-mood="caution"] #brows { opacity: .82; transform: translateY(3px) rotate(-2deg); }
+    [data-mood="strained"] #brows { opacity: 1; transform: translateY(4px); }
+
+    [data-mood="strained"] #tear { opacity: .9; }
+    [data-mood="strained"] #state-mark { opacity: .95; }
+    [data-mood="caution"] #state-mark { opacity: .55; }
+    [data-mood="recovered"] #eyes { transform: translateY(-2px) scaleY(.78); }
+    [data-mood="watchful"] #left-eye { transform: translateX(2.5px); }
+    [data-mood="watchful"] #right-eye { transform: translateX(-2.5px); }
+    [data-mood="caution"] #eyes { transform: translateY(4px) scaleY(.58); }
+    [data-mood="strained"] #eyes { transform: translateY(5px) scaleY(.08); }
+    [data-mood="waiting"] #left-eye { animation: bootEye 1.6s ease-in-out infinite; }
+    [data-mood="waiting"] #right-eye { animation: bootEye 1.6s ease-in-out .8s infinite; }
+    [data-mood="strained"] #sleep-bubbles {
+      opacity: .9;
+      animation: sleepBubbles 3.8s ease-in-out infinite;
+    }
+    [data-mood="waiting"] #heartbeat { opacity: .42; }
+    [data-mood="recovered"] #heartbeat { stroke-width: 5.5; }
+
+    [data-mood="strained"] #float-layer {
+      animation-name: mascotTense;
+      animation-timing-function: ease-in-out;
+    }
+
+    [data-mood="recovered"] #companion-orb {
+      animation-name: orbCelebrate;
+    }
+
+    #particles circle { pointer-events: none; }
+
+    .state-cue {
+      opacity: 0;
+      transition: opacity .32s ease, transform .42s cubic-bezier(.2, .8, .2, 1);
+      transform-origin: 180px 165px;
+      transform-box: view-box;
+    }
+
+    [data-mood="waiting"] #waiting-scan { opacity: .72; }
+    [data-mood="recovered"] #happy-sparks { opacity: .9; }
+    [data-mood="watchful"] #focus-brackets { opacity: .82; }
+    [data-mood="caution"] #caution-drops { opacity: .75; }
+
+    [data-mood="waiting"] #waiting-scan {
+      animation: waitingScan 2.8s ease-in-out infinite;
+    }
+
+    [data-mood="recovered"] #happy-sparks {
+      animation: happySparkle 2.5s ease-in-out infinite;
+    }
+
+    [data-mood="watchful"] #focus-brackets {
+      animation: focusLock 3.6s ease-in-out infinite;
+    }
+
+    [data-mood="caution"] #caution-drops {
+      animation: cautionDrift 3.2s ease-in-out infinite;
+    }
+
+    [data-mood="waiting"] #orb-ring { opacity: .92; }
+    [data-mood="recovered"] #orb-core { filter: url(#tinyGlow); }
+    [data-mood="watchful"] #heartbeat-bed { opacity: .22; }
+    [data-mood="strained"] #heartbeat-bed { opacity: .08; }
+    [data-mood="caution"] #right-hand { animation-name: rightHandDroop; }
+    [data-mood="strained"] #left-hand { animation-name: leftHandRest; }
+    [data-mood="strained"] #right-hand { animation-name: rightHandRest; }
+    [data-mood="strained"] #companion-orb { opacity: .58; filter: saturate(.45); }
+
+    #sleep-bubbles {
+      opacity: 0;
+      transform-origin: 262px 87px;
+      transition: opacity .35s ease;
+    }
+
+    .reduce-motion *,
+    .reduce-motion *::before,
+    .reduce-motion *::after {
+      animation: none !important;
+      transition-duration: .01ms !important;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition-duration: .01ms !important;
+      }
+    }
+
+    @keyframes mascotFloat {
+      0%, 100% { transform: translateY(3px) rotate(-1.2deg); }
+      50% { transform: translateY(-6px) rotate(1.2deg); }
+    }
+
+    @keyframes mascotTense {
+      0%, 100% { transform: translate(0, 1px) rotate(-.5deg); }
+      25% { transform: translate(-1.5px, -1px) rotate(-1.1deg); }
+      50% { transform: translate(1.5px, -2px) rotate(.8deg); }
+      75% { transform: translate(-1px, 0) rotate(.4deg); }
+    }
+
+    @keyframes breathe {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.018, .992); }
+    }
+
+    @keyframes sheenDrift {
+      0%, 100% { transform: translate(-11px, -3px) rotate(-5deg); opacity: .16; }
+      50% { transform: translate(13px, 4px) rotate(5deg); opacity: .4; }
+    }
+
+    @keyframes tideFlow { to { stroke-dashoffset: -98; } }
+
+    @keyframes corePulse {
+      0%, 100% { opacity: .2; transform: scale(.97); }
+      50% { opacity: var(--core-opacity); transform: scale(1.035); }
+    }
+
+    @keyframes orbitReverse { to { transform: rotate(-360deg); } }
+
+    @keyframes handSway {
+      0%, 100% { transform: rotate(4deg) translateY(1px); }
+      50% { transform: rotate(-8deg) translateY(-3px); }
+    }
+
+    @keyframes handWave {
+      0%, 100% { transform: rotate(-5deg); }
+      35% { transform: rotate(10deg) translateY(-2px); }
+      70% { transform: rotate(-1deg); }
+    }
+
+    @keyframes rightHandDroop {
+      0%, 100% { transform: translateY(5px) rotate(-9deg); }
+      50% { transform: translateY(8px) rotate(-12deg); }
+    }
+
+    @keyframes leftHandRest {
+      0%, 100% { transform: translateY(5px) rotate(7deg); }
+      50% { transform: translateY(7px) rotate(10deg); }
+    }
+
+    @keyframes rightHandRest {
+      0%, 100% { transform: translateY(7px) rotate(-8deg); }
+      50% { transform: translateY(9px) rotate(-10deg); }
+    }
+
+    @keyframes orbBob {
+      0%, 100% { transform: translateY(2px) scale(.98); }
+      50% { transform: translateY(-7px) scale(1.04); }
+    }
+
+    @keyframes orbCelebrate {
+      0%, 100% { transform: translateY(1px) rotate(0) scale(1); }
+      35% { transform: translateY(-10px) rotate(14deg) scale(1.08); }
+      70% { transform: translateY(-3px) rotate(-9deg) scale(1.02); }
+    }
+
+    @keyframes orbCorePulse {
+      0%, 100% { transform: scale(.82); opacity: .46; }
+      50% { transform: scale(1.16); opacity: .9; }
+    }
+
+    @keyframes heartbeatDraw {
+      0% { stroke-dashoffset: 138; opacity: .25; }
+      42%, 70% { stroke-dashoffset: 0; opacity: 1; }
+      100% { stroke-dashoffset: -138; opacity: .3; }
+    }
+
+    @keyframes bootEye {
+      0%, 100% { opacity: .45; filter: none; }
+      35% { opacity: 1; filter: drop-shadow(0 0 4px var(--accent)); }
+      70% { opacity: .72; filter: none; }
+    }
+
+    @keyframes sleepBubbles {
+      0%, 100% { transform: translateY(5px) scale(.82); opacity: .25; }
+      50% { transform: translateY(-8px) scale(1.08); opacity: .92; }
+    }
+
+    @keyframes waitingScan {
+      0%, 100% { transform: translateY(-8px) scale(.92); opacity: .18; }
+      48% { transform: translateY(12px) scale(1); opacity: .72; }
+      52% { transform: translateY(12px) scale(1); opacity: .72; }
+    }
+
+    @keyframes happySparkle {
+      0%, 100% { transform: rotate(-5deg) scale(.92); opacity: .45; }
+      50% { transform: rotate(5deg) scale(1.08); opacity: 1; }
+    }
+
+    @keyframes focusLock {
+      0%, 100% { transform: scale(1.07); opacity: .4; }
+      45%, 55% { transform: scale(.96); opacity: .9; }
+    }
+
+    @keyframes cautionDrift {
+      0%, 100% { transform: translateY(-2px); opacity: .38; }
+      50% { transform: translateY(7px); opacity: .82; }
+    }
+  </style>
+</head>
+<body>
+  <svg id="stage" viewBox="0 0 360 360" role="presentation" aria-hidden="true" data-mood="steady">
+    <defs>
+      <linearGradient id="bodyGradient" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#2a8eff"/>
+        <stop offset=".46" stop-color="#1fc6df"/>
+        <stop offset="1" stop-color="#54df8c"/>
+      </linearGradient>
+      <radialGradient id="faceGradient" cx="35%" cy="24%" r="78%">
+        <stop offset="0" stop-color="#ffffff"/>
+        <stop offset=".7" stop-color="#f7fbff"/>
+        <stop offset="1" stop-color="#dcecff"/>
+      </radialGradient>
+      <radialGradient id="eyeGradient" cx="34%" cy="24%" r="76%">
+        <stop offset="0" stop-color="#27415e"/>
+        <stop offset=".46" stop-color="#132a43"/>
+        <stop offset="1" stop-color="#091727"/>
+      </radialGradient>
+      <radialGradient id="blushGradient" cx="42%" cy="35%" r="72%">
+        <stop offset="0" stop-color="#ffc1cd" stop-opacity=".94"/>
+        <stop offset="1" stop-color="#ff86a0" stop-opacity=".58"/>
+      </radialGradient>
+      <linearGradient id="faceRimGradient" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".92"/>
+        <stop offset=".52" stop-color="#ffffff" stop-opacity=".24"/>
+        <stop offset="1" stop-color="var(--accent-2)" stop-opacity=".42"/>
+      </linearGradient>
+      <radialGradient id="orbGradient" cx="28%" cy="22%" r="78%">
+        <stop offset="0" stop-color="#d9ffff"/>
+        <stop offset=".32" stop-color="#4bb8ff"/>
+        <stop offset="1" stop-color="#2ad7a0"/>
+      </radialGradient>
+      <radialGradient id="orbCoreGradient" cx="34%" cy="28%" r="70%">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".95"/>
+        <stop offset=".38" stop-color="var(--accent-2)" stop-opacity=".82"/>
+        <stop offset="1" stop-color="var(--accent)" stop-opacity=".18"/>
+      </radialGradient>
+      <linearGradient id="handGradient" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#ffffff"/>
+        <stop offset="1" stop-color="#dbeaff"/>
+      </linearGradient>
+      <linearGradient id="shellSheenGradient" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#ffffff" stop-opacity="0"/>
+        <stop offset=".48" stop-color="#ffffff" stop-opacity=".72"/>
+        <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+      </linearGradient>
+      <linearGradient id="tideGradient" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0" stop-color="#ffffff" stop-opacity=".1"/>
+        <stop offset=".48" stop-color="#ffffff" stop-opacity=".85"/>
+        <stop offset="1" stop-color="var(--accent-2)" stop-opacity=".42"/>
+      </linearGradient>
+      <clipPath id="bodyClip">
+        <circle cx="180" cy="169" r="88"/>
+      </clipPath>
+      <filter id="softGlow" x="-80%" y="-80%" width="260%" height="260%">
+        <feGaussianBlur stdDeviation="14"/>
+      </filter>
+      <filter id="bodyShadow" x="-40%" y="-40%" width="180%" height="200%">
+        <feDropShadow dx="0" dy="12" stdDeviation="10" flood-color="#184b79" flood-opacity=".22"/>
+      </filter>
+      <filter id="faceLift" x="-35%" y="-35%" width="170%" height="180%">
+        <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#0e547b" flood-opacity=".13"/>
+      </filter>
+      <filter id="tinyGlow" x="-100%" y="-100%" width="300%" height="300%">
+        <feGaussianBlur stdDeviation="3" result="blur"/>
+        <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+
+    <g id="float-layer">
+      <g id="mascot-root">
+        <ellipse cx="180" cy="283" rx="72" ry="13" fill="#194e79" opacity=".13" filter="url(#softGlow)"/>
+
+        <g id="feet" filter="url(#bodyShadow)">
+          <ellipse cx="151" cy="257" rx="25" ry="19" fill="url(#handGradient)" transform="rotate(-8 151 257)"/>
+          <ellipse cx="211" cy="257" rx="25" ry="19" fill="url(#handGradient)" transform="rotate(8 211 257)"/>
+          <path d="M137 253 Q151 244 164 253" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" opacity=".48"/>
+          <path d="M198 253 Q211 244 225 253" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" opacity=".48"/>
+        </g>
+
+        <g id="body-shell" filter="url(#bodyShadow)">
+          <circle cx="180" cy="169" r="91" fill="url(#bodyGradient)"/>
+          <path d="M116 105 C143 75 203 65 241 95 C215 82 177 81 151 99 C126 116 111 143 109 173 C101 151 104 125 116 105Z" fill="#7fc4ff" opacity=".42"/>
+          <path d="M107 190 C132 235 198 259 247 213 C227 250 184 271 143 252 C116 239 99 217 92 193Z" fill="#09bde0" opacity=".32"/>
+          <g clip-path="url(#bodyClip)">
+            <ellipse id="shell-sheen" cx="153" cy="128" rx="73" ry="21" fill="url(#shellSheenGradient)" transform="rotate(-28 153 128)" opacity=".26"/>
+            <path id="tide-line" d="M87 206 C118 183 145 214 174 196 C204 177 230 204 270 180" fill="none" stroke="url(#tideGradient)" stroke-width="4.2" stroke-linecap="round" opacity=".64"/>
+            <path d="M102 218 C137 198 153 228 188 208 C219 190 245 210 263 197" fill="none" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" opacity=".18"/>
+          </g>
+          <circle cx="180" cy="169" r="91" fill="none" stroke="#ffffff" stroke-width="2" opacity=".35"/>
+        </g>
+
+        <circle id="core-ring" cx="180" cy="165" r="75" fill="none" stroke="var(--accent-2)" stroke-width="2.2" opacity=".3" stroke-dasharray="3 9"/>
+
+        <g id="face-disc">
+          <circle cx="180" cy="169" r="68" fill="#1b6d91" opacity=".1" filter="url(#faceLift)"/>
+          <circle cx="180" cy="165" r="68" fill="url(#faceGradient)" filter="url(#faceLift)"/>
+          <circle id="face-rim" cx="180" cy="165" r="67" fill="none" stroke="url(#faceRimGradient)" stroke-width="2.4"/>
+          <path d="M137 117 C155 102 191 97 216 111" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" opacity=".34"/>
+          <ellipse cx="153" cy="185" rx="12" ry="7" fill="url(#blushGradient)"/>
+          <ellipse cx="207" cy="185" rx="12" ry="7" fill="url(#blushGradient)"/>
+
+          <g id="eyes">
+            <g id="pupils">
+              <g id="left-eye">
+                <ellipse class="pupil" cx="153" cy="154" rx="10" ry="14" fill="url(#eyeGradient)"/>
+                <circle class="eye-glint" cx="157" cy="149" r="3.3" fill="#fff"/>
+                <circle cx="150" cy="160" r="1.4" fill="#75b9e4" opacity=".4"/>
+              </g>
+              <g id="right-eye">
+                <ellipse class="pupil" cx="207" cy="154" rx="10" ry="14" fill="url(#eyeGradient)"/>
+                <circle class="eye-glint" cx="211" cy="149" r="3.3" fill="#fff"/>
+                <circle cx="204" cy="160" r="1.4" fill="#75b9e4" opacity=".4"/>
+              </g>
+            </g>
+          </g>
+
+          <g id="brows" fill="none" stroke="#334257" stroke-width="3.2" stroke-linecap="round" opacity="0">
+            <path id="brow-left" d="M142 133 Q153 127 163 133"/>
+            <path id="brow-right" d="M197 133 Q207 127 218 133"/>
+          </g>
+
+          <g id="mouths" fill="none" stroke="#102238" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+            <path id="mouth-smile" class="mouth" d="M167 181 Q180 194 193 181"/>
+            <path id="mouth-neutral" class="mouth" d="M171 186 Q180 184 189 186"/>
+            <path id="mouth-small" class="mouth" d="M175 185 Q180 189 185 185"/>
+            <path id="mouth-concern" class="mouth" d="M168 188 Q180 178 192 188"/>
+            <path id="mouth-frown" class="mouth" d="M167 192 Q180 178 193 192"/>
+            <path id="mouth-open" class="mouth" d="M165 180 Q180 200 195 180 Q180 190 165 180Z" fill="#ff718f"/>
+          </g>
+
+          <g id="tear" opacity="0">
+            <path d="M218 165 C226 176 226 181 218 184 C210 181 210 176 218 165Z" fill="#64baff"/>
+            <circle cx="216" cy="172" r="2" fill="#dff5ff" opacity=".8"/>
+          </g>
+
+          <path id="heartbeat-bed" d="M144 213 H160 L166 201 L176 225 L185 190 L195 216 L202 207 H216" fill="none" stroke="#6d91ad" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" opacity=".13"/>
+          <path id="heartbeat" d="M144 213 H160 L166 201 L176 225 L185 190 L195 216 L202 207 H216" fill="none" stroke="var(--accent)" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
+
+        <g id="waiting-scan" class="state-cue" fill="none" stroke="var(--accent-2)" stroke-linecap="round">
+          <path d="M125 160 H235" stroke-width="2.2" opacity=".86"/>
+          <path d="M132 157 H164 M196 157 H228" stroke-width="5" opacity=".16"/>
+        </g>
+
+        <g id="happy-sparks" class="state-cue" fill="var(--accent)" filter="url(#tinyGlow)">
+          <path d="M116 116 l3.5 8 l8 3.5 l-8 3.5 l-3.5 8 l-3.5 -8 l-8 -3.5 l8 -3.5z"/>
+          <path d="M239 190 l2.5 5.5 l5.5 2.5 l-5.5 2.5 l-2.5 5.5 l-2.5 -5.5 l-5.5 -2.5 l5.5 -2.5z" opacity=".74"/>
+          <circle cx="232" cy="124" r="3.2" fill="var(--accent-2)"/>
+        </g>
+
+        <g id="focus-brackets" class="state-cue" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round">
+          <path d="M130 133 v-11 h11 M219 122 h11 v11 M230 197 v11 h-11 M141 208 h-11 v-11"/>
+          <circle cx="180" cy="165" r="4" opacity=".4"/>
+        </g>
+
+        <g id="caution-drops" class="state-cue" fill="var(--accent-2)">
+          <path d="M126 145 C134 157 134 162 126 165 C118 162 118 157 126 145Z" opacity=".76"/>
+          <path d="M238 151 C243 159 243 163 238 165 C233 163 233 159 238 151Z" opacity=".46"/>
+        </g>
+
+        <g id="left-hand">
+          <path d="M108 187 C90 191 88 211 102 218 C116 225 127 211 124 198 C122 190 116 186 108 187Z" fill="url(#handGradient)" stroke="#d9e9fb" stroke-width="1.4"/>
+          <path d="M102 198 Q111 202 117 196" fill="none" stroke="#c5d9ef" stroke-width="2" stroke-linecap="round"/>
+          <path d="M99 193 Q106 188 113 191" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" opacity=".58"/>
+        </g>
+
+        <g id="right-hand">
+          <path d="M249 158 C263 148 276 159 273 173 C271 184 257 188 248 180 C240 174 240 164 249 158Z" fill="url(#handGradient)" stroke="#d9e9fb" stroke-width="1.4"/>
+          <path d="M253 166 Q261 171 268 165" fill="none" stroke="#c5d9ef" stroke-width="2" stroke-linecap="round"/>
+          <path d="M252 159 Q260 154 267 159" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" opacity=".58"/>
+        </g>
+
+        <g id="companion-orb" filter="url(#bodyShadow)">
+          <circle cx="270" cy="112" r="20" fill="url(#orbGradient)"/>
+          <circle id="orb-ring" cx="270" cy="112" r="15" fill="none" stroke="#ffffff" stroke-width="1.6" stroke-dasharray="3 6" opacity=".54"/>
+          <circle id="orb-core" cx="270" cy="112" r="6" fill="url(#orbCoreGradient)" opacity=".68"/>
+          <ellipse cx="263" cy="105" rx="6" ry="4" fill="#fff" opacity=".58" transform="rotate(-24 263 105)"/>
+          <circle cx="270" cy="112" r="20" fill="none" stroke="#fff" stroke-width="1.5" opacity=".55"/>
+        </g>
+
+        <g id="state-mark" opacity="0" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round">
+          <path d="M249 99 q8 -8 16 0"/>
+          <path d="M252 91 q6 -6 12 0" opacity=".7"/>
+        </g>
+
+        <g id="sleep-bubbles" fill="none" stroke="var(--accent-2)" stroke-width="2.5">
+          <circle cx="258" cy="84" r="5"/>
+          <circle cx="270" cy="68" r="8" opacity=".75"/>
+          <circle cx="289" cy="49" r="11" opacity=".55"/>
+        </g>
+      </g>
+    </g>
+
+    <g id="particles"></g>
+  </svg>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const stage = document.getElementById('stage');
+      const mascot = document.getElementById('mascot-root');
+      const eyes = document.getElementById('eyes');
+      const pupils = document.getElementById('pupils');
+      const particles = document.getElementById('particles');
+      const coreRing = document.getElementById('core-ring');
+      const companionOrb = document.getElementById('companion-orb');
+      const orbCore = document.getElementById('orb-core');
+      const heartbeat = document.getElementById('heartbeat');
+      const rightHand = document.getElementById('right-hand');
+      const root = document.documentElement;
+      const params = new URLSearchParams(location.search);
+      const reduceMotion = params.get('reduceMotion') === '1'
+        || matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // 沿用旧 emotions 的 00 / 02 / 05 / 10 / 15 / 16 语义和节奏，
+      // 由新的眠屿 SVG 角色负责呈现，不复用旧球形角色造型。
+      const emotions = {
+        '00': { mood: 'strained',  gaze: 'sleep',   accent: '#8796aa', accent2: '#b9c9de', core: .24, pulse: .38, tempo: 5.8, orbit: 22 },
+        '02': { mood: 'steady',    gaze: 'idle',    accent: '#48aaf2', accent2: '#45d49d', core: .42, pulse: .68, tempo: 3.4, orbit: 13 },
+        '05': { mood: 'waiting',   gaze: 'boot',    accent: '#8f9bad', accent2: '#b8c2cf', core: .3, pulse: .52, tempo: 4.8, orbit: 20 },
+        '10': { mood: 'recovered', gaze: 'happy',   accent: '#3fc98c', accent2: '#45b4ff', core: .62, pulse: 1, tempo: 2.35, orbit: 8.5 },
+        '15': { mood: 'caution',   gaze: 'tired',   accent: '#df9155', accent2: '#eeb968', core: .34, pulse: .56, tempo: 4.4, orbit: 17 },
+        '16': { mood: 'watchful',  gaze: 'focused', accent: '#e0af32', accent2: '#67b9ef', core: .48, pulse: .74, tempo: 5.2, orbit: 18 }
+      };
+
+      let currentEmotion = '02';
+      let blinkTimer = null;
+      let vitalTimer = null;
+      let pointerID = null;
+      let pointerStart = null;
+      let dragFrame = null;
+      let expressionFrame = null;
+      let pendingDrag = { x: 0, y: 0 };
+
+      if (reduceMotion) document.body.classList.add('reduce-motion');
+
+      function setAnimationDuration(id, seconds) {
+        const node = document.getElementById(id);
+        if (node) node.style.animationDuration = `${seconds}s`;
+      }
+
+      function applyEmotion(id) {
+        if (!emotions[id]) id = '02';
+        currentEmotion = id;
+        const emotion = emotions[id];
+        root.style.setProperty('--accent', emotion.accent);
+        root.style.setProperty('--accent-2', emotion.accent2);
+        root.style.setProperty('--core-opacity', emotion.core);
+        root.style.setProperty('--tempo', `${emotion.tempo}s`);
+        stage.dataset.mood = emotion.mood;
+        stage.dataset.emotion = id;
+        setAnimationDuration('body-shell', emotion.tempo * .78);
+        setAnimationDuration('face-disc', emotion.tempo * .78);
+        setAnimationDuration('left-hand', emotion.tempo * .86);
+        setAnimationDuration('right-hand', emotion.tempo * 1.12);
+        setAnimationDuration('companion-orb', emotion.tempo * .72);
+        setAnimationDuration('orb-ring', emotion.orbit * .48);
+        setAnimationDuration('orb-core', emotion.tempo * .68);
+        setAnimationDuration('heartbeat', emotion.tempo * .64);
+        setAnimationDuration('tide-line', emotion.tempo * 1.15);
+        setAnimationDuration('shell-sheen', emotion.tempo * 1.55);
+        setAnimationDuration('core-ring', emotion.tempo * .92);
+
+        scheduleVitalPulse();
+      }
+
+      function emitVitalWave(intensity = 1) {
+        const emotion = emotions[currentEmotion];
+        for (const [radius, delay] of [[9, 0], [16, 115]]) {
+          const wave = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+          wave.setAttribute('cx', '180');
+          wave.setAttribute('cy', '213');
+          wave.setAttribute('r', String(radius));
+          wave.setAttribute('fill', 'none');
+          wave.setAttribute('stroke', emotion.accent);
+          wave.setAttribute('stroke-width', String(2.5 * intensity));
+          wave.style.transformOrigin = '180px 213px';
+          particles.appendChild(wave);
+          wave.animate([
+            { transform: 'scale(.45)', opacity: .72 * intensity },
+            { transform: 'scale(3.1)', opacity: 0 }
+          ], { delay, duration: 640, easing: 'cubic-bezier(.12,.72,.2,1)' })
+            .finished.finally(() => wave.remove());
+        }
+      }
+
+      function pulseVital({ intensity = emotions[currentEmotion].pulse, emitsWave = false } = {}) {
+        if (reduceMotion) return;
+        const amplitude = Math.max(.3, Math.min(1.24, intensity));
+        coreRing.animate([
+          { transform: 'scale(.98)', opacity: .22 },
+          { transform: `scale(${1.04 + amplitude * .12})`, opacity: .32 + amplitude * .5, offset: .32 },
+          { transform: 'scale(1)', opacity: .24 }
+        ], { duration: 580, easing: 'cubic-bezier(.18,.82,.25,1)' });
+        heartbeat.animate([
+          { opacity: .55, strokeWidth: 4.2 },
+          { opacity: 1, strokeWidth: 4.8 + amplitude * 1.6, offset: .28 },
+          { opacity: .72, strokeWidth: 4.5 }
+        ], { duration: 520, easing: 'ease-out' });
+        orbCore.animate([
+          { transform: 'scale(.8)', opacity: .42 },
+          { transform: `scale(${1 + amplitude * .34})`, opacity: .96, offset: .36 },
+          { transform: 'scale(1)', opacity: .64 }
+        ], { duration: 560, easing: 'cubic-bezier(.16,.8,.24,1)' });
+        if (emitsWave) emitVitalWave(amplitude);
+      }
+
+      function scheduleVitalPulse() {
+        clearTimeout(vitalTimer);
+        if (reduceMotion) return;
+        const emotion = emotions[currentEmotion];
+        const delay = 1250 + emotion.tempo * 650 + Math.random() * 550;
+        vitalTimer = setTimeout(() => {
+          if (pointerID === null) pulseVital();
+          scheduleVitalPulse();
+        }, delay);
+      }
+
+      function scheduleBlink() {
+        clearTimeout(blinkTimer);
+        if (reduceMotion) return;
+        const delay = 2100 + Math.random() * 2800;
+        blinkTimer = setTimeout(() => {
+          eyes.classList.add('blinking');
+          setTimeout(() => eyes.classList.remove('blinking'), 115);
+          if (Math.random() > .72) {
+            setTimeout(() => {
+              eyes.classList.add('blinking');
+              setTimeout(() => eyes.classList.remove('blinking'), 95);
+            }, 210);
+          }
+          scheduleBlink();
+        }, delay);
+      }
+
+      function animateExpression(time) {
+        if (!reduceMotion && pointerID === null) {
+          const emotion = emotions[currentEmotion];
+          const seconds = time / 1000;
+          let x = 0;
+          let y = 0;
+          switch (emotion.gaze) {
+          case 'idle':
+            x = Math.sin(seconds * 1.3) * 4.5;
+            y = Math.sin(seconds * 1.53 + .8) * 1.2;
+            break;
+          case 'happy':
+            x = Math.sin(seconds * 1.1) * 1.8;
+            y = Math.sin(seconds * 2.05) * 2.4 - 1;
+            break;
+          case 'focused':
+            x = Math.sin(seconds * .72) * .7;
+            y = -.5;
+            break;
+          case 'tired':
+            x = Math.sin(seconds * .42) * 1.1;
+            y = 3.2;
+            break;
+          case 'boot':
+            y = Math.sin(seconds * .8) * .5;
+            break;
+          default:
+            break;
+          }
+          pupils.style.transform = `translate(${x}px, ${y}px)`;
+        }
+        expressionFrame = requestAnimationFrame(animateExpression);
+      }
+
+      function startExpressionLoop() {
+        if (reduceMotion || expressionFrame !== null) return;
+        expressionFrame = requestAnimationFrame(animateExpression);
+      }
+
+      function pauseMotionLoops() {
+        clearTimeout(blinkTimer);
+        clearTimeout(vitalTimer);
+        if (dragFrame !== null) cancelAnimationFrame(dragFrame);
+        dragFrame = null;
+        if (expressionFrame !== null) cancelAnimationFrame(expressionFrame);
+        expressionFrame = null;
+      }
+
+      function pointInViewBox(event) {
+        const rect = stage.getBoundingClientRect();
+        return {
+          x: (event.clientX - rect.left) * 360 / rect.width,
+          y: (event.clientY - rect.top) * 360 / rect.height
+        };
+      }
+
+      function trackEyes(point) {
+        if (reduceMotion) return;
+        const dx = Math.max(-1, Math.min(1, (point.x - 180) / 115));
+        const dy = Math.max(-1, Math.min(1, (point.y - 158) / 100));
+        pupils.style.transform = `translate(${dx * 4}px, ${dy * 3}px)`;
+      }
+
+      function queueDrag(x, y) {
+        pendingDrag = { x, y };
+        if (dragFrame) return;
+        dragFrame = requestAnimationFrame(() => {
+          const dx = Math.max(-32, Math.min(32, pendingDrag.x * .22));
+          const dy = Math.max(-24, Math.min(24, pendingDrag.y * .18));
+          mascot.style.transform = `translate(${dx}px, ${dy}px) rotate(${dx * .08}deg)`;
+          dragFrame = null;
+        });
+      }
+
+      function resetDrag() {
+        mascot.animate([
+          { transform: mascot.style.transform || 'translate(0,0)' },
+          { transform: 'translate(0,-8px) scale(1.025,.98)', offset: .45 },
+          { transform: 'translate(0,0) scale(1)' }
+        ], { duration: 620, easing: 'cubic-bezier(.18,.86,.3,1.2)' });
+        mascot.style.transform = '';
+      }
+
+      function acknowledgeTouch() {
+        if (reduceMotion) return;
+        const sleeping = currentEmotion === '00';
+        const recovered = currentEmotion === '10';
+
+        if (!sleeping) {
+          eyes.classList.add('blinking');
+          setTimeout(() => eyes.classList.remove('blinking'), 105);
+        }
+
+        mascot.animate([
+          { transform: 'translateY(0) scale(1)' },
+          { transform: `translateY(${sleeping ? 2 : 3}px) scale(${sleeping ? '.985,1.008' : '.975,1.018'})`, offset: .38 },
+          { transform: 'translateY(-1px) scale(1.006,.994)', offset: .72 },
+          { transform: 'translateY(0) scale(1)' }
+        ], { duration: sleeping ? 420 : 340, easing: 'cubic-bezier(.2,.78,.25,1)' });
+
+        if (!sleeping) {
+          rightHand.animate([
+            { transform: 'rotate(-5deg)' },
+            { transform: `rotate(${recovered ? 12 : 7}deg) translateY(-1px)`, offset: .46 },
+            { transform: 'rotate(-3deg)' }
+          ], { duration: recovered ? 430 : 360, easing: 'cubic-bezier(.2,.78,.25,1)' });
+        }
+
+        companionOrb.animate([
+          { transform: 'translate(0,0) scale(1)' },
+          { transform: `translate(-2px,2px) scale(${recovered ? 1.07 : 1.04})`, offset: .46 },
+          { transform: 'translate(0,0) scale(1)' }
+        ], { duration: 360, easing: 'cubic-bezier(.2,.78,.25,1)' });
+      }
+
+      function celebrate() {
+        acknowledgeTouch();
+      }
+
+      stage.addEventListener('pointerdown', event => {
+        pointerID = event.pointerId;
+        pointerStart = pointInViewBox(event);
+        stage.setPointerCapture(pointerID);
+        stage.classList.add('dragging');
+        trackEyes(pointerStart);
+      });
+
+      stage.addEventListener('pointermove', event => {
+        const point = pointInViewBox(event);
+        trackEyes(point);
+        if (pointerID !== event.pointerId || !pointerStart || reduceMotion) return;
+        queueDrag(point.x - pointerStart.x, point.y - pointerStart.y);
+      });
+
+      function finishPointer(event) {
+        if (pointerID !== event.pointerId || !pointerStart) return;
+        const end = pointInViewBox(event);
+        const travel = Math.hypot(end.x - pointerStart.x, end.y - pointerStart.y);
+        stage.classList.remove('dragging');
+        pointerID = null;
+        pointerStart = null;
+        const cancelled = event.type === 'pointercancel';
+        if (!reduceMotion && (travel >= 13 || cancelled)) resetDrag();
+        else mascot.style.transform = '';
+        if (!cancelled && travel < 13) celebrate(end);
+      }
+
+      stage.addEventListener('pointerup', finishPointer);
+      stage.addEventListener('pointercancel', finishPointer);
+      stage.addEventListener('pointerleave', event => {
+        if (pointerID === null) {
+          pupils.style.transform = '';
+        }
+      });
+
+      window.MianyuMascot = Object.freeze({
+        setEmotion(id) { applyEmotion(id); },
+        celebrate
+      });
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          pauseMotionLoops();
+          return;
+        }
+        scheduleBlink();
+        scheduleVitalPulse();
+        startExpressionLoop();
+      });
+
+      window.addEventListener('pagehide', pauseMotionLoops, { once: true });
+
+      applyEmotion(params.get('emotion') || '02');
+      scheduleBlink();
+      startExpressionLoop();
+    })();
+  </script>
+</body>
+</html>

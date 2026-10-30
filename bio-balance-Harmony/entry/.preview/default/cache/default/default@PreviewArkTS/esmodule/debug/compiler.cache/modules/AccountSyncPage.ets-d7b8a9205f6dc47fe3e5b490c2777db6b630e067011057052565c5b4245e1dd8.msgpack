@@ -1,0 +1,616 @@
+Ôr@Ÿªassertions¤code´customTransformCache¬dependencies¢id¤meta±moduleSideEffects¬originalCode±originalSourcemap«resolvedIds®sourcemapChainµsyntheticNamedExportsµtransformDependencies®transformFiles¨cacheAstÔrAÚJßif (!("finalizeConstruction" in ViewPU.prototype)) {
+    Reflect.set(ViewPU.prototype, "finalizeConstruction", () => { });
+}
+import { AgcCloudSyncTransport } from '../service/AgcCloudSyncTransport';
+import { CloudSyncCoordinator } from '../service/CloudSyncCoordinator';
+import { CloudSyncStateStore } from '../service/CloudSyncStateStore';
+import { HuaweiAccountService } from '../service/HuaweiAccountService';
+const COLOR_BACKGROUND = '#F4F7F5';
+const COLOR_CARD = '#FFFFFFFF';
+const COLOR_TEXT = '#17221D';
+const COLOR_SECONDARY = '#68756E';
+const COLOR_GREEN = '#1E8E63';
+class AccountSyncPage extends ViewPU {
+    constructor(parent, params, __localStorage, elmtId = -1, paramsLambda = undefined, extraInfo) {
+        super(parent, __localStorage, elmtId, extraInfo);
+        if (typeof paramsLambda === "function") {
+            this.paramsGenerator_ = paramsLambda;
+        }
+        this.__signedIn = new ObservedPropertySimplePU(false, this, "signedIn");
+        this.__syncEnabled = new ObservedPropertySimplePU(false, this, "syncEnabled");
+        this.__busy = new ObservedPropertySimplePU(false, this, "busy");
+        this.__status = new ObservedPropertySimplePU(0, this, "status");
+        this.store = undefined;
+        this.account = undefined;
+        this.coordinator = undefined;
+        this.setInitiallyProvidedValue(params);
+        this.finalizeConstruction();
+    }
+    setInitiallyProvidedValue(params) {
+        if (params.signedIn !== undefined) {
+            this.signedIn = params.signedIn;
+        }
+        if (params.syncEnabled !== undefined) {
+            this.syncEnabled = params.syncEnabled;
+        }
+        if (params.busy !== undefined) {
+            this.busy = params.busy;
+        }
+        if (params.status !== undefined) {
+            this.status = params.status;
+        }
+        if (params.store !== undefined) {
+            this.store = params.store;
+        }
+        if (params.account !== undefined) {
+            this.account = params.account;
+        }
+        if (params.coordinator !== undefined) {
+            this.coordinator = params.coordinator;
+        }
+    }
+    updateStateVars(params) {
+    }
+    purgeVariableDependenciesOnElmtId(rmElmtId) {
+        this.__signedIn.purgeDependencyOnElmtId(rmElmtId);
+        this.__syncEnabled.purgeDependencyOnElmtId(rmElmtId);
+        this.__busy.purgeDependencyOnElmtId(rmElmtId);
+        this.__status.purgeDependencyOnElmtId(rmElmtId);
+    }
+    aboutToBeDeleted() {
+        this.__signedIn.aboutToBeDeleted();
+        this.__syncEnabled.aboutToBeDeleted();
+        this.__busy.aboutToBeDeleted();
+        this.__status.aboutToBeDeleted();
+        SubscriberManager.Get().delete(this.id__());
+        this.aboutToBeDeletedInternal();
+    }
+    get signedIn() {
+        return this.__signedIn.get();
+    }
+    set signedIn(newValue) {
+        this.__signedIn.set(newValue);
+    }
+    get syncEnabled() {
+        return this.__syncEnabled.get();
+    }
+    set syncEnabled(newValue) {
+        this.__syncEnabled.set(newValue);
+    }
+    get busy() {
+        return this.__busy.get();
+    }
+    set busy(newValue) {
+        this.__busy.set(newValue);
+    }
+    get status() {
+        return this.__status.get();
+    }
+    set status(newValue) {
+        this.__status.set(newValue);
+    }
+    aboutToAppear() {
+        const context = this.getUIContext().getHostContext();
+        this.store = new CloudSyncStateStore(context);
+        this.account = new HuaweiAccountService(context);
+        this.coordinator = new CloudSyncCoordinator(this.store, new AgcCloudSyncTransport(this.account), this.account);
+        this.restore();
+    }
+    async restore() {
+        if (this.store === undefined || this.account === undefined)
+            return;
+        const accountId = await this.account.restoreSession();
+        if (accountId.length === 0) {
+            await this.store.bindAccount('');
+            this.signedIn = false;
+            this.syncEnabled = false;
+            return;
+        }
+        const settings = await this.store.bindAccount(accountId);
+        this.signedIn = true;
+        this.syncEnabled = settings.enabled;
+    }
+    async signIn() {
+        if (this.account === undefined || this.store === undefined || this.busy)
+            return;
+        this.busy = true;
+        try {
+            const accountId = await this.account.signIn(true);
+            await this.store.bindAccount(accountId);
+            this.signedIn = true;
+            this.syncEnabled = false;
+            this.status = 0;
+        }
+        catch (error) {
+            this.status = 3;
+        }
+        this.busy = false;
+    }
+    async signOut() {
+        if (this.account === undefined || this.store === undefined || this.busy)
+            return;
+        this.busy = true;
+        try {
+            await this.account.signOut();
+        }
+        catch (error) { }
+        await this.store.bindAccount('');
+        this.signedIn = false;
+        this.syncEnabled = false;
+        this.status = 0;
+        this.busy = false;
+    }
+    async changeSync(enabled) {
+        if (this.store === undefined || !this.signedIn)
+            return;
+        const settings = await this.store.settings();
+        this.syncEnabled = await this.store.setEnabled(settings.accountId, settings.generation, enabled) ? enabled : false;
+        this.status = 0;
+    }
+    async synchronize() {
+        if (this.coordinator === undefined || this.busy || !this.syncEnabled)
+            return;
+        this.busy = true;
+        this.status = 1;
+        const result = await this.coordinator.synchronize();
+        if (result.status === 'success')
+            this.status = 2;
+        else if (result.status === 'partial_failure')
+            this.status = 4;
+        else if (result.status === 'account_changed')
+            this.status = 5;
+        else
+            this.status = 3;
+        this.busy = false;
+    }
+    StatusText(parent = null) {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            If.create();
+            if (this.status === 1) {
+                this.ifElseBranchUpdateFunction(0, () => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Text.create({ "id": 16777494, "type": 10003, params: [], "bundleName": "com.boundesu.BioBalance", "moduleName": "entry" });
+                        Text.debugLine("entry/src/main/ets/pages/AccountSyncPage.ets(93:28)", "entry");
+                        Text.fontSize(13);
+                        Text.fontColor(COLOR_SECONDARY);
+                    }, Text);
+                    Text.pop();
+                });
+            }
+            else if (this.status === 2) {
+                this.ifElseBranchUpdateFunction(1, () => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Text.create({ "id": 16777500, "type": 10003, params: [], "bundleName": "com.boundesu.BioBalance", "moduleName": "entry" });
+                        Text.debugLine("entry/src/main/ets/pages/AccountSyncPage.ets(94:33)", "entry");
+                        Text.fontSize(13);
+                        Text.fontColor(COLOR_GREEN);
+                    }, Text);
+                    Text.pop();
+                });
+            }
+            else if (this.status === 3) {
+                this.ifElseBranchUpdateFunction(2, () => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Text.create({ "id": 16777490, "type": 10003, params: [], "bundleName": "com.boundesu.BioBalance", "moduleName": "entry" });
+                        Text.debugLine("entry/src/main/ets/pages/AccountSyncPage.ets(95:33)", "entry");
+                        Text.fontSize(13);
+                        Text.fontColor('#B85A50');
+                    }, Text);
+                    Text.pop();
+                });
+            }
+            else if (this.status === 4) {
+                this.ifElseBranchUpdateFunction(3, () => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Text.create({ "id": 16777493, "type": 10003, params: [], "bundleName": "com.boundesu.BioBalance", "moduleName": "entry" });
+                        Text.debugLine("entry/src/main/ets/pages/AccountSyncPage.ets(96:33)", "entry");
+                        Text.fontSize(13);
+                        Text.fontColor('#B85A50');
+                    }, Text);
+                    Text.pop();
+                });
+            }
+            else if (this.status === 5) {
+                this.ifElseBranchUpdateFunction(4, () => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Text.create({ "id": 16777489, "type": 10003, params: [], "bundleName": "com.boundesu.BioBalance", "moduleName": "entry" });
+                        Text.debugLine("entry/src/main/ets/pages/AccountSyncPage.ets(97:33)", "entry");
+                        Text.fontSize(13);
+                        Text.fontColor('#B85A50');
+                    }, Text);
+                    Text.pop();
+                });
+            }
+            else {
+                this.ifElseBranchUpdateFunction(5, () => {
+                    this.observeComponentCreation2((elmtId, isInitialRender) => {
+                        Text.create({ "id": 16777491, "type": 10003, params: [], "bundleName": "com.boundesu.BioBalance", "moduleName": "entry" });
+                        Text.debugLine("entry/src/main/ets/pages/AccountSyncPage.ets(98:10)", "entry");
+                        Text.fontSize(13);
+                        Text.fontColor(COLOR_SECONDARY);
+                    }, Text);
+                    Text.pop();
+                });
+            }
+        }, If);
+        If.pop();
+    }
+    initialRender() {
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Column.create();
+            Column.debugLine("entry/src/main/ets/pages/AccountSyncPage.ets(102:5)", "entry");
+            Column.width('100%');
+            Column.height('100%');
+            Column.backgroundColor(COLOR_BACKGROUND);
+        }, Column);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Row.create({ space: 12 });
+            Row.debugLine("entry/src/main/ets/pages/AccountSyncPage.ets(103:7)", "entry");
+            Row.width('100%');
+            Row.padding({ left: 18, right: 18, top: 18, bottom: 12 });
+        }, Row);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create('â€¹');
+            Text.debugLine("entry/src/main/ets/pages/AccountSyncPage.ets(104:9)", "entry");
+            Text.fontSize(28);
+            Text.fontColor(COLOR_TEXT);
+            Text.width(38);
+            Text.height(38);
+            Text.textAlign(TextAlign.Center);
+            Text.onClick(() => this.getUIContext().getRouter().back());
+        }, Text);
+        Text.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Column.create({ space: 3 });
+            Column.debugLine("entry/src/main/ets/pages/AccountSyncPage.ets(106:9)", "entry");
+            Column.layoutWeight(1);
+            Column.alignItems(HorizontalAlign.Start);
+        }, Column);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create({ "id": 16777503, "type": 10003, params: [], "bundleName": "com.boundesu.BioBalance", "moduleName": "entry" });
+            Text.debugLine("entry/src/main/ets/pages/AccountSyncPage.ets(107:11)", "entry");
+            Text.fontSize(24);
+            Text.fontWeight(FontWeight.Bold);
+            Text.fontColor(COLOR_TEXT);
+            Text.width('100%');
+        }, Text);
+        Text.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create({ "id": 16777499, "type": 10003, params: [], "bundleName": "com.boundesu.BioBalance", "moduleName": "entry" });
+            Text.debugLine("entry/src/main/ets/pages/AccountSyncPage.ets(108:11)", "entry");
+            Text.fontSize(13);
+            Text.fontColor(COLOR_SECONDARY);
+            Text.width('100%');
+        }, Text);
+        Text.pop();
+        Column.pop();
+        Row.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Scroll.create();
+            Scroll.debugLine("entry/src/main/ets/pages/AccountSyncPage.ets(112:7)", "entry");
+            Scroll.scrollBar(BarState.Off);
+            Scroll.width('100%');
+            Scroll.layoutWeight(1);
+        }, Scroll);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Column.create({ space: 18 });
+            Column.debugLine("entry/src/main/ets/pages/AccountSyncPage.ets(113:9)", "entry");
+            Column.padding({ left: 18, right: 18, top: 8, bottom: 40 });
+            Column.width('100%');
+        }, Column);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Column.create({ space: 14 });
+            Column.debugLine("entry/src/main/ets/pages/AccountSyncPage.ets(114:11)", "entry");
+            Column.padding(17);
+            Column.width('100%');
+            Column.backgroundColor(COLOR_CARD);
+            Column.borderRadius(22);
+            Column.alignItems(HorizontalAlign.Start);
+        }, Column);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create(this.signedIn ? { "id": 16777497, "type": 10003, params: [], "bundleName": "com.boundesu.BioBalance", "moduleName": "entry" } : { "id": 16777498, "type": 10003, params: [], "bundleName": "com.boundesu.BioBalance", "moduleName": "entry" });
+            Text.debugLine("entry/src/main/ets/pages/AccountSyncPage.ets(115:13)", "entry");
+            Text.fontSize(17);
+            Text.fontWeight(FontWeight.Bold);
+            Text.fontColor(COLOR_TEXT);
+            Text.width('100%');
+        }, Text);
+        Text.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Button.createWithLabel(this.signedIn ? { "id": 16777496, "type": 10003, params: [], "bundleName": "com.boundesu.BioBalance", "moduleName": "entry" } : { "id": 16777495, "type": 10003, params: [], "bundleName": "com.boundesu.BioBalance", "moduleName": "entry" });
+            Button.debugLine("entry/src/main/ets/pages/AccountSyncPage.ets(117:13)", "entry");
+            Button.width('100%');
+            Button.height(44);
+            Button.fontColor(Color.White);
+            Button.backgroundColor(COLOR_GREEN);
+            Button.enabled(!this.busy);
+            Button.onClick(() => { if (this.signedIn)
+                this.signOut();
+            else
+                this.signIn(); });
+        }, Button);
+        Button.pop();
+        Column.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Column.create({ space: 12 });
+            Column.debugLine("entry/src/main/ets/pages/AccountSyncPage.ets(122:11)", "entry");
+            Column.padding(17);
+            Column.width('100%');
+            Column.backgroundColor(COLOR_CARD);
+            Column.borderRadius(22);
+            Column.alignItems(HorizontalAlign.Start);
+        }, Column);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Row.create();
+            Row.debugLine("entry/src/main/ets/pages/AccountSyncPage.ets(123:13)", "entry");
+            Row.width('100%');
+        }, Row);
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create({ "id": 16777501, "type": 10003, params: [], "bundleName": "com.boundesu.BioBalance", "moduleName": "entry" });
+            Text.debugLine("entry/src/main/ets/pages/AccountSyncPage.ets(124:15)", "entry");
+            Text.fontSize(16);
+            Text.fontWeight(FontWeight.Bold);
+            Text.fontColor(COLOR_TEXT);
+        }, Text);
+        Text.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Blank.create();
+            Blank.debugLine("entry/src/main/ets/pages/AccountSyncPage.ets(125:15)", "entry");
+        }, Blank);
+        Blank.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Toggle.create({ type: ToggleType.Switch, isOn: this.syncEnabled });
+            Toggle.debugLine("entry/src/main/ets/pages/AccountSyncPage.ets(126:15)", "entry");
+            Toggle.enabled(this.signedIn && !this.busy);
+            Toggle.onChange((enabled) => this.changeSync(enabled));
+        }, Toggle);
+        Toggle.pop();
+        Row.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create({ "id": 16777502, "type": 10003, params: [], "bundleName": "com.boundesu.BioBalance", "moduleName": "entry" });
+            Text.debugLine("entry/src/main/ets/pages/AccountSyncPage.ets(129:13)", "entry");
+            Text.fontSize(13);
+            Text.fontColor(COLOR_SECONDARY);
+            Text.lineHeight(20);
+            Text.width('100%');
+        }, Text);
+        Text.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Text.create({ "id": 16777504, "type": 10003, params: [], "bundleName": "com.boundesu.BioBalance", "moduleName": "entry" });
+            Text.debugLine("entry/src/main/ets/pages/AccountSyncPage.ets(130:13)", "entry");
+            Text.fontSize(13);
+            Text.fontColor(COLOR_SECONDARY);
+            Text.lineHeight(20);
+            Text.width('100%');
+        }, Text);
+        Text.pop();
+        this.observeComponentCreation2((elmtId, isInitialRender) => {
+            Button.createWithLabel({ "id": 16777492, "type": 10003, params: [], "bundleName": "com.boundesu.BioBalance", "moduleName": "entry" });
+            Button.debugLine("entry/src/main/ets/pages/AccountSyncPage.ets(131:13)", "entry");
+            Button.width('100%');
+            Button.height(44);
+            Button.fontColor(Color.White);
+            Button.backgroundColor(COLOR_GREEN);
+            Button.enabled(this.signedIn && this.syncEnabled && !this.busy);
+            Button.onClick(() => this.synchronize());
+        }, Button);
+        Button.pop();
+        this.StatusText.bind(this)();
+        Column.pop();
+        Column.pop();
+        Scroll.pop();
+        Column.pop();
+    }
+    rerender() {
+        this.updateDirtyElements();
+    }
+    static getEntryName() {
+        return "AccountSyncPage";
+    }
+}
+registerNamedRoute(() => new AccountSyncPage(undefined, {}), "", { bundleName: "com.boundesu.BioBalance", moduleName: "entry", pagePath: "pages/AccountSyncPage", pageFullPath: "entry/src/main/ets/pages/AccountSyncPage", integratedHsp: "false", moduleType: "followWithHap" });
+//# sourceMappingURL=AccountSyncPage.js.mapÂ”Ùv/Users/lihaha/Documents/o-company/bio-balance/bio-balance-Harmony/entry/src/main/ets/service/AgcCloudSyncTransport.etsÙu/Users/lihaha/Documents/o-company/bio-balance/bio-balance-Harmony/entry/src/main/ets/service/CloudSyncCoordinator.etsÙt/Users/lihaha/Documents/o-company/bio-balance/bio-balance-Harmony/entry/src/main/ets/service/CloudSyncStateStore.etsÙu/Users/lihaha/Documents/o-company/bio-balance/bio-balance-Harmony/entry/src/main/ets/service/HuaweiAccountService.etsÙn/Users/lihaha/Documents/o-company/bio-balance/bio-balance-Harmony/entry/src/main/ets/pages/AccountSyncPage.etsÔrBšªmoduleName±isLocalDependency¯isNodeEntryFile§pkgPath±belongProjectPath§pkgNameªpkgVersion±dependencyPkgInfo°belongModulePath¬shouldEmitJs¥entryÃÂÙG/Users/lihaha/Documents/o-company/bio-balance/bio-balance-Harmony/entryÙA/Users/lihaha/Documents/o-company/bio-balance/bio-balance-Harmony¥entry¥1.0.0Ô  ÙG/Users/lihaha/Documents/o-company/bio-balance/bio-balance-Harmony/entryÃÃÚimport type common from '@ohos.app.ability.common';
+import { AgcCloudSyncTransport } from '../service/AgcCloudSyncTransport';
+import { CloudSyncCoordinator, CloudSyncResult } from '../service/CloudSyncCoordinator';
+import { CloudSyncSettings, CloudSyncStateStore } from '../service/CloudSyncStateStore';
+import { HuaweiAccountService } from '../service/HuaweiAccountService';
+
+const COLOR_BACKGROUND: string = '#F4F7F5';
+const COLOR_CARD: string = '#FFFFFFFF';
+const COLOR_TEXT: string = '#17221D';
+const COLOR_SECONDARY: string = '#68756E';
+const COLOR_GREEN: string = '#1E8E63';
+
+@Entry
+@Component
+struct AccountSyncPage {
+  @State signedIn: boolean = false;
+  @State syncEnabled: boolean = false;
+  @State busy: boolean = false;
+  @State status: number = 0;
+  private store?: CloudSyncStateStore;
+  private account?: HuaweiAccountService;
+  private coordinator?: CloudSyncCoordinator;
+
+  aboutToAppear(): void {
+    const context: common.UIAbilityContext = this.getUIContext().getHostContext() as common.UIAbilityContext;
+    this.store = new CloudSyncStateStore(context);
+    this.account = new HuaweiAccountService(context);
+    this.coordinator = new CloudSyncCoordinator(this.store, new AgcCloudSyncTransport(this.account), this.account);
+    this.restore();
+  }
+
+  private async restore(): Promise<void> {
+    if (this.store === undefined || this.account === undefined) return;
+    const accountId: string = await this.account.restoreSession();
+    if (accountId.length === 0) {
+      await this.store.bindAccount('');
+      this.signedIn = false;
+      this.syncEnabled = false;
+      return;
+    }
+    const settings: CloudSyncSettings = await this.store.bindAccount(accountId);
+    this.signedIn = true;
+    this.syncEnabled = settings.enabled;
+  }
+
+  private async signIn(): Promise<void> {
+    if (this.account === undefined || this.store === undefined || this.busy) return;
+    this.busy = true;
+    try {
+      const accountId: string = await this.account.signIn(true);
+      await this.store.bindAccount(accountId);
+      this.signedIn = true;
+      this.syncEnabled = false;
+      this.status = 0;
+    } catch (error) {
+      this.status = 3;
+    }
+    this.busy = false;
+  }
+
+  private async signOut(): Promise<void> {
+    if (this.account === undefined || this.store === undefined || this.busy) return;
+    this.busy = true;
+    try { await this.account.signOut(); } catch (error) {}
+    await this.store.bindAccount('');
+    this.signedIn = false;
+    this.syncEnabled = false;
+    this.status = 0;
+    this.busy = false;
+  }
+
+  private async changeSync(enabled: boolean): Promise<void> {
+    if (this.store === undefined || !this.signedIn) return;
+    const settings: CloudSyncSettings = await this.store.settings();
+    this.syncEnabled = await this.store.setEnabled(settings.accountId, settings.generation, enabled) ? enabled : false;
+    this.status = 0;
+  }
+
+  private async synchronize(): Promise<void> {
+    if (this.coordinator === undefined || this.busy || !this.syncEnabled) return;
+    this.busy = true;
+    this.status = 1;
+    const result: CloudSyncResult = await this.coordinator.synchronize();
+    if (result.status === 'success') this.status = 2;
+    else if (result.status === 'partial_failure') this.status = 4;
+    else if (result.status === 'account_changed') this.status = 5;
+    else this.status = 3;
+    this.busy = false;
+  }
+
+  @Builder
+  StatusText() {
+    if (this.status === 1) Text($r('app.string.account_sync_running')).fontSize(13).fontColor(COLOR_SECONDARY)
+    else if (this.status === 2) Text($r('app.string.account_sync_success')).fontSize(13).fontColor(COLOR_GREEN)
+    else if (this.status === 3) Text($r('app.string.account_sync_failed')).fontSize(13).fontColor('#B85A50')
+    else if (this.status === 4) Text($r('app.string.account_sync_partial')).fontSize(13).fontColor('#B85A50')
+    else if (this.status === 5) Text($r('app.string.account_sync_account_changed')).fontSize(13).fontColor('#B85A50')
+    else Text($r('app.string.account_sync_idle')).fontSize(13).fontColor(COLOR_SECONDARY)
+  }
+
+  build() {
+    Column() {
+      Row({ space: 12 }) {
+        Text('â€¹').fontSize(28).fontColor(COLOR_TEXT).width(38).height(38).textAlign(TextAlign.Center)
+          .onClick(() => this.getUIContext().getRouter().back())
+        Column({ space: 3 }) {
+          Text($r('app.string.account_sync_title')).fontSize(24).fontWeight(FontWeight.Bold).fontColor(COLOR_TEXT).width('100%')
+          Text($r('app.string.account_sync_subtitle')).fontSize(13).fontColor(COLOR_SECONDARY).width('100%')
+        }.layoutWeight(1).alignItems(HorizontalAlign.Start)
+      }.width('100%').padding({ left: 18, right: 18, top: 18, bottom: 12 })
+
+      Scroll() {
+        Column({ space: 18 }) {
+          Column({ space: 14 }) {
+            Text(this.signedIn ? $r('app.string.account_sync_signed_in') : $r('app.string.account_sync_signed_out'))
+              .fontSize(17).fontWeight(FontWeight.Bold).fontColor(COLOR_TEXT).width('100%')
+            Button(this.signedIn ? $r('app.string.account_sync_sign_out') : $r('app.string.account_sync_sign_in'))
+              .width('100%').height(44).fontColor(Color.White).backgroundColor(COLOR_GREEN).enabled(!this.busy)
+              .onClick(() => { if (this.signedIn) this.signOut(); else this.signIn(); })
+          }.padding(17).width('100%').backgroundColor(COLOR_CARD).borderRadius(22).alignItems(HorizontalAlign.Start)
+
+          Column({ space: 12 }) {
+            Row() {
+              Text($r('app.string.account_sync_switch')).fontSize(16).fontWeight(FontWeight.Bold).fontColor(COLOR_TEXT)
+              Blank()
+              Toggle({ type: ToggleType.Switch, isOn: this.syncEnabled }).enabled(this.signedIn && !this.busy)
+                .onChange((enabled: boolean) => this.changeSync(enabled))
+            }.width('100%')
+            Text($r('app.string.account_sync_switch_note')).fontSize(13).fontColor(COLOR_SECONDARY).lineHeight(20).width('100%')
+            Text($r('app.string.account_sync_whitelist')).fontSize(13).fontColor(COLOR_SECONDARY).lineHeight(20).width('100%')
+            Button($r('app.string.account_sync_now')).width('100%').height(44).fontColor(Color.White).backgroundColor(COLOR_GREEN)
+              .enabled(this.signedIn && this.syncEnabled && !this.busy).onClick(() => this.synchronize())
+            this.StatusText()
+          }.padding(17).width('100%').backgroundColor(COLOR_CARD).borderRadius(22).alignItems(HorizontalAlign.Start)
+        }.padding({ left: 18, right: 18, top: 8, bottom: 40 }).width('100%')
+      }.scrollBar(BarState.Off).width('100%').layoutWeight(1)
+    }.width('100%').height('100%').backgroundColor(COLOR_BACKGROUND)
+  }
+}
+ÀÔrC”¿../service/CloudSyncCoordinatorÙ ../service/AgcCloudSyncTransport¿../service/HuaweiAccountService¾../service/CloudSyncStateStoreÔrD—ªassertions¨external¢id¤meta±moduleSideEffectsªresolvedByµsyntheticNamedExportsAÂÙu/Users/lihaha/Documents/o-company/bio-balance/bio-balance-Harmony/entry/src/main/ets/service/CloudSyncCoordinator.etsAÃªoh-resolveÂDAÂÙv/Users/lihaha/Documents/o-company/bio-balance/bio-balance-Harmony/entry/src/main/ets/service/AgcCloudSyncTransport.etsAÃªoh-resolveÂDAÂÙu/Users/lihaha/Documents/o-company/bio-balance/bio-balance-Harmony/entry/src/main/ets/service/HuaweiAccountService.etsAÃªoh-resolveÂDAÂÙt/Users/lihaha/Documents/o-company/bio-balance/bio-balance-Harmony/entry/src/main/ets/service/CloudSyncStateStore.etsAÃªoh-resolveÂ“ÔrE–§version¤fileªsourceRoot§sources¥names¨mappings²AccountSyncPage.js ‘³AccountSyncPage.etsÜ“˜”   ” ”	 	” ”   ”& &”ÌH ÌH”ÌI ÌI˜”   ” ”	 	” ” 0”% 6”ÌF ÌW”ÌG ÌX˜”   ” ”	 ” /” 1”$ 7”ÌD ÌW”ÌE ÌX˜”   ” ”	 	” ” ”% %”ÌF ÌF”ÌG ÌG–”   ” ” ” !”" *”# +–”   ” ” ” ” &” '–”   ” ” ” ” $” %–”  	 ” 	” 	” 	 ”! 	)”" 	*–”  
+ ” 
+” 
+” 
+” 
+%” 
+&’” ” ‘”  ’”7 ”< "’”:  ”? %’”3 ”8 ’”5 ”6 ‘” 
+&’” 	” ’” 	” ’” 	” ’” 	” ’” 	” ’” 	” ’” 	” ’” 	” ’” ” œ” ” 
+” ” -” 1” 2”) >”+ Ì@”, ÌA”: ÌO”< Ìl”= Ìm›” ” ” 	” ” ” ”, (”- )”4 0”5 1”6 2›” ” ” 	” ” ” ”/ +”0 ,”7 3”8 4”9 5Ü ” ” ” 	” ” ” ”3 /”4 0”8 4”9 5”> :”Ì@ <”ÌD Ì@”ÌY ÌU”ÌZ ÌV”Ì^ ÌZ”Ì_ Ì[”Ìf Ìb”Ìg Ìc”Ìi Ìe”Ìm Ìi”Ìn Ìj”Ìu Ìq”Ìv Ìr”Ìw Ìs–” ” ” 	” ” ” ’” ” ”” 
+”	 ”
+ ” ”  ”  ”  ”  ”  ”  ”$   ”(  $”,  (”-  )”4  0”9  5”ÌB  >’”  Ì@”  ÌGœ” !” !
+” !” !”  !$”$ !(”% !)”, !0”- !1”; !?”= !ÌA”> !ÌB˜” "” "” "” "” "”! "”" "”$ " ›” #” #” #” #” #” #”( #"”) ##”+ #%”, #&”- #'—” $” $
+” $” $” $”! $”" $—” %” %
+” %” %” %”$ %”% %’” &” &‘”	 '” (” (
+” (” ((” (.”# (2”$ (3”) (8”* (9”5 (ÌD”6 (ÌE”? (ÌN”Ì@ (ÌO”ÌA (ÌP—” )” )” )	” )” )” )” )™” *” *” *	” *” *”# *”$ * ”+ *'”, *(’” +” +”” -
+”	 -”
+ -” -Ü ” .” .” .” .” .” .”& ."”* .&”. .*”/ .+”4 .0”9 .5”ÌB .>”ÌF .ÌB”ÌJ .ÌF”ÌK .ÌG”ÌO .ÌK’” .ÌM” .ÌT—” /” /” /	” /” /” /” /’” 0” 0” 1” 1” 1” 1 ”$ 1&”( 1*”) 1+”0 12”1 13”7 19”8 1:”< 1>”= 1?”> 1Ì@›” 2” 2” 2” 2” 2” 2”( 2"”) 2#”2 2,”3 2-”4 2.—” 3” 3
+” 3” 3” 3”  3”! 3—” 4” 4
+” 4” 4” 4”$ 4”% 4—” 5” 5
+” 5” 5” 5” 5” 5‘”	 6”” 6” 6” 6” 6—” 7” 7
+” 7” 7” 7” 7” 7‘”	 8—” 9” 9” 9	” 9” 9” 9” 9’” :” :”” <
+”	 <”
+ <” <Ü ” =” =” =” =” =” =”& ="”* =&”. =*”/ =+”4 =0”9 =5”ÌB =>”ÌF =ÌB”ÌJ =ÌF”ÌK =ÌG”ÌO =ÌK’” =ÌM” =ÌT—” >” >” >	” >” >” >” >’” ?” ?™” ?
+” ?” ?” ?” ?” ?”& ?$”( ?&”) ?'‘”	 ?)•” ?*” ?1” ?6” ?8” ?:›” Ì@” Ì@
+” Ì@” Ì@” Ì@” Ì@”$ Ì@ ”% Ì@!”' Ì@#”( Ì@$”) Ì@%—” ÌA” ÌA” ÌA	” ÌA” ÌA” ÌA” ÌA—” ÌB” ÌB” ÌB	” ÌB” ÌB”  ÌB”! ÌB—” ÌC” ÌC” ÌC	” ÌC” ÌC” ÌC” ÌC—” ÌD” ÌD” ÌD	” ÌD” ÌD” ÌD” ÌD’” ÌE” ÌE–” ÌG
+”	 ÌG”
+ ÌG” ÌG” ÌG” ÌG+œ” ÌH” ÌH” ÌH” ÌH” ÌH” ÌH”$ ÌH ”( ÌH$”) ÌH%”- ÌH)”. ÌH*”6 ÌH2’” ÌH4” ÌH;œ” ÌI” ÌI
+” ÌI” ÌI(” ÌI.”# ÌI2”$ ÌI3”) ÌI8”* ÌI9”2 ÌIÌA”4 ÌIÌC”5 ÌIÌDÜ ” ÌJ” ÌJ” ÌJ	” ÌJ” ÌJ”! ÌJ”% ÌJ!”& ÌJ"”+ ÌJ'”, ÌJ(”6 ÌJ2”7 ÌJ3”? ÌJ;”Ì@ ÌJ<”ÌI ÌJÌE”ÌK ÌJÌG”ÌS ÌJÌO”ÌT ÌJÌP”Ì^ ÌJÌZ”Ì` ÌJÌ\”Ìg ÌJÌc”Ìh ÌJÌd”Ìi ÌJÌe”Ìj ÌJÌf”Ìk ÌJÌg”Ìr ÌJÌn”Ìs ÌJÌo”Ìt ÌJÌp”Ìu ÌJÌq”Ìz ÌJÌv”Ì{ ÌJÌw—” ÌK” ÌK” ÌK	” ÌK” ÌK” ÌK” ÌK’” ÌL” ÌL”” ÌN
+”	 ÌN”
+ ÌN” ÌNÜ ” ÌO” ÌO” ÌO” ÌO” ÌO”! ÌO”* ÌO&”. ÌO*”2 ÌO.”3 ÌO/”7 ÌO3”; ÌO7”< ÌO8”Ì@ ÌO<”ÌA ÌO=”ÌL ÌOÌH’” ÌOÌJ” ÌOÌQ—” ÌP” ÌP” ÌP	” ÌP” ÌP” ÌP” ÌP—” ÌQ” ÌQ” ÌQ	” ÌQ” ÌQ” ÌQ” ÌQœ” ÌR” ÌR
+” ÌR” ÌR$” ÌR*”! ÌR.”" ÌR/”- ÌR:”. ÌR;”9 ÌRÌF”; ÌRÌH”< ÌRÌI—” ÌS” ÌS” ÌS” ÌS” ÌS” ÌS”' ÌS#—” ÌS%” ÌS)” ÌS*” ÌS0” ÌS3” ÌS4” ÌS5—” ÌT	” ÌT” ÌT” ÌT” ÌT”# ÌT”4 ÌT0—” ÌT2” ÌT6” ÌT7” ÌT=” ÌTÌ@” ÌTÌA” ÌTÌB—” ÌU	” ÌU” ÌU” ÌU” ÌU”# ÌU”4 ÌU0—” ÌU2” ÌU6” ÌU7” ÌU=” ÌUÌ@” ÌUÌA” ÌUÌB—” ÌV	” ÌV” ÌV” ÌV” ÌV” ÌV” ÌV—” ÌW” ÌW” ÌW	” ÌW” ÌW” ÌW” ÌW’” ÌX” ÌX’” Ì[” Ì[—” Ì\” Ì\” Ì\” Ì\” Ì\”  Ì\”! Ì\’” Ì\” Ì\–” Ì\” Ì\” Ì\ÌG”% Ì\ÌO”& Ì\ÌP”( Ì\ÌR–” Ì\” Ì\” Ì\ÌT”& Ì\Ì]”' Ì\Ì^”6 Ì\Ìm’” Ì\” Ì\—” Ì]	” Ì]” Ì]” Ì]”  Ì]”% Ì]”& Ì]’” Ì] ” Ì]$–” Ì] ” Ì]$” Ì]ÌL”% Ì]ÌT”& Ì]ÌU”( Ì]ÌW–” Ì] ” Ì]$” Ì]ÌY”& Ì]Ìb”' Ì]Ìc”2 Ì]Ìn’” Ì] ” Ì]$—” Ì^	” Ì^” Ì^” Ì^”  Ì^”% Ì^”& Ì^’” Ì^ ” Ì^$–” Ì^ ” Ì^$” Ì^ÌK”% Ì^ÌS”& Ì^ÌT”( Ì^ÌV–” Ì^ ” Ì^$” Ì^ÌX”& Ì^Ìa”' Ì^Ìb”0 Ì^Ìk’” Ì^ ” Ì^$—” Ì_	” Ì_” Ì_” Ì_”  Ì_”% Ì_”& Ì_’” Ì_ ” Ì_$–” Ì_ ” Ì_$” Ì_ÌL”% Ì_ÌT”& Ì_ÌU”( Ì_ÌW–” Ì_ ” Ì_$” Ì_ÌY”& Ì_Ìb”' Ì_Ìc”0 Ì_Ìl’” Ì_ ” Ì_$—” Ì`	” Ì`” Ì`” Ì`”  Ì`”% Ì`”& Ì`’” Ì` ” Ì`$–” Ì` ” Ì`$” Ì`ÌT”% Ì`Ì\”& Ì`Ì]”( Ì`Ì_–” Ì` ” Ì`$” Ì`Ìa”& Ì`Ìj”' Ì`Ìk”0 Ì`Ìt’” Ì` ” Ì`$’” Ìa	” Ìa–” Ìa	” Ìa” Ìa2”% Ìa:”& Ìa;”( Ìa=–” Ìa	” Ìa” Ìa?”& ÌaÌH”' ÌaÌI”6 ÌaÌX’” Ìa	” Ìa‘” ÌaÌY‘” Ìb‘” Ìd’” Ìe” Ìe
+–” Ìe” Ìe
+” Ìˆ” Ìˆ” Ìˆ” Ìˆ–” Ìe” Ìe
+” Ìˆ” Ìˆ” Ìˆ”  Ìˆ!–” Ìe” Ìe
+” Ìˆ#”" Ìˆ2”# Ìˆ3”3 ÌˆÌC˜” Ìf” Ìf	” Ìf
+” Ìf” Ìf”  Ìf”" Ìf”$ Ìf–” Ìf” Ìf	” Ìm” Ìm” Ìm” ÌmÜ ” Ìf” Ìf	” Ìm” Ìm” Ìm” Ìm ” Ìm$”  Ìm&”" Ìm(”$ Ìm*”) Ìm/”+ Ìm1”- Ìm3”/ Ìm5”2 Ìm8”4 Ìm:”6 Ìm<”8 Ìm>”> ÌmÌD”Ì@ ÌmÌF”ÌB ÌmÌH”ÌD ÌmÌJ”” Ìg” Ìg” Ìg” Ìg–” Ìg” Ìg” Ìg” Ìg” Ìg” Ìg–” Ìg” Ìg” Ìg” Ìg(” Ìg)”% Ìg3–” Ìg” Ìg” Ìg5” Ìg:” Ìg;” Ìg=–” Ìg” Ìg” Ìg?” ÌgÌE” ÌgÌF” ÌgÌH˜” Ìg” Ìg” ÌgÌJ” ÌgÌS” ÌgÌT”$ ÌgÌ]”% ÌgÌ^”+ ÌgÌdÜ ” Ìg” Ìg” Ìh” Ìh” Ìh” Ìh” Ìh” Ìh”# Ìh”$ Ìh”0 Ìh*”2 Ìh,”3 Ìh-”< Ìh6”> Ìh8”? Ìh9”ÌC Ìh=”ÌE Ìh?’” Ìg” Ìg˜” Ìi” Ìi” Ìi” Ìi”! Ìi”# Ìi”$ Ìi”& Ìi–” Ìi” Ìi” Ìl
+” Ìl”  Ìl”! Ìl˜” Ìi” Ìi” Ìl” Ìl$” Ìl%”- Ìl4”. Ìl5”3 Ìl:’” Ìj
+” Ìj–” Ìj
+” Ìj” Ìj4” Ìj<” Ìj=” Ìj?˜” Ìj
+” Ìj” ÌjÌA” ÌjÌK” ÌjÌL”& ÌjÌV”' ÌjÌW”+ ÌjÌ[–” Ìj
+” Ìj” ÌjÌ]” ÌjÌf” ÌjÌg”% ÌjÌq–” Ìj
+” Ìj” ÌjÌs” ÌjÌx” ÌjÌy” ÌjÌ’” Ìj
+” Ìj’” Ìk
+” Ìk–” Ìk
+” Ìk” Ìk7” Ìk?” ÌkÌ@” ÌkÌB–” Ìk
+” Ìk” ÌkÌD” ÌkÌM” ÌkÌN”* ÌkÌ]–” Ìk
+” Ìk” ÌkÌ_” ÌkÌd” ÌkÌe” ÌkÌk’” Ìk
+” Ìk’” Ìi” Ìi’” Ìf” Ìf	’” Ìo” Ìo˜” Ìo” Ìo” Ì‡” Ì‡” Ì‡”% Ì‡”& Ì‡”) Ì‡–” Ìo” Ìo” Ì‡ ” Ì‡%” Ì‡&” Ì‡,–” Ìo” Ìo” Ì‡.” Ì‡:”  Ì‡;”! Ì‡<˜” Ìp” Ìp” Ìp” Ìp”! Ìp”# Ìp”% Ìp”' ÌpÜ ” Ìp” Ìp” Ì†
+” Ì†” Ì†” Ì†”! Ì†”# Ì†”% Ì†”' Ì†”, Ì†#”. Ì†%”0 Ì†'”2 Ì†)”5 Ì†,”7 Ì†.”8 Ì†/”: Ì†1”Ì@ Ì†7”ÌB Ì†9”ÌD Ì†;”ÌF Ì†=–” Ìp” Ìp” Ì†?” Ì†ÌD” Ì†ÌE” Ì†ÌK˜” Ìq
+” Ìq” Ìq” Ìq”! Ìq”# Ìq”% Ìq”' Ìq–” Ìq
+” Ìq” Ìw” Ìw” Ìw” Ìw–” Ìq
+” Ìq” Ìw” Ìw” Ìw” Ìw$–” Ìq
+” Ìq” Ìw&”" Ìw5”# Ìw6”- ÌwÌ@–” Ìq
+” Ìq” ÌwÌB” ÌwÌN”  ÌwÌO”" ÌwÌQ˜” Ìq
+” Ìq” ÌwÌS” ÌwÌ]” ÌwÌ^”- ÌwÌm”. ÌwÌn”3 ÌwÌs›” Ìr” Ìr” Ìr” Ìr” Ìr”% Ìr”& Ìr”' Ìr ”Ì– ÌrÌI”Ì— ÌrÌJ”Í ÌrÌs–” Ìr” Ìr” Ìs” Ìs” Ìs” Ìs˜” Ìr” Ìr” Ìs” Ìs&” Ìs'”& Ìs1”' Ìs2”+ Ìs6–” Ìr” Ìr” Ìs8” ÌsÌA” ÌsÌB”% ÌsÌL–” Ìr” Ìr” ÌsÌN” ÌsÌS” ÌsÌT” ÌsÌZ’” Ìr” Ìr›” Ìt” Ìt”# Ìt”' Ìt”( Ìt”0 Ìt ”1 Ìt!”2 Ìt"”Ì¡ ÌtÌJ”Ì¢ ÌtÌK”Í ÌtÌq–” Ìt” Ìt” Ìu” Ìu” Ìu” Ìu–” Ìt” Ìt” Ìu” Ìu#” Ìu$” Ìu&˜” Ìt” Ìt” Ìu(” Ìu1” Ìu2”" Ìu7”# Ìu8”( Ìu=–” Ìt” Ìt” Ìu?”" ÌuÌN”# ÌuÌO”. ÌuÌZ™” Ìt” Ìt” ÌuÌ\” ÌuÌc” ÌuÌd” ÌuÌe”  ÌuÌi”! ÌuÌj”% ÌuÌnœ” Ìt” Ìt” Ìv” Ìv” Ìv” Ìv”  Ìv”# Ìv”' Ìv#”+ Ìv'”, Ìv(”4 Ìv0–” Ìv2” Ìv6” Ìv7” Ìv>” ÌvÌ@” ÌvÌA˜” ÌvÌG” ÌvÌK” ÌvÌL” ÌvÌR” ÌvÌT” ÌvÌU” ÌvÌV”  ÌvÌW’” Ìt” Ìt’” Ìq
+” Ìq˜” Ìy
+” Ìy” Ìy” Ìy”! Ìy”# Ìy”% Ìy”' Ìy–” Ìy
+” Ìy” Ì…” Ì…” Ì…” Ì…–” Ìy
+” Ìy” Ì…” Ì…” Ì…” Ì…$–” Ìy
+” Ìy” Ì…&”" Ì…5”# Ì…6”- Ì…Ì@–” Ìy
+” Ìy” Ì…ÌB” Ì…ÌN”  Ì…ÌO”" Ì…ÌQ˜” Ìy
+” Ìy” Ì…ÌS” Ì…Ì]” Ì…Ì^”- Ì…Ìm”. Ì…Ìn”3 Ì…Ìs’” Ìz” Ìz–” Ìz” Ìz” Ì” Ì” Ì” Ì’” Ì{” Ì{–” Ì{” Ì{” Ì{9” Ì{ÌA” Ì{ÌB” Ì{ÌD˜” Ì{” Ì{” Ì{ÌF” Ì{ÌP” Ì{ÌQ”& Ì{Ì[”' Ì{Ì\”+ Ì{Ì`–” Ì{” Ì{” Ì{Ìb” Ì{Ìk” Ì{Ìl”% Ì{Ìv’” Ì{” Ì{’” Ì|” Ì|’” Ì|” Ì|Ü ” Ì}” Ì}” Ì}” Ì}”  Ì}”" Ì}”, Ì}'”- Ì}(”3 Ì}.”5 Ì}0”9 Ì}4”; Ì}6”? Ì}:”Ì@ Ì};”ÌK Ì}ÌF”ÌM Ì}ÌH” Ì}” Ì}” Ì}ÌJ” Ì}ÌQ” Ì}ÌR” Ì}ÌV”  Ì}ÌW”( Ì}Ì_”, Ì}Ìc”- Ì}Ìd”1 Ì}Ìh”2 Ì}Ìi”6 Ì}ÌmÜ ” Ì}” Ì}” Ì~” Ì~” Ì~” Ì~”$ Ì~+”& Ì~-”( Ì~/”) Ì~0”- Ì~4”. Ì~5”8 Ì~?”9 Ì~Ì@”Ì@ Ì~ÌG”ÌA Ì~ÌH’” Ì}” Ì}’” Ìz” Ìz’” Ì€” Ì€–” Ì€” Ì€” Ì€<” Ì€ÌD” Ì€ÌE” Ì€ÌG–” Ì€” Ì€” Ì€ÌI” Ì€ÌR” Ì€ÌS”* Ì€Ìb–” Ì€” Ì€” Ì€Ìd” Ì€Ìn” Ì€Ìo” Ì€Ìq–” Ì€” Ì€” Ì€Ìs” Ì€Ìx” Ì€Ìy” Ì€Ì’” Ì€” Ì€’” Ì” Ì–” Ì” Ì” Ì:” ÌÌB” ÌÌC” ÌÌE–” Ì” Ì” ÌÌG” ÌÌP” ÌÌQ”* ÌÌ`–” Ì” Ì” ÌÌb” ÌÌl” ÌÌm” ÌÌo–” Ì” Ì” ÌÌq” ÌÌv” ÌÌw” ÌÌ}’” Ì” Ì’” Ì‚” Ì‚–” Ì‚” Ì‚” Ì‚6” Ì‚;” Ì‚<” Ì‚ÌB–” Ì‚” Ì‚” Ì‚ÌD” Ì‚ÌJ” Ì‚ÌK” Ì‚ÌM˜” Ì‚” Ì‚” Ì‚ÌO” Ì‚ÌX” Ì‚ÌY”" Ì‚Ì^”# Ì‚Ì_”( Ì‚Ìd–” Ì‚” Ì‚” Ì‚Ìf”" Ì‚Ìu”# Ì‚Ìv”. Ì‚ÌÜ ” Ì‚” Ì‚” Ìƒ” Ìƒ” Ìƒ” Ìƒ”  Ìƒ”( Ìƒ$”, Ìƒ(”0 Ìƒ,”1 Ìƒ-”< Ìƒ8”Ì@ Ìƒ<”ÌA Ìƒ=”ÌE ÌƒÌA”ÌF ÌƒÌB”ÌJ ÌƒÌFœ” Ì‚” Ì‚” ÌƒÌH” ÌƒÌO” ÌƒÌP” ÌƒÌS”  ÌƒÌU”! ÌƒÌV”% ÌƒÌZ”& ÌƒÌ[”1 ÌƒÌf”3 ÌƒÌh’” Ì‚” Ì‚•” Ì„” Ì„” Ì„” Ì„”$ Ì„’” Ìy
+” Ìy’” Ìp” Ìp’” Ìo” Ìo’” Ìe” Ìe
+‘” Ì‰ÔrF–§version¤file§sources®sourcesContent¥names¨mappingsÀ‘À‘ÀÜœ‘”    ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”  	 ‘”  
+ ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”   ‘”    ‘”  ! ‘”  " ‘”  # ‘”  $ ‘”  % ‘”  & ‘”  ' ‘”  ( ‘”  ) ‘”  * ‘”  + ‘”  , ‘”  - ‘”  . ‘”  / ‘”  0 ‘”  1 ‘”  2 ‘”  3 ‘”  4 ‘”  5 ‘”  6 ‘”  7 ‘”  8 ‘”  9 ‘”  : ‘”  ; ‘”  < ‘”  = ‘”  > ‘”  ? ‘”  Ì@ ‘”  ÌA ‘”  ÌB ‘”  ÌC ‘”  ÌD ‘”  ÌE ‘”  ÌF ‘”  ÌG ‘”  ÌH ‘”  ÌI ‘”  ÌJ ‘”  ÌK ‘”  ÌL ‘”  ÌM ‘”  ÌN ‘”  ÌO ‘”  ÌP ‘”  ÌQ ‘”  ÌR ‘”  ÌS ‘”  ÌT ‘”  ÌU ‘”  ÌV ‘”  ÌW ‘”  ÌX ‘”  ÌY ‘”  ÌZ ‘”  Ì[ ‘”  Ì\ ‘”  Ì] ‘”  Ì^ ‘”  Ì_ ‘”  Ì` ‘”  Ìa ‘”  Ìb ‘”  Ìc ‘”  Ìd ‘”  Ìe ‘”  Ìf ‘”  Ìg ‘”  Ìh ‘”  Ìi ‘”  Ìj ‘”  Ìk ‘”  Ìl ‘”  Ìm ‘”  Ìn ‘”  Ìo ‘”  Ìp ‘”  Ìq ‘”  Ìr ‘”  Ìs ‘”  Ìt ‘”  Ìu ‘”  Ìv ‘”  Ìw ‘”  Ìx ‘”  Ìy ‘”  Ìz ‘”  Ì{ ‘”  Ì| ‘”  Ì} ‘”  Ì~ ‘”  Ì ‘”  Ì€ ‘”  Ì ‘”  Ì‚ ‘”  Ìƒ ‘”  Ì„ ‘”  Ì… ‘”  Ì† ‘”  Ì‡ ‘”  Ìˆ ‘”  Ì‰ ‘”  ÌŠ ‘”  Ì‹ ‘”  ÌŒ ‘”  Ì ‘”  Ì ‘”  Ì ‘”  Ì ‘”  Ì‘ ‘”  Ì’ ‘”  Ì“ ‘”  Ì” ‘”  Ì• ‘”  Ì– ‘”  Ì— ‘”  Ì˜ ‘”  Ì™ ‘”  Ìš ‘”  Ì› ‘”  Ìœ ‘”  Ì ‘”  Ì ‘”  ÌŸ ‘”  Ì  ‘”  Ì¡ ‘”  Ì¢ ‘”  Ì£ ‘”  Ì¤ ‘”  Ì¥ ‘”  Ì¦ ‘”  Ì§ ‘”  Ì¨ ‘”  Ì© ‘”  Ìª ‘”  Ì« ‘”  Ì¬ ‘”  Ì­ ‘”  Ì® ‘”  Ì¯ ‘”  Ì° ‘”  Ì± ‘”  Ì² ‘”  Ì³ ‘”  Ì´ ‘”  Ìµ ‘”  Ì¶ ‘”  Ì· ‘”  Ì¸ ‘”  Ì¹ ‘”  Ìº ‘”  Ì» ‘”  Ì¼ ‘”  Ì½ ‘”  Ì¾ ‘”  Ì¿ ‘”  ÌÀ ‘”  ÌÁ ‘”  ÌÂ ‘”  ÌÃ ‘”  ÌÄ ‘”  ÌÅ ‘”  ÌÆ ‘”  ÌÇ ‘”  ÌÈ ‘”  ÌÉ ‘”  ÌÊ ‘”  ÌË ‘”  ÌÌ ‘”  ÌÍ ‘”  ÌÎ ‘”  ÌÏ ‘”  ÌĞ ‘”  ÌÑ ‘”  ÌÒ ‘”  ÌÓ ‘”  ÌÔ ‘”  ÌÕ ‘”  ÌÖ ‘”  Ì× ‘”  ÌØ ‘”  ÌÙ ‘”  ÌÚ ‘”  ÌÛ ‘”  ÌÜ ‘”  Ìİ ‘”  ÌŞ ‘”  Ìß ‘”  Ìà ‘”  Ìá ‘”  Ìâ ‘”  Ìã ‘”  Ìä ‘”  Ìå ‘”  Ìæ ‘”  Ìç ‘”  Ìè ‘”  Ìé ‘”  Ìê ‘”  Ìë ‘”  Ìì ‘”  Ìí ‘”  Ìî ‘”  Ìï ‘”  Ìğ ‘”  Ìñ ‘”  Ìò ‘”  Ìó ‘”  Ìô ‘”  Ìõ ‘”  Ìö ‘”  Ì÷ ‘”  Ìø ‘”  Ìù ‘”  Ìú ‘”  Ìû ‘”  Ìü ‘”  Ìı ‘”  Ìş ‘”  Ìÿ ‘”  Í  ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í	 ‘”  Í
+ ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í  ‘”  Í! ‘”  Í" ‘”  Í# ‘”  Í$ ‘”  Í% ‘”  Í& ‘”  Í' ‘”  Í( ‘”  Í) ‘”  Í* ‘”  Í+ ‘”  Í, ‘”  Í- ‘”  Í. ‘”  Í/ ‘”  Í0 ‘”  Í1 ‘”  Í2 ‘”  Í3 ‘”  Í4 ‘”  Í5 ‘”  Í6 ‘”  Í7 ‘”  Í8 ‘”  Í9 ‘”  Í: ‘”  Í; ‘”  Í< ‘”  Í= ‘”  Í> ‘”  Í? ‘”  Í@ ‘”  ÍA ‘”  ÍB ‘”  ÍC ‘”  ÍD ‘”  ÍE ‘”  ÍF ‘”  ÍG ‘”  ÍH ‘”  ÍI ‘”  ÍJ ‘”  ÍK ‘”  ÍL ‘”  ÍM ‘”  ÍN ‘”  ÍO ‘”  ÍP ‘”  ÍQ ‘”  ÍR ‘”  ÍS ‘”  ÍT ‘”  ÍU ‘”  ÍV ‘”  ÍW ‘”  ÍX ‘”  ÍY ‘”  ÍZ ‘”  Í[ ‘”  Í\ ‘”  Í] ‘”  Í^ ‘”  Í_ ‘”  Í` ‘”  Ía ‘”  Íb ‘”  Íc ‘”  Íd ‘”  Íe ‘”  Íf ‘”  Íg ‘”  Íh ‘”  Íi ‘”  Íj ‘”  Ík ‘”  Íl ‘”  Ím ‘”  Ín ‘”  Ío ‘”  Íp ‘”  Íq ‘”  Ír ‘”  Ís ‘”  Ít ‘”  Íu ‘”  Ív ‘”  Íw ‘”  Íx ‘”  Íy ‘”  Íz ‘”  Í{ ‘”  Í| ‘”  Í} ‘”  Í~ ‘”  Í ‘”  Í€ ‘”  Í ‘”  Í‚ ‘”  Íƒ ‘”  Í„ ‘”  Í… ‘”  Í† ‘”  Í‡ ‘”  Íˆ ‘”  Í‰ ‘”  ÍŠ ‘”  Í‹ ‘”  ÍŒ ‘”  Í ‘”  Í ‘”  Í ‘”  Í ‘”  Í‘ ‘”  Í’ ‘”  Í“ ‘”  Í” ‘”  Í• ‘”  Í– ‘”  Í— ‘”  Í˜ ‘”  Í™ ‘”  Íš ‘”  Í› ÔrG’§missing¦pluginÃ¦genAbcÂÔ  ÔrH”²dynamicImportCache¹exportAllDeclarationCache»exportNamedDeclarationCache«importCache”ÔrI•¤type¥start£endªspecifiers¦source±ImportDeclarationÌ€ÌÉ‘ÔrJ•¤type¥start£end¨imported¥local¯ImportSpecifierÌ‰ÌÔrK”¤type¥start£end¤nameªIdentifierÌ‰ÌµAgcCloudSyncTransportKªIdentifierÌ‰ÌµAgcCloudSyncTransportÔrL•¤type¥start£end¥value£raw§LiteralÌ¦ÌÈÙ ../service/AgcCloudSyncTransportÙ"'../service/AgcCloudSyncTransport'I±ImportDeclarationÌËÍ‘J¯ImportSpecifierÌÔÌèKªIdentifierÌÔÌè´CloudSyncCoordinatorKªIdentifierÌÔÌè´CloudSyncCoordinatorL§LiteralÌğÍ¿../service/CloudSyncCoordinatorÙ!'../service/CloudSyncCoordinator'I±ImportDeclarationÍÍY‘J¯ImportSpecifierÍÍ0KªIdentifierÍÍ0³CloudSyncStateStoreKªIdentifierÍÍ0³CloudSyncStateStoreL§LiteralÍ8ÍX¾../service/CloudSyncStateStoreÙ '../service/CloudSyncStateStore'I±ImportDeclarationÍ[Í¢‘J¯ImportSpecifierÍdÍxKªIdentifierÍdÍx´HuaweiAccountServiceKªIdentifierÍdÍx´HuaweiAccountServiceL§LiteralÍ€Í¡¿../service/HuaweiAccountServiceÙ!'../service/HuaweiAccountService'

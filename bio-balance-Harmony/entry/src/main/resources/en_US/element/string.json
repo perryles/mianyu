@@ -1,0 +1,596 @@
+{
+  "string": [
+    {
+      "name": "module_desc",
+      "value": "Mianyu health rhythm and daily recovery"
+    },
+    {
+      "name": "EntryAbility_desc",
+      "value": "Mianyu home"
+    },
+    {
+      "name": "EntryAbility_label",
+      "value": "Mianyu"
+    },
+    {
+      "name": "local_only",
+      "value": "Stored only on this device"
+    },
+    {
+      "name": "local_storage_unavailable",
+      "value": "Local storage is temporarily unavailable"
+    },
+    {
+      "name": "saved_on_device",
+      "value": "Saved on this device"
+    },
+    {
+      "name": "save_failed",
+      "value": "Could not save. Try again later."
+    },
+    {
+      "name": "context_unavailable",
+      "value": "App context is unavailable"
+    },
+    {
+      "name": "loading",
+      "value": "Loading…"
+    },
+    {
+      "name": "cancel",
+      "value": "Cancel"
+    },
+    {
+      "name": "delete",
+      "value": "Delete"
+    },
+    {
+      "name": "save",
+      "value": "Save"
+    },
+    {
+      "name": "minutes_format",
+      "value": "%1$d min"
+    },
+    {
+      "name": "duration_format",
+      "value": "%1$d hr %2$d min"
+    },
+    {
+      "name": "score_format",
+      "value": "%1$d pts"
+    },
+    {
+      "name": "steps_format",
+      "value": "%1$d steps"
+    },
+    {
+      "name": "heart_rate_format",
+      "value": "%1$d bpm"
+    },
+    {
+      "name": "days_format",
+      "value": "%1$d days"
+    },
+    {
+      "name": "weekday_sun",
+      "value": "Sun"
+    },
+    {
+      "name": "weekday_mon",
+      "value": "Mon"
+    },
+    {
+      "name": "weekday_tue",
+      "value": "Tue"
+    },
+    {
+      "name": "weekday_wed",
+      "value": "Wed"
+    },
+    {
+      "name": "weekday_thu",
+      "value": "Thu"
+    },
+    {
+      "name": "weekday_fri",
+      "value": "Fri"
+    },
+    {
+      "name": "weekday_sat",
+      "value": "Sat"
+    },
+    {
+      "name": "today_short",
+      "value": "Today"
+    },
+    {
+      "name": "checkin_sunlight_title",
+      "value": "Sunlight log"
+    },
+    {
+      "name": "checkin_caffeine_title",
+      "value": "Caffeine log"
+    },
+    {
+      "name": "checkin_medication_title",
+      "value": "Medication log"
+    },
+    {
+      "name": "checkin_symptom_title",
+      "value": "Symptom log"
+    },
+    {
+      "name": "checkin_private_subtitle",
+      "value": "Stored on this device; health details are never uploaded"
+    },
+    {
+      "name": "checkin_invalid_minutes",
+      "value": "Enter a value from 0 to 1440 minutes"
+    },
+    {
+      "name": "checkin_sunlight_saved",
+      "value": "Sunlight log saved"
+    },
+    {
+      "name": "checkin_caffeine_saved",
+      "value": "Caffeine intake logged"
+    },
+    {
+      "name": "checkin_medication_name_required",
+      "value": "Enter a medication name"
+    },
+    {
+      "name": "checkin_medication_saved",
+      "value": "Medication logged"
+    },
+    {
+      "name": "checkin_symptom_saved",
+      "value": "Symptom logged"
+    },
+    {
+      "name": "checkin_not_recorded",
+      "value": "Not recorded"
+    },
+    {
+      "name": "checkin_not_recorded_today",
+      "value": "Nothing recorded today"
+    },
+    {
+      "name": "checkin_sunlight_help",
+      "value": "Track daily outdoor daylight to help assess your routine."
+    },
+    {
+      "name": "checkin_sunlight_placeholder",
+      "value": "Outdoor minutes, e.g. 30"
+    },
+    {
+      "name": "checkin_record_intake",
+      "value": "Log an intake"
+    },
+    {
+      "name": "checkin_add_once",
+      "value": "+ Add intake"
+    },
+    {
+      "name": "checkin_record_medication",
+      "value": "Log medication"
+    },
+    {
+      "name": "checkin_medication_name_placeholder",
+      "value": "Medication, e.g. Vitamin D"
+    },
+    {
+      "name": "checkin_medication_dose_placeholder",
+      "value": "Dose (optional), e.g. 1 tablet"
+    },
+    {
+      "name": "checkin_add_medication",
+      "value": "+ Add medication"
+    },
+    {
+      "name": "checkin_record_symptom",
+      "value": "Log a symptom"
+    },
+    {
+      "name": "checkin_intensity",
+      "value": "Intensity"
+    },
+    {
+      "name": "checkin_add_symptom",
+      "value": "+ Add symptom"
+    },
+    {
+      "name": "checkin_privacy_emergency",
+      "value": "Logs stay on this device and health details are never uploaded. For urgent symptoms, contact local emergency services immediately."
+    },
+    {
+      "name": "symptom_headache",
+      "value": "Headache"
+    },
+    {
+      "name": "symptom_fatigue",
+      "value": "Fatigue"
+    },
+    {
+      "name": "symptom_anxiety",
+      "value": "Anxiety"
+    },
+    {
+      "name": "symptom_insomnia",
+      "value": "Insomnia"
+    },
+    {
+      "name": "symptom_neck_pain",
+      "value": "Neck or shoulder pain"
+    },
+    {
+      "name": "symptom_other",
+      "value": "Other"
+    },
+    {
+      "name": "intensity_very_light",
+      "value": "Very mild"
+    },
+    {
+      "name": "intensity_light",
+      "value": "Mild"
+    },
+    {
+      "name": "intensity_medium",
+      "value": "Moderate"
+    },
+    {
+      "name": "intensity_heavy",
+      "value": "Strong"
+    },
+    {
+      "name": "intensity_severe",
+      "value": "Severe"
+    },
+    {
+      "name": "sleep_reading",
+      "value": "Reading sleep data"
+    },
+    {
+      "name": "sleep_auth_check_failed",
+      "value": "Could not check sleep-data permission"
+    },
+    {
+      "name": "sleep_auth_required",
+      "value": "Allow sleep-data access to view details"
+    },
+    {
+      "name": "sleep_read_failed",
+      "value": "Could not read sleep data. Try again later."
+    },
+    {
+      "name": "sleep_source",
+      "value": "Data comes from Huawei Health authorized on this device"
+    },
+    {
+      "name": "sleep_empty",
+      "value": "No sleep records available"
+    },
+    {
+      "name": "sleep_stage_deep",
+      "value": "Deep"
+    },
+    {
+      "name": "sleep_stage_shallow",
+      "value": "Light"
+    },
+    {
+      "name": "sleep_stage_rem",
+      "value": "REM"
+    },
+    {
+      "name": "sleep_stage_awake",
+      "value": "Awake"
+    },
+    {
+      "name": "sleep_stage_empty",
+      "value": "No stage details. Some wearables provide only a sleep summary."
+    },
+    {
+      "name": "sleep_hint_good",
+      "value": "Your deep-sleep share looks good. Keep a regular schedule."
+    },
+    {
+      "name": "sleep_hint_low",
+      "value": "If deep sleep is low, try a fixed bedtime and less bright light before bed."
+    },
+    {
+      "name": "sleep_hint_unknown",
+      "value": "No stage data is available. Refer to Huawei Health for sleep details."
+    },
+    {
+      "name": "sleep_detail_title",
+      "value": "Sleep details"
+    },
+    {
+      "name": "sleep_last_night",
+      "value": "Last night"
+    },
+    {
+      "name": "sleep_score",
+      "value": "Sleep score"
+    },
+    {
+      "name": "sleep_week_duration",
+      "value": "Sleep duration · 7 days"
+    },
+    {
+      "name": "sleep_week_score",
+      "value": "Sleep score · 7 days"
+    },
+    {
+      "name": "sleep_stages",
+      "value": "Sleep stages"
+    },
+    {
+      "name": "sleep_stage_total_format",
+      "value": "Total %1$s"
+    },
+    {
+      "name": "sleep_no_details",
+      "value": "No details"
+    },
+    {
+      "name": "sleep_privacy_disclaimer",
+      "value": "Sleep data is read only from an authorized on-device source. It is not saved or uploaded and is not medical advice."
+    },
+    {
+      "name": "reminder_storage_unavailable",
+      "value": "Local storage is temporarily unavailable"
+    },
+    {
+      "name": "reminder_permission_required",
+      "value": "Notification permission is required. Allow notifications in system settings."
+    },
+    {
+      "name": "reminder_enabled_format",
+      "value": "Enabled “%1$s”"
+    },
+    {
+      "name": "reminder_disabled_format",
+      "value": "Disabled “%1$s”"
+    },
+    {
+      "name": "reminder_time_saved_format",
+      "value": "Set “%1$s” to %2$s"
+    },
+    {
+      "name": "reminder_time_save_failed",
+      "value": "Could not save the reminder time. Try again later."
+    },
+    {
+      "name": "reminder_daily",
+      "value": "Daily reminder"
+    },
+    {
+      "name": "reminder_off",
+      "value": "Off"
+    },
+    {
+      "name": "reminder_time",
+      "value": "Reminder time"
+    },
+    {
+      "name": "reminder_title",
+      "value": "Health reminders"
+    },
+    {
+      "name": "reminder_subtitle",
+      "value": "Daily on-device reminders"
+    },
+    {
+      "name": "reminder_disclaimer",
+      "value": "Reminders support everyday health management and are not medical advice."
+    },
+    {
+      "name": "reminder_water_title",
+      "value": "Water reminder"
+    },
+    {
+      "name": "reminder_water_content",
+      "value": "Remember to drink some water and stay hydrated."
+    },
+    {
+      "name": "reminder_medication_title",
+      "value": "Medication reminder"
+    },
+    {
+      "name": "reminder_medication_content",
+      "value": "It is time for your medication. Follow your clinician’s instructions."
+    },
+    {
+      "name": "reminder_sedentary_title",
+      "value": "Move reminder"
+    },
+    {
+      "name": "reminder_sedentary_content",
+      "value": "You have been sitting for a while. Take a moment to move."
+    },
+    {
+      "name": "reminder_fallback_content",
+      "value": "It is time to take care of yourself."
+    },
+    {
+      "name": "health_ready",
+      "value": "Huawei Health is ready"
+    },
+    {
+      "name": "health_initialized",
+      "value": "Huawei Health initialized"
+    },
+    {
+      "name": "health_auth_all",
+      "value": "Steps, resting heart rate, and sleep access granted"
+    },
+    {
+      "name": "health_auth_partial",
+      "value": "Some health-data access was granted"
+    },
+    {
+      "name": "health_auth_none",
+      "value": "Health-data access was not granted. You can try again later."
+    },
+    {
+      "name": "health_auth_revoked",
+      "value": "Mianyu’s Huawei Health access was revoked"
+    },
+    {
+      "name": "health_error_config",
+      "value": "Check the AppGallery Connect Client ID and app signature"
+    },
+    {
+      "name": "health_error_network",
+      "value": "The network is unavailable. Huawei Health cannot sync right now."
+    },
+    {
+      "name": "health_error_account",
+      "value": "Sign in to your Huawei account on this device"
+    },
+    {
+      "name": "health_error_unavailable_format",
+      "value": "Huawei Health is temporarily unavailable (%1$d)"
+    },
+    {
+      "name": "health_error_privacy",
+      "value": "Open Huawei Health and accept its privacy agreement first"
+    },
+    {
+      "name": "privacy_page_title",
+      "value": "Privacy & data"
+    },
+    {
+      "name": "privacy_page_subtitle",
+      "value": "Health-data boundaries and permission use"
+    },
+    {
+      "name": "privacy_section_permission",
+      "value": "Why permissions are needed"
+    },
+    {
+      "name": "privacy_permission_body",
+      "value": "Mianyu reads steps, resting heart rate, and sleep (including the latest sleep stages) to show health summaries, 7-day trends, sleep details, and an on-device score. It is not used for anything else."
+    },
+    {
+      "name": "privacy_section_scope",
+      "value": "Data scope"
+    },
+    {
+      "name": "privacy_scope_steps",
+      "value": "Steps: today and daily totals for the last 7 days"
+    },
+    {
+      "name": "privacy_scope_heart",
+      "value": "Resting heart rate: daily values for the last 7 days"
+    },
+    {
+      "name": "privacy_scope_sleep",
+      "value": "Sleep: duration and score for 7 days, plus the latest deep/light/REM/awake stages"
+    },
+    {
+      "name": "privacy_section_boundary",
+      "value": "Data boundaries"
+    },
+    {
+      "name": "privacy_boundary_readonly",
+      "value": "Read only: Mianyu never writes or deletes health data"
+    },
+    {
+      "name": "privacy_boundary_local",
+      "value": "Data stays on this device; health details are never uploaded"
+    },
+    {
+      "name": "privacy_boundary_backup",
+      "value": "App data is excluded from system cloud backup and restore"
+    },
+    {
+      "name": "privacy_boundary_sync",
+      "value": "Any future cloud sync will be off by default and limited to an allowlist summary"
+    },
+    {
+      "name": "privacy_section_revoke",
+      "value": "Manage access"
+    },
+    {
+      "name": "privacy_revoke_body",
+      "value": "You can revoke Mianyu’s Huawei Health access from Profile at any time. Reading stops immediately; existing on-device logs are unaffected."
+    },
+    {
+      "name": "privacy_section_disclaimer",
+      "value": "Notice"
+    },
+    {
+      "name": "privacy_disclaimer_body",
+      "value": "Health data is for reference only and is not a medical diagnosis. For urgent symptoms, contact local emergency services immediately."
+    },
+    {
+      "name": "account_sync_running",
+      "value": "Syncing…"
+    },
+    {
+      "name": "account_sync_success",
+      "value": "Sync complete"
+    },
+    {
+      "name": "account_sync_failed",
+      "value": "Sync failed"
+    },
+    {
+      "name": "account_sync_partial",
+      "value": "Partial"
+    },
+    {
+      "name": "account_sync_account_changed",
+      "value": "Account changed"
+    },
+    {
+      "name": "account_sync_idle",
+      "value": "Ready"
+    },
+    {
+      "name": "account_sync_title",
+      "value": "Cross-device sync"
+    },
+    {
+      "name": "account_sync_subtitle",
+      "value": "Allowlist summaries only; raw health data stays on-device"
+    },
+    {
+      "name": "account_sync_signed_in",
+      "value": "Signed in"
+    },
+    {
+      "name": "account_sync_signed_out",
+      "value": "Signed out"
+    },
+    {
+      "name": "account_sync_sign_out",
+      "value": "Sign out"
+    },
+    {
+      "name": "account_sync_sign_in",
+      "value": "Sign in with HUAWEI ID"
+    },
+    {
+      "name": "account_sync_switch",
+      "value": "Enable cross-device sync"
+    },
+    {
+      "name": "account_sync_switch_note",
+      "value": "When enabled, allowlist summaries are synced to your HUAWEI Cloud. Raw health data and on-device details are never uploaded."
+    },
+    {
+      "name": "account_sync_whitelist",
+      "value": "Current allowlist: sleep score, step summary, weekly resting heart-rate average. More fields will be added in future releases."
+    },
+    {
+      "name": "account_sync_now",
+      "value": "Sync now"
+    }
+  ]
+}

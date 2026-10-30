@@ -1,0 +1,1125 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		668CC4B02F8FE2EB000A6761 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 668CC4AF2F8FE2EB000A6761 /* WidgetKit.framework */; };
+		668CC4B22F8FE2EB000A6761 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 668CC4B12F8FE2EB000A6761 /* SwiftUI.framework */; };
+		668CC4C32F8FE2EC000A6761 /* BioBalanceWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 668CC4AD2F8FE2EB000A6761 /* BioBalanceWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		66C311902F8C97110076FDF2 /* BioBalanceWatch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = 66C3118F2F8C97110076FDF2 /* BioBalanceWatch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		66C312112F8D20000076FDF2 /* BioBalanceComplications.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 66C312002F8D20000076FDF2 /* BioBalanceComplications.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		B10000000000000000000001 /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C10000000000000000000001 /* HealthKit.framework */; };
+		B10000000000000000000003 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C10000000000000000000003 /* CloudKit.framework */; };
+		B10000000000000000000004 /* WeatherKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C10000000000000000000004 /* WeatherKit.framework */; };
+		B10000000000000000000005 /* AuthenticationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C10000000000000000000005 /* AuthenticationServices.framework */; };
+		B10000000000000000000006 /* UserNotifications.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C10000000000000000000006 /* UserNotifications.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		668CC4C12F8FE2EC000A6761 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 66C3115D2F8C950D0076FDF2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 668CC4AC2F8FE2EB000A6761;
+			remoteInfo = BioBalanceWidgetExtension;
+		};
+		66A4DE9E2FB6473C008F3F51 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 66C3115D2F8C950D0076FDF2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 66C312022F8D20000076FDF2;
+			remoteInfo = BioBalanceComplications;
+		};
+		66C311912F8C97110076FDF2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 66C3115D2F8C950D0076FDF2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 66C3118E2F8C97110076FDF2;
+			remoteInfo = "BioBalanceWatch Watch App";
+		};
+		66D000062FA0000000AA0006 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 66C3115D2F8C950D0076FDF2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 66C311642F8C950D0076FDF2;
+			remoteInfo = BioBalance;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		668CC4C42F8FE2EC000A6761 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				668CC4C32F8FE2EC000A6761 /* BioBalanceWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		66C3119C2F8C97110076FDF2 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				66C311902F8C97110076FDF2 /* BioBalanceWatch Watch App.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		66C312102F8D20000076FDF2 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				66C312112F8D20000076FDF2 /* BioBalanceComplications.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		668CC4AD2F8FE2EB000A6761 /* BioBalanceWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BioBalanceWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		668CC4AF2F8FE2EB000A6761 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		668CC4B12F8FE2EB000A6761 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		66C311652F8C950D0076FDF2 /* BioBalance.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BioBalance.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		66C3118F2F8C97110076FDF2 /* BioBalanceWatch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "BioBalanceWatch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		66C312002F8D20000076FDF2 /* BioBalanceComplications.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BioBalanceComplications.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		66D000002FA0000000AA0000 /* BioBalanceTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BioBalanceTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		C10000000000000000000001 /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
+		C10000000000000000000003 /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
+		C10000000000000000000004 /* WeatherKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WeatherKit.framework; path = System/Library/Frameworks/WeatherKit.framework; sourceTree = SDKROOT; };
+		C10000000000000000000005 /* AuthenticationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AuthenticationServices.framework; path = System/Library/Frameworks/AuthenticationServices.framework; sourceTree = SDKROOT; };
+		C10000000000000000000006 /* UserNotifications.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UserNotifications.framework; path = System/Library/Frameworks/UserNotifications.framework; sourceTree = SDKROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		668CC4C72F8FE2EC000A6761 /* Exceptions for "BioBalanceWidgetExtension" folder in "BioBalanceWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 668CC4AC2F8FE2EB000A6761 /* BioBalanceWidgetExtension */;
+		};
+		66C3120D2F8D20000076FDF2 /* Exceptions for "BioBalanceComplications" folder in "BioBalanceComplications" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 66C312022F8D20000076FDF2 /* BioBalanceComplications */;
+		};
+		66D0000B2FA0000000AA000B /* Exceptions for "BioBalance" folder in "BioBalance" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Components/Charts/README.md,
+				Core/AI/README.md,
+				Core/Algorithms/README.md,
+				Core/Algorithms/Sleep/README.md,
+				Core/Algorithms/Stress/Assessment/STRESS_CALCULATION.md,
+				Core/Algorithms/Stress/Assessment/STRESS_DEBUG_PLAYBOOK.md,
+				Core/Algorithms/Stress/BodyBattery/STRESS_BODY_BATTERY_CALCULATION.md,
+				Core/Algorithms/Stress/FocusCapacity/STRESS_FOCUS_CAPACITY_CALCULATION.md,
+				Core/Algorithms/Stress/README.md,
+				Core/Algorithms/Stress/VO2Max/VO2MAX_CALCULATION.md,
+				Views/README.md,
+			);
+			target = 66C311642F8C950D0076FDF2 /* BioBalance */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		668CC4B32F8FE2EB000A6761 /* BioBalanceWidgetExtension */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				668CC4C72F8FE2EC000A6761 /* Exceptions for "BioBalanceWidgetExtension" folder in "BioBalanceWidgetExtension" target */,
+			);
+			path = BioBalanceWidgetExtension;
+			sourceTree = "<group>";
+		};
+		66C311672F8C950D0076FDF2 /* BioBalance */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				66D0000B2FA0000000AA000B /* Exceptions for "BioBalance" folder in "BioBalance" target */,
+			);
+			path = BioBalance;
+			sourceTree = "<group>";
+		};
+		66C311932F8C97110076FDF2 /* BioBalanceWatch Watch App */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "BioBalanceWatch Watch App";
+			sourceTree = "<group>";
+		};
+		66C312012F8D20000076FDF2 /* BioBalanceComplications */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				66C3120D2F8D20000076FDF2 /* Exceptions for "BioBalanceComplications" folder in "BioBalanceComplications" target */,
+			);
+			path = BioBalanceComplications;
+			sourceTree = "<group>";
+		};
+		66D000012FA0000000AA0001 /* BioBalanceTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = BioBalanceTests;
+			sourceTree = "<group>";
+		};
+		66E100012FB1000000BB0001 /* Shared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Shared;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		668CC4AA2F8FE2EB000A6761 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				668CC4B22F8FE2EB000A6761 /* SwiftUI.framework in Frameworks */,
+				668CC4B02F8FE2EB000A6761 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		66C311622F8C950D0076FDF2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B10000000000000000000001 /* HealthKit.framework in Frameworks */,
+				B10000000000000000000003 /* CloudKit.framework in Frameworks */,
+				B10000000000000000000004 /* WeatherKit.framework in Frameworks */,
+				B10000000000000000000005 /* AuthenticationServices.framework in Frameworks */,
+				B10000000000000000000006 /* UserNotifications.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		66C3118C2F8C97110076FDF2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		66C312042F8D20000076FDF2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		66D000032FA0000000AA0003 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		668CC4AE2F8FE2EB000A6761 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				C10000000000000000000001 /* HealthKit.framework */,
+				C10000000000000000000003 /* CloudKit.framework */,
+				C10000000000000000000004 /* WeatherKit.framework */,
+				C10000000000000000000005 /* AuthenticationServices.framework */,
+				C10000000000000000000006 /* UserNotifications.framework */,
+				668CC4AF2F8FE2EB000A6761 /* WidgetKit.framework */,
+				668CC4B12F8FE2EB000A6761 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		66C3115C2F8C950D0076FDF2 = {
+			isa = PBXGroup;
+			children = (
+				66C311672F8C950D0076FDF2 /* BioBalance */,
+				66D000012FA0000000AA0001 /* BioBalanceTests */,
+				66C311932F8C97110076FDF2 /* BioBalanceWatch Watch App */,
+				66C312012F8D20000076FDF2 /* BioBalanceComplications */,
+				66E100012FB1000000BB0001 /* Shared */,
+				668CC4B32F8FE2EB000A6761 /* BioBalanceWidgetExtension */,
+				668CC4AE2F8FE2EB000A6761 /* Frameworks */,
+				66C311662F8C950D0076FDF2 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		66C311662F8C950D0076FDF2 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				66C311652F8C950D0076FDF2 /* BioBalance.app */,
+				66D000002FA0000000AA0000 /* BioBalanceTests.xctest */,
+				66C3118F2F8C97110076FDF2 /* BioBalanceWatch Watch App.app */,
+				66C312002F8D20000076FDF2 /* BioBalanceComplications.appex */,
+				668CC4AD2F8FE2EB000A6761 /* BioBalanceWidgetExtension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		668CC4AC2F8FE2EB000A6761 /* BioBalanceWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 668CC4C82F8FE2EC000A6761 /* Build configuration list for PBXNativeTarget "BioBalanceWidgetExtension" */;
+			buildPhases = (
+				668CC4A92F8FE2EB000A6761 /* Sources */,
+				668CC4AA2F8FE2EB000A6761 /* Frameworks */,
+				668CC4AB2F8FE2EB000A6761 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				668CC4B32F8FE2EB000A6761 /* BioBalanceWidgetExtension */,
+				66E100012FB1000000BB0001 /* Shared */,
+			);
+			name = BioBalanceWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = BioBalanceWidgetExtension;
+			productReference = 668CC4AD2F8FE2EB000A6761 /* BioBalanceWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		66C311642F8C950D0076FDF2 /* BioBalance */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 66C311702F8C95100076FDF2 /* Build configuration list for PBXNativeTarget "BioBalance" */;
+			buildPhases = (
+				66C311612F8C950D0076FDF2 /* Sources */,
+				66C311622F8C950D0076FDF2 /* Frameworks */,
+				66C311632F8C950D0076FDF2 /* Resources */,
+				668CC4C42F8FE2EC000A6761 /* Embed Foundation Extensions */,
+				66C3119C2F8C97110076FDF2 /* Embed Watch Content */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				668CC4C22F8FE2EC000A6761 /* PBXTargetDependency */,
+				66C311922F8C97110076FDF2 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				66C311672F8C950D0076FDF2 /* BioBalance */,
+				66E100012FB1000000BB0001 /* Shared */,
+			);
+			name = BioBalance;
+			packageProductDependencies = (
+			);
+			productName = BioBalance;
+			productReference = 66C311652F8C950D0076FDF2 /* BioBalance.app */;
+			productType = "com.apple.product-type.application";
+		};
+		66C3118E2F8C97110076FDF2 /* BioBalanceWatch Watch App */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 66C3119F2F8C97120076FDF2 /* Build configuration list for PBXNativeTarget "BioBalanceWatch Watch App" */;
+			buildPhases = (
+				66C3118B2F8C97110076FDF2 /* Sources */,
+				66C3118C2F8C97110076FDF2 /* Frameworks */,
+				66C3118D2F8C97110076FDF2 /* Resources */,
+				66C312102F8D20000076FDF2 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				66A4DE9F2FB6473C008F3F51 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				66C311932F8C97110076FDF2 /* BioBalanceWatch Watch App */,
+				66E100012FB1000000BB0001 /* Shared */,
+			);
+			name = "BioBalanceWatch Watch App";
+			packageProductDependencies = (
+			);
+			productName = "BioBalanceWatch Watch App";
+			productReference = 66C3118F2F8C97110076FDF2 /* BioBalanceWatch Watch App.app */;
+			productType = "com.apple.product-type.application";
+		};
+		66C312022F8D20000076FDF2 /* BioBalanceComplications */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 66C312082F8D20000076FDF2 /* Build configuration list for PBXNativeTarget "BioBalanceComplications" */;
+			buildPhases = (
+				66C312032F8D20000076FDF2 /* Sources */,
+				66C312042F8D20000076FDF2 /* Frameworks */,
+				66C312052F8D20000076FDF2 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				66C312012F8D20000076FDF2 /* BioBalanceComplications */,
+				66E100012FB1000000BB0001 /* Shared */,
+			);
+			name = BioBalanceComplications;
+			packageProductDependencies = (
+			);
+			productName = BioBalanceComplications;
+			productReference = 66C312002F8D20000076FDF2 /* BioBalanceComplications.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		66D000022FA0000000AA0002 /* BioBalanceTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 66D0000A2FA0000000AA000A /* Build configuration list for PBXNativeTarget "BioBalanceTests" */;
+			buildPhases = (
+				66D000052FA0000000AA0005 /* Sources */,
+				66D000032FA0000000AA0003 /* Frameworks */,
+				66D000042FA0000000AA0004 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				66D000072FA0000000AA0007 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				66D000012FA0000000AA0001 /* BioBalanceTests */,
+			);
+			name = BioBalanceTests;
+			packageProductDependencies = (
+			);
+			productName = BioBalanceTests;
+			productReference = 66D000002FA0000000AA0000 /* BioBalanceTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		66C3115D2F8C950D0076FDF2 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2640;
+				LastUpgradeCheck = 2700;
+				TargetAttributes = {
+					668CC4AC2F8FE2EB000A6761 = {
+						CreatedOnToolsVersion = 26.4;
+					};
+					66C311642F8C950D0076FDF2 = {
+						CreatedOnToolsVersion = 26.4;
+					};
+					66C3118E2F8C97110076FDF2 = {
+						CreatedOnToolsVersion = 26.4;
+					};
+					66C312022F8D20000076FDF2 = {
+						CreatedOnToolsVersion = 26.4;
+					};
+					66D000022FA0000000AA0002 = {
+						CreatedOnToolsVersion = 27.0;
+						TestTargetID = 66C311642F8C950D0076FDF2;
+					};
+				};
+			};
+			buildConfigurationList = 66C311602F8C950D0076FDF2 /* Build configuration list for PBXProject "BioBalance" */;
+			developmentRegion = "zh-Hans";
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				fr,
+				ko,
+				ru,
+				"zh-Hans",
+				"zh-Hant",
+				Base,
+			);
+			mainGroup = 66C3115C2F8C950D0076FDF2;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 66C311662F8C950D0076FDF2 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				66C311642F8C950D0076FDF2 /* BioBalance */,
+				66D000022FA0000000AA0002 /* BioBalanceTests */,
+				66C3118E2F8C97110076FDF2 /* BioBalanceWatch Watch App */,
+				66C312022F8D20000076FDF2 /* BioBalanceComplications */,
+				668CC4AC2F8FE2EB000A6761 /* BioBalanceWidgetExtension */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		668CC4AB2F8FE2EB000A6761 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		66C311632F8C950D0076FDF2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		66C3118D2F8C97110076FDF2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		66C312052F8D20000076FDF2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		66D000042FA0000000AA0004 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		668CC4A92F8FE2EB000A6761 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		66C311612F8C950D0076FDF2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		66C3118B2F8C97110076FDF2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		66C312032F8D20000076FDF2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		66D000052FA0000000AA0005 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		668CC4C22F8FE2EC000A6761 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 668CC4AC2F8FE2EB000A6761 /* BioBalanceWidgetExtension */;
+			targetProxy = 668CC4C12F8FE2EC000A6761 /* PBXContainerItemProxy */;
+		};
+		66A4DE9F2FB6473C008F3F51 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 66C312022F8D20000076FDF2 /* BioBalanceComplications */;
+			targetProxy = 66A4DE9E2FB6473C008F3F51 /* PBXContainerItemProxy */;
+		};
+		66C311922F8C97110076FDF2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 66C3118E2F8C97110076FDF2 /* BioBalanceWatch Watch App */;
+			targetProxy = 66C311912F8C97110076FDF2 /* PBXContainerItemProxy */;
+		};
+		66D000072FA0000000AA0007 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 66C311642F8C950D0076FDF2 /* BioBalance */;
+			targetProxy = 66D000062FA0000000AA0006 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		668CC4C52F8FE2EC000A6761 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = BioBalanceWidgetExtension/BioBalanceWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = BioBalanceWidgetExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "眠屿";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 3.3.40;
+				PRODUCT_BUNDLE_IDENTIFIER = com.boundesu.BioBalance.BioBalanceWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		668CC4C62F8FE2EC000A6761 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = BioBalanceWidgetExtension/BioBalanceWidget.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = BioBalanceWidgetExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "眠屿";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 3.3.40;
+				PRODUCT_BUNDLE_IDENTIFIER = com.boundesu.BioBalance.BioBalanceWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		66C3116E2F8C95100076FDF2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = X86JR5CAY3;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		66C3116F2F8C95100076FDF2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = X86JR5CAY3;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		66C311712F8C95100076FDF2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = BioBalance/BioBalance.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = X86JR5CAY3;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "BioBalanceApp-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "眠屿";
+				INFOPLIST_KEY_CKSharingSupported = YES;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NSCameraUsageDescription = "眠屿 需要使用相机拍摄饮品、餐食或处方图片，用于生成记录、估算餐食热量或识别处方文字。";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "眠屿 需要读取你的心率、HRV、睡眠、步数、活动能量、呼吸频率、正念分钟、环境声级等健康数据，用于展示趋势、生成恢复建议和提醒；游泳训练期间还会读取训练、距离、划水次数与路线数据。";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "眠屿 会在你记录正念练习、经期信息，以及系统支持时的饮水、咖啡因和药物记录时，将对应数据写入健康 App，用于趋势展示与提醒。不会修改你的其他原始健康记录。";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "眠屿 需要在你主动开启好友共享时读取一次当前位置，用于生成粗略位置摘要。不会共享实时定位或历史轨迹。";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "眠屿 仅会在你主动开启睡眠监测会话时，本机实时分析夜间声音用于鼾声检测。不会保存录音，也不会上传任何音频。";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "眠屿 需要将你生成的分享图片保存到相册。";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "眠屿 需要读取你选择的饮品、餐食或处方图片，用于生成记录、估算餐食热量或识别处方文字。";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 26.6;
+				MARKETING_VERSION = 3.3.40;
+				PRODUCT_BUNDLE_IDENTIFIER = com.boundesu.BioBalance;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				XROS_DEPLOYMENT_TARGET = 26.6;
+			};
+			name = Debug;
+		};
+		66C311722F8C95100076FDF2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = BioBalance/BioBalance.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = X86JR5CAY3;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_PREVIEWS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "BioBalanceApp-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "眠屿";
+				INFOPLIST_KEY_CKSharingSupported = YES;
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
+				INFOPLIST_KEY_NSCameraUsageDescription = "眠屿 需要使用相机拍摄饮品、餐食或处方图片，用于生成记录、估算餐食热量或识别处方文字。";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "眠屿 需要读取你的心率、HRV、睡眠、步数、活动能量、呼吸频率、正念分钟、环境声级等健康数据，用于展示趋势、生成恢复建议和提醒；游泳训练期间还会读取训练、距离、划水次数与路线数据。";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "眠屿 会在你记录正念练习、经期信息，以及系统支持时的饮水、咖啡因和药物记录时，将对应数据写入健康 App，用于趋势展示与提醒。不会修改你的其他原始健康记录。";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "眠屿 需要在你主动开启好友共享时读取一次当前位置，用于生成粗略位置摘要。不会共享实时定位或历史轨迹。";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "眠屿 仅会在你主动开启睡眠监测会话时，本机实时分析夜间声音用于鼾声检测。不会保存录音，也不会上传任何音频。";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "眠屿 需要将你生成的分享图片保存到相册。";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "眠屿 需要读取你选择的饮品、餐食或处方图片，用于生成记录、估算餐食热量或识别处方文字。";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 26.6;
+				MARKETING_VERSION = 3.3.40;
+				PRODUCT_BUNDLE_IDENTIFIER = com.boundesu.BioBalance;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = auto;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				XROS_DEPLOYMENT_TARGET = 26.6;
+			};
+			name = Release;
+		};
+		66C3119D2F8C97110076FDF2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = "BioBalanceWatch Watch App/BioBalanceWatch Watch App.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "BioBalanceWatchApp-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "眠屿";
+				INFOPLIST_KEY_CFBundleIconName = AppIcon;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "眠屿 需要读取你的心率、HRV、睡眠、步数、活动能量、呼吸频率、正念分钟、环境声级等健康数据，用于展示趋势、生成恢复建议和提醒；游泳训练期间还会读取心率、活动能量与游泳数据用于实时指标和训练详情。";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "眠屿 会在你记录正念练习、经期信息，以及系统支持时的饮水、咖啡因和药物记录时，将对应数据写入健康 App，用于趋势展示与提醒；Apple Watch 游泳训练也会保存到健康 App，供眠屿和健康 App 查看训练时间及设备提供的游泳数据。不会修改你的其他原始健康记录。";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.boundesu.BioBalance;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 3.3.40;
+				PRODUCT_BUNDLE_IDENTIFIER = com.boundesu.BioBalance.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		66C3119E2F8C97110076FDF2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = "BioBalanceWatch Watch App/BioBalanceWatch Watch App.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "BioBalanceWatchApp-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "眠屿";
+				INFOPLIST_KEY_CFBundleIconName = AppIcon;
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "眠屿 需要读取你的心率、HRV、睡眠、步数、活动能量、呼吸频率、正念分钟、环境声级等健康数据，用于展示趋势、生成恢复建议和提醒；游泳训练期间还会读取心率、活动能量与游泳数据用于实时指标和训练详情。";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "眠屿 会在你记录正念练习、经期信息，以及系统支持时的饮水、咖啡因和药物记录时，将对应数据写入健康 App，用于趋势展示与提醒；Apple Watch 游泳训练也会保存到健康 App，供眠屿和健康 App 查看训练时间及设备提供的游泳数据。不会修改你的其他原始健康记录。";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.boundesu.BioBalance;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 3.3.40;
+				PRODUCT_BUNDLE_IDENTIFIER = com.boundesu.BioBalance.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
+		66C312062F8D20000076FDF2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = BioBalanceComplications/BioBalanceComplications.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = BioBalanceComplications/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "眠屿";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 3.3.40;
+				PRODUCT_BUNDLE_IDENTIFIER = com.boundesu.BioBalance.watchkitapp.BioBalanceComplications;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		66C312072F8D20000076FDF2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = BioBalanceComplications/BioBalanceComplications.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = BioBalanceComplications/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "眠屿";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 3.3.40;
+				PRODUCT_BUNDLE_IDENTIFIER = com.boundesu.BioBalance.watchkitapp.BioBalanceComplications;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
+		66D000082FA0000000AA0008 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = X86JR5CAY3;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-weak_framework",
+					AppIntentsTesting,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.boundesu.BioBalanceTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BioBalance.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/BioBalance";
+			};
+			name = Debug;
+		};
+		66D000092FA0000000AA0009 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = X86JR5CAY3;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-weak_framework",
+					AppIntentsTesting,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.boundesu.BioBalanceTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/BioBalance.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/BioBalance";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		668CC4C82F8FE2EC000A6761 /* Build configuration list for PBXNativeTarget "BioBalanceWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				668CC4C52F8FE2EC000A6761 /* Debug */,
+				668CC4C62F8FE2EC000A6761 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		66C311602F8C950D0076FDF2 /* Build configuration list for PBXProject "BioBalance" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				66C3116E2F8C95100076FDF2 /* Debug */,
+				66C3116F2F8C95100076FDF2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		66C311702F8C95100076FDF2 /* Build configuration list for PBXNativeTarget "BioBalance" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				66C311712F8C95100076FDF2 /* Debug */,
+				66C311722F8C95100076FDF2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		66C3119F2F8C97120076FDF2 /* Build configuration list for PBXNativeTarget "BioBalanceWatch Watch App" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				66C3119D2F8C97110076FDF2 /* Debug */,
+				66C3119E2F8C97110076FDF2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		66C312082F8D20000076FDF2 /* Build configuration list for PBXNativeTarget "BioBalanceComplications" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				66C312062F8D20000076FDF2 /* Debug */,
+				66C312072F8D20000076FDF2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		66D0000A2FA0000000AA000A /* Build configuration list for PBXNativeTarget "BioBalanceTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				66D000082FA0000000AA0008 /* Debug */,
+				66D000092FA0000000AA0009 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 66C3115D2F8C950D0076FDF2 /* Project object */;
+}

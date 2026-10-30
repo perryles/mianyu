@@ -1,0 +1,376 @@
+{
+  "sourceLanguage" : "zh-Hans",
+  "strings" : {
+    "CFBundleDisplayName" : {
+      "comment" : "Bundle display name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "眠屿"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "眠屿"
+          }
+        }
+      },
+      "shouldTranslate" : false
+    },
+    "CFBundleName" : {
+      "comment" : "Bundle name",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "眠屿"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "眠屿"
+          }
+        }
+      }
+    },
+    "NSCameraUsageDescription" : {
+      "comment" : "Privacy - Camera Usage Description",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu uses the camera to capture photos of drinks, meals, or prescriptions to create records, estimate meal calories, or recognize prescription text."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu utilise l’appareil photo pour photographier des boissons, des repas ou des ordonnances afin de créer des enregistrements, d’estimer les calories des repas ou de reconnaître le texte des ordonnances."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu는 음료, 식사 또는 처방전 사진을 촬영하여 기록을 만들고 식사 열량을 추정하거나 처방전 문자를 인식하기 위해 카메라를 사용합니다."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu использует камеру для съёмки напитков, блюд или рецептов, чтобы создавать записи, оценивать калорийность еды или распознавать текст рецепта."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "眠屿 需要使用相机拍摄饮品、餐食或处方图片，用于生成记录、估算餐食热量或识别处方文字。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "眠屿 需要使用相機拍攝飲品、餐食或處方圖片，用於建立記錄、估算餐食熱量或辨識處方文字。"
+          }
+        }
+      }
+    },
+    "NSHealthShareUsageDescription" : {
+      "comment" : "Privacy - Health Share Usage Description",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu reads your health data such as heart rate, HRV, sleep, steps, active energy, respiratory rate, mindful minutes, and environmental sound levels to show trends and generate recovery insights and reminders. Swimming workout details also read workout, swim distance, stroke-count, and route data."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu lit vos données de santé, notamment la fréquence cardiaque, la VFC, le sommeil, les pas, l’énergie active, la fréquence respiratoire, les minutes de pleine conscience et les niveaux sonores ambiants, afin d’afficher des tendances et de générer des conseils de récupération et des rappels. Les détails des entraînements de natation lisent aussi les entraînements, la distance, le nombre de mouvements et les itinéraires."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu는 심박수, HRV, 수면, 걸음 수, 활동 에너지, 호흡수, 마음챙김 시간 및 환경 소음 수준 등의 건강 데이터를 읽어 추세를 표시하고 회복 인사이트와 알림을 생성합니다. 수영 운동 상세 정보에는 운동, 수영 거리, 스트로크 수 및 경로 데이터도 사용됩니다."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu считывает данные о здоровье, включая пульс, ВСР, сон, шаги, активную энергию, частоту дыхания, минуты осознанности и уровень окружающего шума, чтобы показывать тенденции и формировать рекомендации по восстановлению и напоминания. Для сведений о плавании также читаются тренировки, дистанция, число гребков и данные маршрута."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "眠屿 需要读取你的心率、HRV、睡眠、步数、活动能量、呼吸频率、正念分钟、环境声级等健康数据，用于展示趋势、生成恢复建议和提醒；游泳训练详情还会读取训练、距离、划水次数与路线数据。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "眠屿 需要讀取你的心率、HRV、睡眠、步數、活動能量、呼吸頻率、正念分鐘、環境聲級等健康數據，用於顯示趨勢、產生恢復建議與提醒；游泳訓練詳情也會讀取訓練、距離、划水次數與路線資料。"
+          }
+        }
+      }
+    },
+    "NSHealthUpdateUsageDescription" : {
+      "comment" : "Privacy - Health Update Usage Description",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu writes data to the Health app when you log mindfulness sessions, cycle information, and — where supported — water, caffeine, and medication records, for trend display and reminders. Your other original health records are never modified."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu écrit des données dans l’app Santé lorsque vous enregistrez des séances de pleine conscience, des informations sur le cycle et, lorsque le système le permet, l’eau, la caféine et les médicaments, afin d’afficher des tendances et des rappels. Vos autres données de santé d’origine ne sont jamais modifiées."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu는 마음챙김 세션, 생리 주기 정보와 시스템에서 지원되는 경우 물, 카페인 및 복약 기록을 입력할 때 해당 데이터를 건강 앱에 기록하여 추세와 알림에 사용합니다. 다른 원본 건강 기록은 수정하지 않습니다."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu записывает данные в приложение «Здоровье», когда вы отмечаете сеансы осознанности, сведения о цикле и, если система поддерживает, воду, кофеин и приём лекарств, чтобы показывать тенденции и напоминания. Другие исходные данные о здоровье не изменяются."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "眠屿 会在你记录正念练习、经期信息，以及系统支持时的饮水、咖啡因和药物记录时，将对应数据写入健康 App，用于趋势展示与提醒。不会修改你的其他原始健康记录。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "眠屿 會在你記錄正念練習、經期資訊，以及系統支援時的飲水、咖啡因和藥物記錄時，將對應數據寫入健康 App，用於趨勢顯示與提醒。不會修改你的其他原始健康記錄。"
+          }
+        }
+      }
+    },
+    "NSLocationWhenInUseUsageDescription" : {
+      "comment" : "Privacy - Location When In Use Usage Description",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu uses your location while you view local environment guidance or enable friend sharing, to provide local weather and a coarse location summary. Real-time location and history are never shared."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu utilise votre position lorsque vous consultez les conseils locaux d’ensoleillement ou activez le partage avec des amis, afin de fournir la météo locale et un résumé approximatif. La position en temps réel et l’historique ne sont jamais partagés."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu는 현지 일조 안내를 보거나 친구 공유를 활성화할 때 위치를 사용해 현지 날씨와 대략적인 위치 요약을 제공합니다. 실시간 위치나 위치 기록은 공유하지 않습니다."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu использует местоположение при просмотре местных рекомендаций по дневному свету или включении обмена с друзьями, чтобы показать местную погоду и приблизительную сводку. Геопозиция в реальном времени и история не передаются."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "眠屿 会在你查看当地环境建议或主动开启好友共享时使用当前位置，用于提供本地天气和粗略位置摘要。不会共享实时定位或历史轨迹。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "眠屿 會在你查看當地環境建議或主動開啟好友共享時使用目前位置，用於提供本地天氣和粗略位置摘要。不會共享即時定位或歷史軌跡。"
+          }
+        }
+      }
+    },
+    "NSMicrophoneUsageDescription" : {
+      "comment" : "Privacy - Microphone Usage Description",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu analyzes nighttime sound on-device in real time for snore detection, only during sleep monitoring sessions you start. No recordings are saved or uploaded."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu analyse en temps réel les sons nocturnes sur l’appareil pour détecter les ronflements, uniquement pendant les sessions de suivi du sommeil que vous démarrez. Aucun enregistrement n’est conservé ni envoyé."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu는 사용자가 시작한 수면 모니터링 세션 중에만 코골이 감지를 위해 기기에서 야간 소리를 실시간으로 분석합니다. 녹음은 저장되거나 업로드되지 않습니다."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu анализирует ночные звуки на устройстве в реальном времени для обнаружения храпа только во время запущенных вами сеансов мониторинга сна. Записи не сохраняются и не загружаются."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "眠屿 仅会在你主动开启睡眠监测会话时，本机实时分析夜间声音用于鼾声检测。不会保存录音，也不会上传任何音频。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "眠屿 只會在你主動開啟睡眠監測時，於裝置上即時分析夜間聲音用於鼾聲偵測。不會儲存錄音，也不會上傳任何音訊。"
+          }
+        }
+      }
+    },
+    "NSPhotoLibraryAddUsageDescription" : {
+      "comment" : "Privacy - Photo Library Additions Usage Description",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu saves share images you create to your photo library."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu enregistre dans votre photothèque les images de partage que vous créez."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu는 사용자가 만든 공유 이미지를 사진 보관함에 저장합니다."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu сохраняет созданные вами изображения для публикации в медиатеке."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "眠屿 需要将你生成的分享图片保存到相册。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "眠屿 需要將你產生的分享圖片儲存到相簿。"
+          }
+        }
+      }
+    },
+    "NSPhotoLibraryUsageDescription" : {
+      "comment" : "Privacy - Photo Library Usage Description",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu reads photos you select of drinks, meals, or prescriptions to create records, estimate meal calories, or recognize prescription text."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu lit les photos de boissons, de repas ou d’ordonnances que vous sélectionnez afin de créer des enregistrements, d’estimer les calories des repas ou de reconnaître le texte des ordonnances."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu는 사용자가 선택한 음료, 식사 또는 처방전 사진을 읽어 기록을 만들고 식사 열량을 추정하거나 처방전 문자를 인식합니다."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mianyu считывает выбранные вами фотографии напитков, блюд или рецептов, чтобы создавать записи, оценивать калорийность еды или распознавать текст рецепта."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "眠屿 需要读取你选择的饮品、餐食或处方图片，用于生成记录、估算餐食热量或识别处方文字。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "眠屿 需要讀取你選擇的飲品、餐食或處方圖片，用於建立記錄、估算餐食熱量或辨識處方文字。"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
